@@ -1,0 +1,159 @@
+<div class="container-fluid row signup-container">
+  <div class="text-end close-icon cursor">
+    <i class="material-icons" (click)="closePopup()">close</i>
+  </div>
+  <!-- rest of the template remains the same -->
+  <div class="col-6 signup-image ">
+    <img class="mt-2 p-1" height="100%" src='app/assets/etutor/signup_background.svg' alt="Learning Image">
+  </div>
+  @if (showForm) {
+  <div class="col-6 signup-form register mt-1 align-self-center">
+    <p class="text-center mx-font-25 mb-2"><strong>Sign Up</strong></p>
+    <p class="text-center mb-2">Sharpe your mind</p>
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit(signupForm)">
+      <div class="row mb-2">
+        <div class="form-group col-md-6">
+          <label for="firstName">First Name<span class="error">*</span></label>
+          <input autocomplete="off" formControlName="first_name" type="text" class="form-control rounded-border"
+            id="firstName" placeholder="First Name">
+          <label
+            *ngIf="!signupForm.get('first_name')?.valid && (signupForm.get('first_name')?.dirty || signupForm.get('first_name')?.touched)"
+            class="error jquery-validation-error small form-text">
+            First name is required
+          </label>
+        </div>
+        <div class="form-group col-md-6">
+          <label for="lastName">Last Name<span class="error">*</span></label>
+          <input autocomplete="off" formControlName="last_name" type="text" class="form-control rounded-border"
+            id="lastName" placeholder="Last Name">
+          <label
+            *ngIf="!signupForm.get('last_name')?.valid && (signupForm.get('last_name')?.dirty || signupForm.get('last_name')?.touched)"
+            class="error jquery-validation-error small form-text">
+            Last name is required
+          </label>
+        </div>
+      </div>
+      <div class="form-group mb-2">
+        <label class="p-1" for="mobileNumber">Mobile Number<span class="error">*</span></label>
+        <div class="input-group">
+          <div style="width: 10%" class="input-group-append rounded-border d-flex align-items-center justify-content-center">
+            <img style="width: 75%; padding: 0 2px" src="app/assets/etutor/indian_flag.png">
+          </div>
+          <div style="padding-left: 4px" class="input-group-append rounded-border d-flex align-items-center justify-content-center">
+            <span style="font-size: 14px">+91</span>
+          </div>
+          <input style="border-left: 0;padding-left: 6px;" (keypress)="numberValidation($event)" autocomplete="off" formControlName="mobile_number"
+          (focusout)="sendOTP(signupForm)" type="text" maxlength="10" class="form-control rounded-border"
+          id="mobileNumber" placeholder="Enter Mobile Number">
+        </div>
+
+        <label
+          *ngIf="!signupForm.get('mobile_number')?.valid && (signupForm.get('mobile_number')?.dirty || signupForm.get('mobile_number')?.touched)"
+          class="error jquery-validation-error small form-text">
+          Mobile number is required
+        </label>
+      </div>
+
+      <div class="form-group mb-2">
+        <label class="p-1" for="gender">Gender<span class="error">*</span></label>
+        <select autocomplete="off" formControlName="gender" class="form-control rounded-border" id="gender">
+          <option value="" disabled selected>Please Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="FeMale">FeMale</option>
+        </select>
+        <label
+          *ngIf="!signupForm.get('gender')?.valid && (signupForm.get('gender')?.dirty || signupForm.get('gender')?.touched)"
+          class="error jquery-validation-error small form-text">
+          Gender is required
+        </label>
+      </div>
+
+      @if (user === '0') {
+      <div class="form-group mb-2">
+        <label class="p-1" for="Grade">Grade<span class="error">*</span></label>
+        <select autocomplete="off" formControlName="grade" class="form-control rounded-border" id="Grade">
+          <option value="" disabled selected>Choose the Grade</option>
+          <option *ngFor="let data of gradeList" [value]="data.id">{{data.displayname}}</option>
+        </select>
+        <label
+          *ngIf="!signupForm.get('grade')?.valid && (signupForm.get('grade')?.dirty || signupForm.get('grade')?.touched)"
+          class="error jquery-validation-error small form-text">
+          Grade is required
+        </label>
+      </div>
+      }
+      <div class="form-group mb-2">
+        <label for="emailID">Email ID<span class="error">*</span></label>
+        <input autocomplete="off" formControlName="email" type="email" (focusout)="sendOTP(signupForm)"
+          class="form-control rounded-border" id="emailID" placeholder="Enter Mail ID" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]{2,26}\.[a-z]{2,10}$">
+        @if (signupForm.get('email')?.touched && signupForm.get('email')?.invalid) {
+        <label *ngIf="signupForm.get('email')?.errors?.['required']"
+          class="error jquery-validation-error small form-text ">Please
+          Email Id is required
+        </label>
+        <label *ngIf="signupForm.get('email')?.hasError('pattern')"
+           class="error jquery-validation-error small form-text ">Please enter valid Email Id.
+        </label>
+        }
+      </div>
+      @if (showOTP) {
+      <div class="form-group mb-2">
+        <label class="p-1" for="password">OTP <span class="error">*</span></label>
+        <div class="input-group">
+          <input autocomplete="off" formControlName="otp" (keypress)="numberValidation($event)"
+            [type]="showOtp ? 'text' : 'Password'" maxlength="4" class="form-control rounded-border" id="password"
+            placeholder="Enter the OTP">
+          <div class="input-group-append rounded-border d-flex align-items-center">
+            <span (click)="showOtp = !showOtp" class="cursor m-2">
+              <i [ngClass]="showOtp ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+            </span>
+          </div>
+        </div>
+        <label *ngIf="!signupForm.get('otp')?.valid && (signupForm.get('otp')?.dirty || signupForm.get('otp')?.touched)"
+          class="error jquery-validation-error small form-text">
+          Please enter the OTP
+        </label>
+
+        <h6 *ngIf="isResendDisabled" class="col-12 text-right my-2" style="font-size: 14px">Not received the OTP? Try Again after
+          <span style="font-weight: 800">{{ countdown > 0 ? countdown : '' }} seconds</span>
+        </h6>
+        <h6 *ngIf="!isResendDisabled" class="col-12 text-right my-2" style="font-size: 14px">
+          <span (click)="resendOTP = true;sendOTP(signupForm)" style="font-weight: 800; text-decoration: underline" class="cursor">Resend OTP</span>
+        </h6>
+      </div>
+      }
+      <button type="submit" class="btn w-100 mt-2 rounded-border btn-login btn-block">Signup</button>
+    </form>
+  <!--    <div class="line mt-4 mx-h-20">-->
+  <!--      <hr class="left-line">-->
+  <!--      <span class="or-circle mx-font-13">OR</span>-->
+  <!--      <hr class="right-line">-->
+  <!--    </div>-->
+  <!--    <div class="social-login">-->
+  <!--      <img class="mx-2" src="app/assets/etutor/google.svg" alt="Google">-->
+  <!--      <img class="mx-2" src="app/assets/etutor/facebook.svg" alt="Facebook">-->
+  <!--      <img class="mx-2" src="app/assets/etutor/apple.svg" alt="Apple">-->
+  <!--    </div>-->
+    <div class="signup-footer mt-2">
+      <p class="mx-font-12 mt-3">Already have an account? <a class="anchorStyle cursor" (click)="openLogin()">Login</a></p>
+    </div>
+  </div>
+  } @else {
+  <div class="col-6 user_selection loginuser-form align-content-center  mt-1 ">
+    <h4 class="text-center">Inspiring Growth Learn, Teach, Transform!</h4>
+    <p class="text-center mb-0">Choose us</p>
+    <div class="row justify-content-center">
+      <div class="col-9 text-center">
+        <button type="button" (click)="selectFormType('0')"
+          class="w-100 mt-4 btn-login-user rounded-border btn-block">Student</button>
+
+        <button type="button" (click)="selectFormType('1')"
+          class="w-100 mt-4 btn-login-user rounded-border  btn-block">Teacher</button>
+      </div>
+    </div>
+    <div>
+    </div>
+  </div>
+  }
+
+</div>

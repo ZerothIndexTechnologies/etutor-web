@@ -1,0 +1,35 @@
+# Step 1: Use an official Node.js runtime as a parent image
+FROM node:21.0.0 AS build
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the package.json and package-lock.json to the container
+COPY package*.json ./
+
+# Step 4: Install the dependencies
+RUN npm install
+
+
+# Step 5: Copy the Angular project files to the container
+
+RUN npm install -g @angular/cli
+
+
+# Step 6: Copy the Angular project files to the container
+COPY . ./
+
+# Step 7: Build the Angular application
+RUN npm run build --prod
+
+# Step 8: Use an official NGINX image as the base image for the final stage
+FROM nginx:etutor
+
+# Step 9: Copy the built Angular files to the NGINX container
+COPY --from=build /app/dist/etutor /usr/share/nginx/html
+
+# Step 10 Expose port 80
+EXPOSE 80
+
+# Step 10: Start NGINX server
+# CMD ["nginx", "-g", "daemon off;"]

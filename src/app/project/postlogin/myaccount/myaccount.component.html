@@ -1,0 +1,29 @@
+<!-- Profile Header -->
+<div class="container-fluid profile-header  text-start">
+    <p class="mx-10 w-50 mx-m-l-5"><strong>My Account </strong>
+        @for (bread of breadcrumbs; let i = $index; track bread.name)
+        {
+        <span>> {{bread.name}}</span>
+        }
+</div>
+
+
+<section class="container-fluid mt-2 row">
+    <div class="col-md-2 text-align-center">
+        <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+            <div class="position-sticky d-flex justify-content-around">
+                <ul class="nav flex-column nav-pills">
+                    @for (menu of sidebarMenus; let i = $index; track menu.title) {
+                    <li class="nav-item">
+                        <a class="nav-link cursor" [class.menu-active]="menu.active"
+                            (click)="navigation(menu, i)">{{menu.title}}</a>
+                    </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="col-md-10">
+        <router-outlet />
+    </div>
+</section>

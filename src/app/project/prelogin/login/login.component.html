@@ -1,0 +1,96 @@
+<div class="container-fluid row signup-container">
+  <div class="text-end close-icon cursor">
+    <i class="material-icons" (click)="closePopup()">close</i>
+  </div>
+  <div class="col-6 signup-image ">
+    <img class="mt-2 p-1" src='app/assets/etutor/login_background.svg' alt="Learning Image">
+  </div>
+  @if (showLogin) {
+  <div class="col-6 login-form align-self-center mt-1">
+    <p class="text-center mx-font-25 mb-2"><strong>Login</strong></p>
+    <p class="text-center">welcome back !</p>
+    <form [formGroup]="loginForm" (ngSubmit)="userLogin(loginForm)">
+      <div class="form-group">
+        <label class="p-1" for="email">User Name</label>
+        <input type="text" required formControlName="email" class="form-control rounded-border" id="email"
+          placeholder="Enter Your Username" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]{2,26}\.[a-z]{2,10}$">
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
+        <label *ngIf="loginForm.get('email')?.errors?.['required']"
+          class="error jquery-validation-error small form-text ">Please
+          enter your user name.
+        </label>
+        <label *ngIf="loginForm.get('email')?.hasError('pattern')"
+          class="error jquery-validation-error small form-text ">Please
+          enter valid Email Id.
+        </label>
+        }
+
+      </div>
+      <div class="form-group">
+        <label class="p-1" for="password">Password</label>
+        <div class="input-group">
+          <input autocomplete="off" [type]="showPwd ? 'text' : 'password'" formControlName="password"
+            class="form-control rounded-border" id="password" placeholder="Enter Your Password" autocomplete="off">
+          <div class="input-group-append rounded-border d-flex align-items-center">
+            <span (click)="showPwd = !showPwd" class="m-2 cursor">
+              <i [ngClass]="showPwd ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+            </span>
+          </div>
+        </div>
+        @if (!loginForm.get('password')?.valid && (loginForm.get('password')?.dirty
+        || loginForm.get('password')?.touched)) {
+        <label class="error jquery-validation-error small form-text">Please enter the password
+        </label>
+        }
+
+      </div>
+      <a class="mt-2 mx-font-11 cursor mx-1 anchorStyle" (click)="showLogin = undefined;showForGot = !showForGot">Forgot
+        Password</a>
+      <button type="submit" class="btn w-100 mt-2 rounded-border btn-save btn-login btn-block">Login</button>
+    </form>
+<!--    <div class="line mt-30 mx-h-20">-->
+<!--      <hr class="left-line">-->
+<!--      <span class="or-circle mx-font-13">OR</span>-->
+<!--      <hr class="right-line">-->
+<!--    </div>-->
+<!--    <div class="social-login">-->
+<!--      <img class="mx-2" src="app/assets/etutor/google.svg" alt="Google">-->
+<!--      <img class="mx-2" src="app/assets/etutor/facebook.svg" alt="Facebook">-->
+<!--      <img class="mx-2" src="app/assets/etutor/apple.svg" alt="Apple">-->
+<!--    </div>-->
+    <div class="signup-footer">
+      <p class="mx-font-12">Don't have an account? <a class="anchorStyle" (click)="openSignup()">Sign Up</a></p>
+    </div>
+  </div>
+  }
+  @else if (showLogin === false) {
+  <div class="col-6 user_selection loginuser-form align-content-center  mt-1 ">
+    <h4 class="text-center">Inspiring Growth Learn, Teach, Transform!</h4>
+    <p class="text-center mb-0">Choose us</p>
+    <div class="row justify-content-center">
+      <div class="col-9 text-center">
+        <button type="button" (click)="selectFormType('0')"
+          class="w-100 mt-4 btn-login-user rounded-border btn-block">Student</button>
+
+        <button type="button" (click)="selectFormType('1')"
+          class="w-100 mt-4 btn-login-user rounded-border  btn-block">Teacher</button>
+      </div>
+    </div>
+    <div>
+    </div>
+  </div>
+  }
+  @if(showForGot) {
+  <div class="col-6 signup-form  align-content-center mt-1">
+    <p class="text-center mx-font-25"><strong>Login</strong></p>
+    <p class="text-center">Forgot your password?</p>
+    <form>
+      <div class="form-group">
+        <label class="p-1" for="mobileNumber">Email Id or Mobile Number</label>
+        <input type="text" class="form-control rounded-border" id="mobileNumber" placeholder="Enter Mobile Number">
+      </div>
+      <button type="submit" class="btn w-100 mt-4 rounded-border btn-login btn-block">Verify</button>
+    </form>
+  </div>
+  }
+</div>

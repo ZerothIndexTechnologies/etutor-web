@@ -1,0 +1,123 @@
+<!-- <script src="class-list.component.ts"></script> -->
+<section class="mb-3 p-4 profile-section rounded-border">
+  <div class="row">
+    <div class="col-12">
+      <h6 class="font-weight-bold">Class List</h6>
+    </div>
+    <div class="col-12 text-end mb-4" *ngIf="auth.getRoleId() != '3'">
+      <button class="btn btn-orange" (click)="addClass()">Add Class</button>
+    </div>
+
+    <div class="col-12">
+      <div class="row">
+        <div class="col-md-6 my-3 d-flex flex-column justify-content-center px-2"
+             *ngFor="let classData of classListdata; let i = index">
+          <div class="card class-card class-hover" style="border-radius: 12px">
+            <div class="card-body p-2">
+              <div class="row p-2 cursor">
+                <div class="col-12">
+                  <div class="row">
+                    <div class="col-md-9">
+                      <h6 class="mb-2">
+                        <span class="font-weight-bold" style="font-size: 18px">{{classData.subject}}</span>
+                      </h6>
+                    </div>
+                    <div class="col-md-3 text-right">
+                      <div *ngIf="auth.getRoleId() != '3'">
+                        <i class="fa fa-link" title="Update Meeting Link" (click)="updateMeetingLink(classData)"></i>
+                        <i class="fa fa-plus ms-3" title="Add More Session" (click)="editClass(classData)"></i>
+                        <i class="far fa-trash-alt ms-3" title="Delete Class" (click)="deleteClass(classData)"></i>
+                      </div>
+                      <div *ngIf="auth.getRoleId() == '3'">
+                        <button (click)="joinNow(classData)" style="padding: 6px 12px" class="btn btn-orange">Join Now</button>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="p-0">
+                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Grade:</span><span
+                    class="t-name color-primary font-weight-bold ms-1">{{classData.grade_name ?? '-'}}</span>
+                    <span style="font-size: 13px; color: #777777" class="font-weight-bold ms-2">Curriculum:</span><span
+                    class="t-name font-weight-bold ms-1">{{classData.curriculum_name ?? '-'}}</span>
+                  </p>
+                  <p class="p-0">
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Time:</span>
+                    <i style="font-size: 13px" class="fas fa-clock ms-1"></i>
+                    <span style="font-size: 14px;"
+                          class="t-name font-weight-bold ms-1">{{classData.start_time}}</span>-<span style="font-size: 14px;"
+                                                                                                     class="t-name font-weight-bold">{{classData.end_time}}</span>
+                  </p>
+                  <p class="p-0" *ngIf="auth.getRoleId() != '3'">
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Amount</span><br>
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Monthly:</span>
+                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
+                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.monthly_amount}}, </span>
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Quarterly:</span>
+                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
+                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.quarterly_amount}}, </span>
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Half Yearly:</span>
+                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
+                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.halfyearly_amount}}, </span>
+
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Yearly:</span>
+                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
+                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.yearly_amount}}</span>
+                  </p>
+                  <p class="p-0">
+                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Selected Days:</span><span
+                    class="t-name font-weight-bold ms-1">{{classData.days ?? '-'}}</span> &nbsp;<br />
+                  </p>
+                  <p *ngIf="auth.getRoleId() == '3'" class="text-right" style="font-size: 10px">
+                    <span class="notes" *ngIf="!classData.meeting_link"><i class="fa fa-info-circle me-2"></i>The meeting link for this class is not updated for this class.</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row d-flex justify-content-center" *ngIf="classListdata.length == 0">
+        <img style="width: 25%" src="app/assets/etutor/no_data.svg" alt="">
+        <h6 class="mb-0 text-center font-weight-bold mt-2" style="font-size: 18px">No Class Available</h6>
+      </div>
+    </div>
+  </div>
+</section>
+
+<ng-template #deleteClassConfirmation>
+  <div class="card">
+    <div class="card-header py-3">
+      <span style="font-size: 16px" class="text-capitalize col-12 font-weight-bold mb-0">Delete Class</span>
+    </div>
+    <div class="card-body">
+      <div class="col-12">
+        <h6 style="font-size: 16px" class="mb-0">Are you want to delete the <span
+            class="font-weight-bold">{{classData.subject}}</span> class ?</h6>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="col-12 d-flex justify-content-end">
+        <button (click)="closePopup()" class="btn btn-outline-danger">No</button>
+        <button (click)="deleteClassService()" style="padding: 6px 12px; border-radius: 4px" class="ms-3 btn btn-orange">Yes</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template #meetingLink>
+  <div class="card">
+    <div class="card-header py-3">
+      <span style="font-size: 16px" class="text-capitalize col-12 font-weight-bold mb-0">Update Meeting Link</span>
+    </div>
+    <div class="card-body">
+      <div class="col-12">
+        <input [(ngModel)]="meetingLinkValue" class="form-control" type="url" placeholder="Zoom Meeting Link">
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="col-12 d-flex justify-content-end">
+        <button (click)="closePopup()" class="btn btn-outline-danger">No</button>
+        <button (click)="updateClassMeetingLink()" style="padding: 6px 12px; border-radius: 4px" class="ms-3 btn btn-orange">Save</button>
+      </div>
+    </div>
+  </div>
+</ng-template>

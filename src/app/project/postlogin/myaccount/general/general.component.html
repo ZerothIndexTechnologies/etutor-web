@@ -1,0 +1,220 @@
+<!-- general page starts here -->
+<div class="container">
+<!--    @if (auth.getUserType === '1') {-->
+    <!-- Teacher Profile form starts here -->
+    <div class="row" *ngIf="auth.getUserType === '1'">
+        <div class="col-md-12">
+            <div class="profile-section p-4 mb-3 rounded-border">
+                <div class="row">
+                    <div class="col-md-6 d-flex text-center align-items-center">
+                        <div>
+                            <img src="app/assets/etutor/avatar.svg" height="130" alt="Profile Picture"
+                                class="profile-img">
+                            <div class="profileAdd cursor" (click)="teacherFile.click()">
+                                <i class="material-icons">add</i>
+                                <input type="file" #teacherFile (change)="onFileSelected($event)" id="teacher" hidden>
+                            </div>
+                        </div>
+                        <div class="mx-5 profile-info">
+                            <h6 class="fw-bold">{{profileData?.first_name}} {{profileData?.last_name}}</h6>
+                            <span class="text-black-50 fw-bold">Teacher</span>
+                            <p><a (click)="routeToChangePassword()" class="fw-medium cursor highlight mx-font-13">Change Password</a></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>About</h5>
+                        <p class="mx-font-14 text-black-50">It is a long established fact that a reader will be
+                            distracted by the
+                            readable content of
+                            a page when looking at its layout. The point of using Lorem Ipsum is that it has a
+                            more-or-less normal distribution of letters, as opposed to using 'Content here',making it
+                            look like readable English. Many desktop publishng packages and wep page editors now use
+                            Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will concover many
+                            web sites still in their infancy.</p>
+                    </div>
+                </div>
+                <div class="mt-2">
+                  <h6 class="mx-font-20 fw-bold">General Info<span><i (click)="editProfileDetails = !editProfileDetails" class="material-icons mt-2">edit</i></span></h6>
+                </div>
+                <form [formGroup]="teacherForm">
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="subjects">Subjects</label>
+                                <input type="text" formControlName="subject" class="form-control" id="subjects">
+                            </div>
+                            <div class="form-group  mt-2">
+                                <label for="gender">Gender</label>
+                                <select formControlName="gender" class="form-control rounded-border" id="gender">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="languages">Languages</label>
+                                <input type="text" formControlName="language" class="form-control" id="languages">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="mobile">Mobile Number</label>
+                                <input type="text" formControlName="mobile" class="form-control" id="mobile">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="identfication">Identification</label>
+                                <input type="text" formControlName="identification" class="form-control"
+                                    id="identfication">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="qualfication">Qualification</label>
+                                <input type="text" formControlName="qualification" class="form-control"
+                                    id="qualfication" />
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="duration">Duration</label>
+                                <input type="text" class="form-control" formControlName="duration" id="duration" />
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="mail">Mail ID</label>
+                                <input type="email" class="form-control" formControlName="mail" id="mail">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="address">Address</label>
+                                <input type="text" class="form-control" formControlName="address" id="address" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-end">
+                        <button type="button" (click)="editProfileDetails = false" class="btn mx-2 rounded-border">Cancel</button>
+                        <button type="submit" class="btn btn-save rounded-border">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Teacher Profile form ends here -->
+
+
+<!--    } @else {-->
+    <!-- Student Profile form starts here -->
+    <div class="row" *ngIf="auth.getUserType !== '1'">
+        <div class="col-md-12">
+            <div class="profile-section p-4 mb-3 rounded-border">
+                <div class="row">
+                    <div class="col-md-6 d-flex align-items-center text-center">
+                        <div>
+                            <img src="app/assets/etutor/avatar.svg" height="130" alt="Profile Picture"
+                                class="profile-img">
+                            <div class="profileAdd cursor" (click)="studentFile.click()">
+                                <i class="material-icons">add</i>
+                                <input type="file" #studentFile (change)="onFileSelected($event)" id="student" hidden>
+                            </div>
+                        </div>
+                        <div class="mx-5 profile-info">
+                            <h6 class="fw-bold">{{profileData?.first_name}} {{profileData?.last_name}}
+                            </h6>
+                            <span class="text-black-50 fw-bold">Student</span>
+                            <p><a (click)="routeToChangePassword()" class="fw-medium cursor highlight mx-font-13">Change Password</a></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex flex-column">
+                        <div class="card p-2">
+                            <div>
+                                <p class="mx-font-14 m-0 fw-bold">Purchases Class</p>
+                                <span class="text-black-50 mx-font-14 fw-bold">English</span>
+                            </div>
+                            <div>
+                                <p class="mx-font-14 m-0 mt-3 fw-bold">Beginner Level</p>
+                                <span class="text-black-50 mx-font-14 fw-bold">Recommended Experience</span>
+                            </div>
+                            <div>
+                                <p class="mx-font-14 fw-bold mt-3">6 Months at 10 Hours A Week</p>
+                            </div>
+
+                            <div>
+                                <p class="mx-font-14 m-0 fw-bold mt-2">Flexible Schedule</p>
+                                <span class="text-black-50 mx-font-14 fw-bold">Learn At Your Own Pace</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <h6 class="mx-font-20 fw-bold">General Info<span><i (click)="editProfileDetails = !editProfileDetails" class="material-icons mt-2">edit</i></span></h6>
+                </div>
+                <form [formGroup]="studentForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group my-2">
+                            <label>First Name</label>
+                            <input placeholder="First Name" type="text" class="form-control"/>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group my-2">
+                            <label>Last Name</label>
+                            <input placeholder="Last Name" type="text" class="form-control"/>
+                          </div>
+                        </div>
+                      <div class="col-md-6">
+                        <div class="form-group my-2">
+                          <label>Email Id</label>
+                          <input placeholder="Email Id" type="email" class="form-control"/>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group my-2">
+                          <label>Mobile Number</label>
+                          <input placeholder="Mobile Number" type="text" class="form-control"/>
+                        </div>
+                      </div>
+                        <div class="col-md-6">
+                          <div class="form-group my-2">
+                            <label>Gender</label>
+                            <select class="form-control rounded-border">
+                              <option selected disabled>Please Select</option>
+                              <option>Male</option>
+                              <option>Female</option>
+                              <option>Other</option>
+                            </select>
+                          </div>
+                        </div>
+                      <div class="col-md-6 form-group my-2">
+                        <label>Grade List</label>
+                        <ng-select class="profile"
+                          [items]="gradeListData"
+                          bindLabel="displayname"
+                          bindValue="id"
+                          placeholder="Please Select"
+                          typeToSearchText=""
+                          multiple="true"
+                        >
+                        </ng-select>
+                      </div>
+
+                      <div class="col-md-6 form-group my-2">
+                        <label>Curriculum Type List</label>
+                        <ng-select class="profile"
+                                   [items]="curriculumList"
+                                   bindLabel="curriculum_type"
+                                   bindValue="id"
+                                   placeholder="Please Select"
+                                   typeToSearchText=""
+                                   multiple="true"
+                        >
+                        </ng-select>
+                      </div>
+
+                    </div>
+                    <div class="mt-4 text-end">
+                        <button type="button" (click)="editProfileDetails = false" class="btn mx-2 rounded-border">Cancel</button>
+                        <button type="submit" class="btn btn-save rounded-border">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<!--    }-->
+    <!-- Student Profile form ends here -->
+
+</div>

@@ -1,0 +1,68 @@
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">E - Tuition</a>
+        <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button> -->
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+                @for (menu of menus; let i = $index; track menu.name) {
+                <li class="nav-item">
+                    <a class="nav-link cursor" [class.active]="menu.active"
+                        (click)="menuNavigation(menu, i)">{{menu.name}}</a>
+                </li>
+                }
+                @empty {
+                <li>No items found</li>
+                }
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="aboutus">About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ourapp">Our App</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="contact">Contact</a>
+                </li> -->
+            </ul>
+        </div>
+        <div class="ml-auto">
+          <a *ngIf="auth.getUserType === '1'" class="btn btn-signup mx-1 rounded-border" (click)="toTutor()">Become Tutor</a>
+
+          <a class="btn btn-signup mx-1 rounded-border" (click)="toMyaccount()">My Account</a>
+
+            <i (click)="onLogout()" class="material-icons cursor signout-icon mx-2">exit_to_app</i>
+
+            <!-- <a href="#" class="btn btn-login">Become Tutor</a>
+            <a href="/myaccount" class="btn btn-signup">My Account</a> -->
+        </div>
+    </div>
+</nav>
+
+<ng-template #prompt let-c="close" let-d="dismiss">
+  <div class="shadow-none card p-4">
+    <div class="card-body">
+      <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '0' || teacherStatus == '0'">
+        <h6 class="text-warning mx-font-19 font-weight-bold">Approval Pending</h6>
+        <span class="mx-font-14 m-2">Your account is awaiting admin approval. You will be notified once the approval process is complete. </span>
+      </div>
+      <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '1' || teacherStatus == '1'">
+        <img class="mt-30" style="height: 100px" src="app/assets/etutor/tick.png" alt="Learn More">
+        <h6 class="text-warning mx-font-19 font-weight-bold mt-2">Account Approved</h6>
+        <span class="mx-font-14 m-2">Your account has been successfully approved. You can now access all the features. </span>
+      </div>
+      <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '2' || teacherStatus == '2'">
+        <h6 class="text-warning mx-font-19 font-weight-bold ">Account Rejected</h6>
+        <span class="mx-font-14 m-2">Unfortunately, your account has been rejected. Please contact support for more information.</span>
+      </div>
+    </div>
+
+    <div>
+      <a (click)="closePopup()" type="button" class="btn p-2 p-2 w-75 btn-signup mx-1 rounded-border">
+        {{auth?.teacherVerificationStatus == '1' || teacherStatus == '1' ? 'Continue' : 'Ok'}}</a>
+    </div>
+
+  </div>
+</ng-template>

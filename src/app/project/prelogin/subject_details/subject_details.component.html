@@ -1,0 +1,412 @@
+<!--<div class="body">-->
+<!-- Hero Section -->
+<!--<section class="hero-section">-->
+<!--  <div class="container">-->
+<!--    <div class="row d-flex justify-content-between">-->
+<!--      <div class="col-5 text-start px-4">-->
+<!--        <h1>{{subjectDetails?.subject}} Tuition Near me With Fees in <span class="highlight w-100">India</span></h1>-->
+<!--        <p class="mt-4">-->
+<!--          <img width="38" src="app/assets/etutor/crown.png">-->
+<!--          <span class="ms-3">Find Best {{subjectDetails?.subject}} Teachers With Fees</span></p>-->
+<!--        <p>-->
+<!--          <img width="38" src="app/assets/etutor/user.png">-->
+<!--          <span class="ms-3">36,812 {{subjectDetails?.subject}} Teachers</span></p>-->
+<!--        <p>-->
+<!--          <img width="38" src="app/assets/etutor/fire.png">-->
+<!--          <span class="ms-3">Find {{subjectDetails?.subject}} Tuition E Tutuion</span></p>-->
+<!--        <p>-->
+<!--          <img width="38" src="app/assets/etutor/tick.png">-->
+<!--          <span class="ms-3">✓ Fees from ₹499/hr</span></p>-->
+<!--        <div class="search-bar my-5 rbt-search-style">-->
+<!--          <button class="rbt-search-btn border-0 search_button image_start">-->
+<!--            <i style="font-size: 20px" class="fa fa-search color-primary fa-2x"></i>-->
+<!--          </button>-->
+<!--          <input style="padding-left: 45px" type="text" placeholder="What do you want to learn?">-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="col-5 d-flex align-items-center justify-content-end">-->
+<!--        <div class="bulb_div">-->
+<!--          <img class="bulb_image" src="app/assets/etutor/home_page/bulk.png" alt="Sudent Image">-->
+<!--        </div>-->
+<!--        <div class="white_circle">-->
+<!--          <div class="review_card top_card row">-->
+<!--            <div class="col-2 p-0 text-start">-->
+<!--              <img src="app/assets/etutor/home_page/review_chart.svg" alt="Review chart">-->
+<!--            </div>-->
+<!--            <div class="col-10 p-0 text-start">-->
+<!--              <span class="span1">100% Education Growth</span>-->
+<!--              <p style="line-height: normal" class="mb-0 d-flex align-items-center">-->
+<!--                <img style="width: 13px; height: 11px" src="app/assets/etutor/home_page/star.png" alt="Star">-->
+<!--                <span class="span2 ms-1">4.9</span>-->
+<!--                <span class="span3 ms-2">(1520 Reviews)</span>-->
+<!--              </p>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <div class="review_card bottom_card row">-->
+<!--            <div class="col-12 p-0 text-start">-->
+<!--              <span class="span1">1000,000 Happy Students</span>-->
+<!--              <p style="line-height: normal" class="mb-0 d-flex align-items-center">-->
+<!--                <img style="width: 13px; height: 11px" src="app/assets/etutor/home_page/star.png" alt="Star">-->
+<!--                <span class="span2 ms-1">4.9</span>-->
+<!--                <span class="span3 ms-2">(15k Reviews)</span>-->
+<!--              </p>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <img class="white_image" src="app/assets/etutor/home_page/opening_image.png" alt="Sudent Image">-->
+<!--          <img class="arrow_image" src="app/assets/etutor/home_page/curved_right_arrow.png" alt="Arrow">-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</section>-->
+
+<section>
+  <div class="container-fluid" style="padding: 0px 100px">
+    <div class="row">
+      <mat-accordion>
+        <mat-expansion-panel
+          (opened)="togglePanel(true)"
+          (closed)="togglePanel(false)"
+          class="filter-accordion"
+          [expanded]="true"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title class="w-100"> Filter Options </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="col-12">
+            <div class="row filter-content">
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">Curriculum List</label>
+                <ng-select
+                  [items]="curriculumData"
+                  bindLabel="curriculum_type"
+                  bindValue="id"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  multiple="true"
+                  (change)="getTeacherList()"
+                  [(ngModel)]="selectedCurriculum"
+                >
+                </ng-select>
+              </div>
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">Grade List</label>
+                <ng-select
+                  [items]="gradeListData"
+                  bindLabel="displayname"
+                  bindValue="id"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  multiple="true"
+                  (change)="getTeacherList()"
+                  [(ngModel)]="selectedGrade"
+                >
+                </ng-select>
+              </div>
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">Subject List</label>
+                <ng-select
+                  [items]="subjectListData"
+                  bindLabel="subject"
+                  bindValue="subject"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  multiple="true"
+                  (change)="getTeacherList()"
+                  [(ngModel)]="selectedSubject"
+                >
+                </ng-select>
+              </div>
+
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">Language List</label>
+                <ng-select
+                  [items]="languageListData"
+                  bindLabel="language_name"
+                  bindValue="language_name"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  multiple="true"
+                  (change)="getTeacherList()"
+                  [(ngModel)]="selectedLanguage"
+                >
+                </ng-select>
+              </div>
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">State List</label>
+                <ng-select
+                  [items]="stateListData"
+                  bindLabel="state_name"
+                  bindValue="state_id"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  (change)="cityList('change')"
+                  [(ngModel)]="selectedStates"
+                >
+                </ng-select>
+              </div>
+
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">City List</label>
+                <ng-select
+                  [items]="cityListData"
+                  bindLabel="city_name"
+                  bindValue="city_name"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  multiple="true"
+                  (change)="getTeacherList()"
+                  [(ngModel)]="selectedCity"
+                >
+                </ng-select>
+              </div>
+
+              <div class="col-3 filter-fields mt-2">
+                <label class="mb-1">Gender</label>
+                <ng-select
+                  [items]="genderListData"
+                  bindLabel="label"
+                  bindValue="id"
+                  placeholder="Please Select"
+                  typeToSearchText=""
+                  multiple="true"
+                  (change)="getTeacherList()"
+                  [(ngModel)]="selectedGender"
+                >
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <div class="col-12 text-center mt-5">
+        <h2>
+          Best {{ selectedSubject }} Classes In India - 536,812 Tutors For Maths
+          Nearby
+        </h2>
+        <img src="app/assets/etutor/home_page/star.png" alt="Star" />
+      </div>
+      <div
+        *ngIf="teacherList.length != 0"
+        class="row mt-5 {{ teacherList.length <= 3 ? 'setWidth' : '' }}"
+      >
+        <owl-carousel-o [options]="customOptions">
+          <div *ngFor="let teacher of teacherList; let i = index"></div>
+          @for (teacher of teacherList; let i = $index; track
+          teacher.first_name) {
+
+          <ng-template carouselSlide>
+            <div class="carousel-wrapper card m-2">
+              <!--              <img class="carousel-img zoom" [src]="envImg + teacher.profile_image[0]" alt="Image">-->
+              <img
+                class="carousel-img zoom"
+                [src]="teacher.profile_image[0]"
+                alt="Image"
+              />
+              <div class="card-content">
+                <div class="w-100 slide-img-content ps-2 pe-4">
+                  <div class="text-start w-100">
+                    <p
+                      class="mx-font-16 text-white d-flex justify-content-between text-capitalize"
+                    >
+                      {{ teacher.first_name + " " + teacher.last_name }}
+                      <img
+                        style="width: 8% !important"
+                        src="app/assets/etutor/home_page/tilted_star.png"
+                        alt="Star"
+                      />
+                    </p>
+                  </div>
+                  <p class="w-100 text-start mx-font-16 text-white">
+                    {{ teacher.qualifications }}
+                  </p>
+                </div>
+                <p class="text-start carousel-description mx-font-13">
+                  {{ teacher.about_you }}
+                </p>
+                <div
+                  class="d-flex align-items-center flex-row justify-content-between"
+                >
+                  <p class="mb-0"><b>&#8377;850/hr</b></p>
+                  <button
+                    (click)="routeToTeacherDetail(teacher)"
+                    class="btn btn-slide mx-1"
+                  >
+                    1st class free
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          }
+        </owl-carousel-o>
+      </div>
+
+      <div
+        class="col-12 col-md-12 col-lg-12 mt-3 px-4 d-flex justify-content-center"
+        *ngIf="teacherList.length == 0"
+      >
+        <div class="col-9 col-md-9 col-lg-9 p-5 text-center no_record_div">
+          <span class="no_record">No Teacher Available!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tutor-section home_perfect_tutor_background">
+  <div class="container text-center">
+    <span>STEPS</span>
+    <h2>Finding the perfect tutor is easy</h2>
+    <div class="row my-5 d-flex justify-content-around">
+      <div class="col-md-4 d-flex justify-content-center">
+        <div class="tutor-card widget-box col-9">
+          <h5>Choose Your Tutor</h5>
+          <img
+            src="app/assets/etutor/home_page/choose_tutor.svg"
+            class="rounded-circle"
+            alt="Tutor 1"
+          />
+        </div>
+        <span class="stepChip slide slide1">Step 1</span>
+      </div>
+      <div class="col-md-4 d-flex justify-content-center">
+        <div class="tutor-card widget-box col-9">
+          <h5>Share Your Goals</h5>
+          <img
+            src="app/assets/etutor/home_page/book_lesson.svg"
+            class="rounded-circle"
+            alt="Tutor 3"
+          />
+        </div>
+        <span class="stepChip slide slide2">Step 2</span>
+      </div>
+      <div class="col-md-4 d-flex justify-content-center">
+        <div class="tutor-card widget-box col-9">
+          <h5>Book Your Lesson</h5>
+          <img
+            src="app/assets/etutor/home_page/share_goal.svg"
+            class="rounded-circle"
+            alt="Tutor 2"
+          />
+        </div>
+        <span class="stepChip slide slide3">Step 3</span>
+      </div>
+    </div>
+    <div class="third_level mt-5 mb-4">
+      <span>The Right Fit, Or It's Free</span>
+      <p class="mb-0">
+        We're so confident that you'll find a great match, we guarantee your
+        first hour with any new tutor.
+      </p>
+      <button class="btn btn-orange mt-4">SIGN UP NOW</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="row faq_margin">
+      <div class="col-12">
+        <h2 class="text-center faq_header">FAQ</h2>
+      </div>
+      <div class="col-12 mt-2">
+        @for (count of matExpansionData; track count) {
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <p class="me-4 expansion-panel-title header_content mb-0">
+                What is the average price of
+                {{ subjectDetails?.subject }} tuition in India?
+              </p>
+            </mat-expansion-panel-header>
+            <mat-expansion-panel-content>
+              <div class="text-start">
+                <p class="content_mat">
+                  The average price of Maths Classes on Superprof is ₹971/hr.
+                </p>
+                <p class="content_mat">
+                  The price of your math tuition depends on a number of factors
+                </p>
+                <p class="bullet-dot content_mat">
+                  The experience of your Maths tutor
+                </p>
+                <p class="bullet-dot content_mat">
+                  The location of your lessons
+                </p>
+                <p class="bullet-dot content_mat">
+                  The duration and frequency of your Maths classes.
+                </p>
+                <p class="bullet-dot content_mat">
+                  Home tutors for Maths or Online Maths Tuition
+                </p>
+                <p class="content_mat">
+                  97% of tutor offer their first lesson for free.
+                </p>
+                <div class="col-12 text-center">
+                  <button>More</button>
+                </div>
+              </div>
+            </mat-expansion-panel-content>
+          </mat-expansion-panel>
+        </mat-accordion>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feeback slider seciton starts here -->
+<section class="feedback_slider">
+  <div class="container" style="padding: 0 75px 75px 75px">
+    <div class="row px-3">
+      <div class="col-12 text-center">
+        <h2>What student say abut us</h2>
+      </div>
+      <div class="row mt-5">
+        <owl-carousel-o [options]="customOptions1">
+          @for (item of items1; let i = $index; track item.img) {
+
+          <ng-template carouselSlide>
+            <!-- <div class="carousel-wrapper card m-2">
+              <img class="carousel-img zoom" [src]="item.img" alt="Image">
+              <div class="card-content">
+                <div class="w-100 slide-img-content d-flex flex-row justify-content-between">
+                  <div class="text-start w-75">
+                    <p class="mx-font-16">{{ item.name }}</p>
+                    <p class="mx-font-16">{{ item.location }}</p>
+                  </div>
+                  <p class="w-50"><span class="rating">{{ item.rating }}</span></p>
+                </div>
+                <p class="text-start carousel-description mx-font-13">{{ item.description }}</p>
+                <div class="d-flex flex-row justify-content-between">
+                  <p><b>{{ item.price }}</b></p>
+                  <button class="mx-font-11 btn btn-slide mx-1">1st class free</button>
+                </div>
+              </div>
+            </div> -->
+
+            <div class="feedback_card card m-2">
+              <div class="card-body">
+                <!-- <h5 class="card-title">{{ item.name }}</h5> -->
+                <p class="card-text text-start">{{ item.description }}</p>
+                <div class="d-flex flex-row">
+                  <img [src]="item.img" alt="img" />
+                  <div
+                    class="d-flex mx-3 flex-column align-self-end align-items-start"
+                  >
+                    <p class="mx-m-b-1">{{ item.name }}</p>
+                    <p class="role">{{ item.role }}</p>
+                  </div>
+                </div>
+                <!-- <p class="card-text"><small class="text-muted">Rating: {{ item.rating }}</small></p> -->
+              </div>
+            </div>
+          </ng-template>
+          }
+        </owl-carousel-o>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,66 @@
+em {
+  font-size: 14px !important;
+}
+.timing-container {
+  display: flex;
+  //flex-direction: column;
+  align-items: center;
+}
+
+.timepicker-card {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  //display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+}
+
+.timepicker-input {
+  border: none;
+  outline: none;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  width: 100%;
+  color: #000;
+  background-color: transparent;
+}
+
+.timepicker-input::placeholder {
+  color: #bbb;
+  text-align: center;
+}
+
+.timepicker-card:hover {
+  border-color: #8F008A; /* Your preferred border color for hover */
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.form-select {
+  border-radius: 24px;
+  padding: 8px 16px;
+}
+
+th {
+  background-color: #edfbff !important;
+  text-align: center !important;
+  font-size: 14px;
+}
+
+td {
+  font-size: 14px;
+}
+
+.availability_table {
+  border-top: 1px solid #dee2e6 !important;
+  border-left: 1px solid #dee2e6 !important;
+  border-right: 1px solid #dee2e6 !important;
+}

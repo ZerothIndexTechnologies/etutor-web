@@ -1,0 +1,7 @@
+@if (!auth.isLoggedIn) {
+<app-header></app-header>
+} @else {
+<app-post-header></app-post-header>
+}
+<router-outlet />
+<app-footer *ngIf="currentUrl != '/myaccount/reserve-class-list'"></app-footer>

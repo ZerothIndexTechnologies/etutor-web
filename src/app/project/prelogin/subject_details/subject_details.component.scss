@@ -1,0 +1,287 @@
+.perfect_match,
+.tutorProfile_slider,
+.feedback_slider {
+  background-color: #fff !important;
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .container {
+    text-align: center;
+    padding: 24px 48px 24px 48px;
+  }
+
+  .image_container {
+    display: flex;
+    align-items: center;
+  }
+
+  .image-grid {
+    width: min-content;
+  }
+
+  h2 {
+    line-height: 40px;
+    font-weight: 500;
+    font-size: 32px;
+    margin: 0.5rem;
+    text-align: center;
+  }
+
+  h4 {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 30px;
+    text-align: center;
+  }
+
+  span {
+    color: #666666;
+  }
+}
+
+.course_icon {
+  width: 10%;
+  height: 10%;
+  padding: 16px;
+  text-align: center;
+  border-radius: 20%;
+  border: 1px solid #3473ef33;
+  background-color: #edfbff !important;
+  box-shadow: 0 19px 18px 0 #0000000d;
+
+  img {
+    width: 50px;
+  }
+
+  p {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 28px;
+    margin-bottom: 0;
+  }
+}
+
+.tutor-section {
+  h2 {
+    line-height: 28px;
+    font-weight: 500;
+    font-size: 36px;
+    margin: 0.5rem;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 28px;
+
+    &:not(.stepChip) {
+      letter-spacing: 0.45em;
+    }
+  }
+
+  .third_level {
+    span {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 36px;
+      text-align: center;
+      color: #121212;
+      letter-spacing: normal;
+    }
+
+    p {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 36px;
+      text-align: center;
+      color: #666666;
+    }
+  }
+}
+
+.join_class_section {
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+}
+
+.learn_what {
+  h2 {
+    font-size: 30px;
+    font-weight: 600;
+    padding-top: 16px;
+    color: #121212;
+    margin-bottom: 0;
+  }
+
+  .course_name {
+    border-radius: 30px;
+    border: 1px solid #505050;
+    margin-right: 12px;
+    margin-bottom: 36px;
+    padding: 8px 32px 8px 32px;
+  }
+
+  span {
+    color: #222222;
+    font-weight: 400;
+  }
+}
+
+.hero-section {
+  p {
+    color: #000000 !important;
+    font-size: 18px;
+  }
+  .right-side-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    background-color: #f9fafb;
+    /* Light background color */
+  }
+
+  .image-section {
+    position: relative;
+    width: fit-content;
+  }
+
+  .student-image {
+    width: 250px;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.card {
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card img:has(.feedback_card) {
+  width: 100%;
+  height: auto;
+}
+
+.card-content {
+  padding: 10px;
+}
+
+.card h4 {
+  margin: 10px 0;
+}
+
+.card .rating {
+  color: gold;
+  width: 115px;
+}
+
+.card .free-class {
+  background-color: #ff8c00;
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+mat-expansion-panel {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #ffff !important;
+  text-align: center !important;
+}
+
+.mat-expansion-panel-header {
+  justify-content: center;
+  text-align: center;
+}
+
+.mat-expansion-panel-header:hover {
+  background: none !important;
+}
+
+.bullet-dot::before {
+  content: "•";
+  display: inline-block;
+  margin: 0 12px;
+  color: #000000 !important;
+}
+
+mat-expansion-panel-content {
+  display: flex;
+  justify-content: center;
+}
+
+.content_mat {
+  color: #666666;
+}
+
+.header_content {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+button {
+  background-color: #f57c00;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 2rem;
+  font-size: 1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  //margin-top: 1rem;
+}
+
+button:hover {
+  background-color: #ef6c00;
+}
+
+.faq_header {
+  font-size: 36px;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+.faq_margin {
+  margin-top: 1.5rem;
+  margin-bottom: 5rem;
+}
+
+.filter-accordion {
+  background-color: antiquewhite !important;
+  border-radius: 10px !important;
+  // overflow: visible !important;
+
+  .mat-expansion-panel-header {
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem;
+    font-size: x-large;
+  }
+  .filter-fields {
+    text-align: start;
+  }
+}

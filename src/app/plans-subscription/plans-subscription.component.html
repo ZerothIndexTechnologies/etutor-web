@@ -1,0 +1,128 @@
+<head>
+    <style>
+        .plan-subscription {
+
+            .alert-light {
+                background-color: #edfbff;
+                border-radius: 20px !important;
+            }
+
+        }
+
+        .plan-card {
+            width: 45%;
+            border: 2px solid #3a3a3a;
+            border-radius: 50px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .plan-price {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .vl {
+            border-left: 3px solid lightgray;
+            height: 500px;
+        }
+
+
+
+        .payment-option {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-radius: 30px;
+
+            button {
+                flex: 1;
+                margin: 5px;
+                border-radius: 30px;
+            }
+        }
+
+        .payment-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+
+            input {
+                flex: 1;
+                margin-right: 10px;
+            }
+        }
+
+        .tab-selected {
+            background-color: #ff8c00;
+            color: #fff;
+
+        }
+    </style>
+</head>
+
+<div class="container mt-5 p-5">
+    <div class="row plan-subscription">
+        <div class="col-md-5">
+            <div class="d-flex align-content-center flex-column align-items-center">
+                <h5 class=" fw-bold">Selective Plan</h5>
+                <div class="plan-card text-center pt-5 pb-5">
+                    <h5 class="mt-5">Monthly Plan</h5>
+                    <p>30 days of amount</p>
+                    <div class="plan-price mb-5">₹1000/-</div>
+                </div>
+                <div class="form-check form-check-inline mt-2">
+                    <input class="form-check-input text-warning" type="radio" id="radio3" name="radioGroup"
+                        value="Weekly">
+                    <label class="form-check-label" for="Weekly">Auto renewal</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 vl"></div>
+
+        <div class="col-md-5">
+            <h5 class="fw-bold">Monthly Plan <span class="hightlight">₹1000/-</span></h5>
+            <div class="p-3 alert-light">
+                <ul>
+                    <li class="mt-2">Plan is 30 days will be counted</li>
+                    <li class="mt-2">Auto renewal options also available</li>
+                </ul>
+            </div>
+            <h6 class="fw-bold mt-4">Type of payment</h6>
+            <div class="payment-option">
+                <button class="btn" [ngClass]="[showCard ? 'tab-selected' : 'btn-light']"
+                    (click)="showCard = !showCard">Credit/Debit card</button>
+                <button class="btn" [ngClass]="[!showCard ? 'tab-selected' : 'btn-light']"
+                    (click)="showCard = !showCard">UPI</button>
+            </div>
+            <!-- CARD starts-->
+            @if (showCard) {
+            <div class="payment-details mt-4 row">
+                <div class="col-10 form-group">
+                    <input type="text" class="form-control" placeholder="Credit card">
+                </div>
+                <div class="col-2 form-group">
+                    <input type="text" class="form-control" placeholder="CVV">
+                </div>
+            </div>
+            <!-- CARD ends-->
+
+            }@else {
+            <!-- UPI Starts-->
+            <div class="payment-details mt-4 column">
+                <div class="col-6 form-group">
+                    <input type="text" class="form-control" placeholder="UPI ID">
+                </div>
+                <div class="col-6 form-group mx-1">
+                    <input type="text" class="form-control" placeholder="UPI Number">
+                </div>
+            </div>
+            }
+            <!-- UPI ends -->
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">E - Tuition</a>
+        <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button> -->
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+                @for (menu of menus; let i = $index; track menu.name) {
+                <li class="nav-item">
+                    <a class="nav-link cursor" [class.active]="menu.active"
+                        (click)="menuNavigation(menu, i)">{{menu.name}}</a>
+                </li>
+                }
+                @empty {
+                <li>No items found</li>
+                }
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="aboutus">About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ourapp">Our App</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="contact">Contact</a>
+                </li> -->
+            </ul>
+        </div>
+        <div class="ml-auto">
+
+            <a class="btn btn-login rounded-border" (click)="onLogin()">Login</a>
+            <a class="btn btn-signup mx-1 rounded-border" style="padding: 8px 24px" (click)="onSingUp()">Sign Up</a>
+            <!-- <a class="btn btn-signup mx-1 rounded-border" (click)="toTutor()">Become Tutor</a> -->
+        </div>
+    </div>
+</nav>

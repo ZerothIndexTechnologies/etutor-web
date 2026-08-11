@@ -1,0 +1,112 @@
+<!-- <script src="reserve-reserve-class-list.component.ts"></script> -->
+<section class="mb-3 p-4 profile-section rounded-border">
+  <div class="row">
+    <div class="col-12">
+      <h6 class="font-weight-bold">Reserve Class List</h6>
+    </div>
+
+    <div class="col-12">
+      <div class="row">
+        <div class="col-4 filter-fields mt-2 mb-3">
+          <label style="font-size: 14px" class="mb-1">Teacher List</label>
+          <ng-select
+            [items]="teacherList"
+            bindLabel="display_name"
+            bindValue="teacher_id"
+            placeholder="Please Select"
+            typeToSearchText=""
+            multiple="true"
+            (change)="reserveClassList()"
+            [(ngModel)]="selectedTeacher"
+          >
+          </ng-select>
+        </div>
+        <div class="col-4 filter-fields mt-2 mb-3">
+          <label style="font-size: 14px" class="mb-1">Grade List</label>
+          <ng-select
+            [items]="gradeListData"
+            bindLabel="displayname"
+            bindValue="id"
+            placeholder="Please Select"
+            typeToSearchText=""
+            multiple="true"
+            (change)="reserveClassList()"
+            [(ngModel)]="selectedGrade"
+          >
+          </ng-select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 my-3 d-flex flex-column justify-content-center px-2"
+             *ngFor="let classData of classListdata; let i = index">
+          <div class="card class-card class-hover" style="border-radius: 12px">
+            <div class="card-body p-2">
+              <div class="row p-2 cursor">
+                <div class="col-12">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <h6 class="mb-2">
+                        <span class="font-weight-bold" style="font-size: 18px">{{classData.subject ?? '-'}}</span>
+                      </h6>
+                    </div>
+                    <div class="col-4 text-right" *ngIf="auth.getRoleId() == '3'">
+                      <button (click)="subscribeNow(classData)" style="padding: 6px 12px" type="button" class="btn btn-orange">Subscribe Now</button>
+                    </div>
+                  </div>
+                  <p class="p-0">
+                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Grade:</span><span
+                    class="t-name color-primary font-weight-bold ms-1">{{classData.grade_name ?? '-'}}</span>
+                    <span style="font-size: 13px; color: #777777" class="font-weight-bold ms-2">Curriculum:</span><span
+                    class="t-name font-weight-bold ms-1">{{classData.curriculum_name ?? '-'}}</span>
+                  </p>
+                  <p class="p-0">
+                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Time:</span>
+                    <i style="font-size: 13px" class="fas fa-clock ms-1"></i>
+                    <span style="font-size: 14px;"
+                          class="t-name font-weight-bold ms-1">{{classData.start_time}}</span>-<span style="font-size: 14px;"
+                                                                                                     class="t-name font-weight-bold">{{classData.end_time}}</span>
+                  </p>
+                  <p class="p-0">
+                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Class Days:</span><span
+                    class="t-name font-weight-bold ms-1">{{classData.days ?? '-'}}</span> &nbsp;<br />
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row d-flex justify-content-center" *ngIf="classListdata.length == 0">
+        <img style="width: 25%" src="app/assets/etutor/no_data.svg" alt="">
+        <h6 class="mb-0 text-center font-weight-bold mt-2" style="font-size: 18px">No Class Available</h6>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<ng-template #showSubscriptionPlan>
+  <div class="card">
+    <div class="card-header py-3">
+      <span style="font-size: 18px" class="text-capitalize col-12 font-weight-bold mb-0">Subscription Plan</span>
+    </div>
+    <div class="card-body">
+      <div class="row plan-subscription">
+        <div class="col-md-3" *ngFor="let sub of subscriptionPlan;">
+          <div class="w-100">
+            <div class="w-100 plan-card px-1 text-center pt-5 pb-5 my-0">
+              <h5 class="mt-4 mb-2">{{sub.name}} Plan</h5>
+              <p class="mb-3">{{sub.days}} days of amount</p>
+              <div *ngIf="sub.plan_id != '1'" class="plan-price mb-5">₹{{classDetail[sub.key]}}/-</div>
+              <div *ngIf="sub.plan_id == '1'" class="plan-price mb-5">₹0/-</div>
+              <button (click)="userSubscription(sub)" [disabled]="sub.plan_id != '1'" type="button" class="btn btn-orange">Select Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button (click)="closePopup()" type="button" class="btn btn-orange pull-right">Close</button>
+    </div>
+  </div>
+</ng-template>

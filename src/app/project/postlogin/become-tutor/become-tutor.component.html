@@ -1,0 +1,396 @@
+<div class="container">
+  <div class="row m-3" *ngIf="showFirst">
+    <div class="col-12 m-3">
+      <div class="step-indicator">
+        <div class="step step-3">1</div>
+        <div class="step step-4 cursor" (click)="onCollapseStepper(2)">
+          <div>2</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div>
+        <h4>Good to
+          <span class="tutor-title">Know</span>
+        </h4>
+      </div>
+      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
+        readable
+        content of a page when looking at its layout.
+      </div>
+      <form [formGroup]="stepper">
+        <div class="d-flex flex-row mt-3">
+          <div>
+            <img *ngIf="!profileBase64" src=" app/assets/etutor/avatar.svg" width="130" height="130"
+              alt="Profile Picture" class="profile-img">
+            <img *ngIf="profileBase64" [src]="profileBase64" height="130" width="130" alt="Profile Picture"
+              class="profile-img">
+
+
+            <div class="profileAdd cursor" (click)="file.click()">
+              <i class="material-icons mx-1">add</i>
+              <input type="file" #file (change)="onFileSelected($event, 'profile')" id="profile" hidden>
+            </div>
+          </div>
+
+          <div class="mx-5 profile-info mt-4">
+            <p class="fw-bold mx-font-19">{{(user.first_name + ' ' + user.last_name).toUpperCase()}}</p>
+            <span class="text-black-50 fw-medium mx-font-16">{{user.mobile_number}}</span>
+          </div>
+        </div>
+        <div class="form-group mt-3">
+          <label for="address">Address<span class="text-danger">*</span></label>
+          <input placeholder="Enter Your Address" formControlName="address" class="form-control" id="address"
+            required />
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper.get('address')?.valid && (stepper.get('address')?.dirty || stepper.get('address')?.touched)">Address
+            is Required</label>
+        </div>
+        <div class="form-group mt-1">
+          <label for="about">About you<span class="text-danger">*</span></label>
+          <input placeholder="Enter About You" formControlName="aboutInfo" class="form-control" id="about" required />
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper.get('aboutInfo')?.valid && (stepper.get('aboutInfo')?.dirty || stepper.get('aboutInfo')?.touched)">
+            About you is Required</label>
+
+        </div>
+        <div class="form-group mt-1">
+          <label for="lang">Language Proficiency<span class="text-danger">*</span></label>
+          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center">
+            <div *ngFor="let chip of langChips" class="chip d-flex align-items-center">
+              <span>{{ chip }}</span>
+              <button type="button" class="btn-close" aria-label="Close" (click)="removeChip(chip)"></button>
+            </div>
+            <input style="padding: 8px 4px" placeholder="Enter Your Language Proficiency" type="text"
+              class="border-0 flex-grow-1" id="lang" formControlName="language"
+              (keydown)="handleKeyDown($event, 'language')">
+          </div>
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper.get('language')?.valid && (stepper.get('language')?.dirty || stepper.get('language')?.touched) && langChips.length == 0">
+            Language Proficiency is Required</label>
+        </div>
+
+        <div class="form-group mt-1">
+          <label for="pin">Pincode<span class="text-danger">*</span></label>
+          <input (input)="getCityAndStateListByPincode()" placeholder="Enter Your Pincode" type="text"
+            formControlName="pin" required class="form-control" id="pin">
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper.get('pin')?.valid && (stepper.get('pin')?.dirty || stepper.get('pin')?.touched)">
+            Pincode is Required</label>
+        </div>
+        <div class="row">
+          <div class="form-group mt-1 w-50">
+            <label for="city">City<span class="text-danger">*</span></label>
+            <input readonly placeholder="Enter Your City" type="text" formControlName="city" required
+              class="form-control" id="city">
+            <label class="error jquery-validation-error small form-text"
+              *ngIf="!stepper.get('city')?.valid && (stepper.get('city')?.dirty || stepper.get('city')?.touched)">
+              City is Required</label>
+          </div>
+          <div class="form-group mt-1 w-50">
+            <label for="state">State<span class="text-danger">*</span></label>
+            <input readonly placeholder="Enter Your State" type="text" formControlName="state" required
+              class="form-control" id="state">
+            <label class="error jquery-validation-error small form-text"
+              *ngIf="!stepper.get('state')?.valid && (stepper.get('state')?.dirty || stepper.get('state')?.touched)">
+              State is Required</label>
+          </div>
+
+          <div class="col-12 mt-3">
+            <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(2)">Proceed
+              <i class="material-icons arrow-icon icon-center">arrow_forward</i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6 image-container">
+      <img class="mt-2 p-5" style="object-fit: cover;" height="95%" src='app/assets/etutor/becometutor_background.svg'
+        alt="Tutor ">
+    </div>
+  </div>
+
+  <div class="row m-3" *ngIf="showSecond">
+    <div class="col-12 m-3">
+      <div class="step-indicator">
+        <div class="step step-3 cursor" (click)="onCollapseStepper(1)">2</div>
+        <div class="step step-4 cursor">
+          <div>3</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+
+      <div>
+        <h4>Good to
+          <span class="tutor-title">Know</span>
+        </h4>
+      </div>
+      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
+        readable
+        content of a page when looking at its layout.
+      </div>
+      <form [formGroup]="stepper1">
+
+        <div class="form-group mt-1">
+          <label for="qualif">Qualification</label>
+          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center">
+            <div *ngFor="let chip of qualificationChips" class="chip d-flex align-items-center">
+              <span>{{ chip }}</span>
+              <button type="button" class="btn-close" aria-label="Close"
+                (click)="removeQualificationChip(chip)"></button>
+            </div>
+            <input style="padding: 8px 4px" placeholder="Enter Your Qualification" type="text"
+              formControlName="qualification" class="border-0 flex-grow-1" id="qualif"
+              (keydown)="handleKeyDown($event, 'qualification')">
+          </div>
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper1.get('qualification')?.valid && (stepper1.get('qualification')?.dirty || stepper1.get('pin')?.touched) && qualificationChips.length == 0">
+            Qualification is Required</label>
+        </div>
+        <div class="form-group mt-2">
+          <label class="p-1" for="exp">Experience in Yrs</label>
+          <input placeholder="Enter Your Experience" formControlName="exp" type="text"
+            class="form-control rounded-border" id="exp">
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper1.get('exp')?.valid && (stepper1.get('exp')?.dirty || stepper1.get('exp')?.touched) && qualificationChips.length == 0">
+            Experiences is Required</label>
+        </div>
+
+        <div class="form-group mt-1">
+          <label for="subteach">Subject Teach</label>
+          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center">
+            <div *ngFor="let subject of subjectChips" class="chip d-flex align-items-center">
+              <span>{{ subject }}</span>
+              <button type="button" class="btn-close" aria-label="Close" (click)="removeSubjectChip(subject)"></button>
+            </div>
+            <input style="padding: 8px 4px" placeholder="Enter the Subject You Teach" type="text"
+              formControlName="subTeach" class="border-0 flex-grow-1" id="subteach"
+              (keydown)="handleKeyDown($event, 'subjectTeach')">
+          </div>
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper1.get('subTeach')?.valid && (stepper1.get('subTeach')?.dirty || stepper1.get('subTeach')?.touched) && qualificationChips.length == 0">
+            Subject Teach is Required</label>
+        </div>
+        <div class="form-group mt-1">
+          <label for="currculum">Curriculum</label>
+          <select style="padding: 8px 16px" formControlName="curriculum" class="form-control rounded-border"
+            id="currculum">
+            <option selected disabled value="">Please Select</option>
+            <option *ngFor="let data of curriculumList" [value]="data.curriculum_type">
+              {{data.curriculum_type}}</option>
+          </select>
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper1.get('curriculum')?.valid && (stepper1.get('curriculum')?.dirty || stepper1.get('curriculum')?.touched) && qualificationChips.length == 0">
+            Currriculum is Required</label>
+        </div>
+
+        <div class="col-12 mt-3">
+          <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(3)">Proceed
+            <i class="material-icons arrow-icon icon-center">arrow_forward</i>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6 image-container">
+      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor ">
+    </div>
+  </div>
+
+  <div class="row m-3" *ngIf="showThird">
+    <div class="col-12 m-3">
+      <div class="step-indicator">
+        <div class="step step-3 cursor" (click)="onCollapseStepper(2)">3</div>
+        <div class="step step-4 cursor">
+          <div>4</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+
+      <div>
+        <h4>Good to
+          <span class="tutor-title">Know</span>
+        </h4>
+      </div>
+      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
+        readable
+        content of a page when looking at its layout.
+      </div>
+      <form [formGroup]="stepper2">
+        <div class="form-group mt-3">
+          <label for="proof">Identification Proof</label>
+          <select formControlName="identity" class="form-control rounded-border" id="proof">
+            <option *ngFor="let data of proofList" [value]="data.proof_type">{{data.proof_type}}</option>
+          </select>
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper2.get('identity')?.valid && (stepper2.get('identity')?.dirty || stepper2.get('identity')?.touched) && qualificationChips.length == 0">
+            Identification is Required</label>
+        </div>
+        <div class="file-uploader mt-3">
+          <input type="file" (change)="onFileSelected($event, 'identity')" id="identity" hidden>
+          <label for="identity" class="file-label">
+            <div class="file-label-content">
+              <i class="material-icons">cloud_upload</i>
+              <span>Upload an Identity</span>
+            </div>
+          </label>
+          <div class="file-details">
+            <p>File Name: {{ identityFile?.name }}</p>
+            <p>File Size: {{ identityFile?.size / 1000 }} KB</p>
+          </div>
+        </div>
+
+        <div class="form-group mt-2">
+          <label for="bankname">Bank Name</label>
+          <input placeholder="Enter Your Bank Name" formControlName="bankName" type="text" class="form-control"
+            id="bankname">
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper2.get('bankName')?.valid && (stepper2.get('bankName')?.dirty || stepper2.get('bankName')?.touched) && qualificationChips.length == 0">
+            Bank Name is Required</label>
+        </div>
+        <div class="form-group mt-2">
+          <label class="p-1" for="bankacc">Bank Account Number</label>
+          <input placeholder="Enter Your Bank Account Number" type="text" formControlName="bankAccnum"
+            class="form-control rounded-border" id="bankacc">
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper2.get('bankAccnum')?.valid && (stepper2.get('bankAccnum')?.dirty || stepper2.get('bankAccnum')?.touched) && qualificationChips.length == 0">
+            Bank Account Number is Required</label>
+        </div>
+        <div class="form-group mt-2">
+          <label class="p-1" for="ifsc">IFSC Code</label>
+          <input placeholder="Enter Your IFSC Code" type="text" formControlName="ifsc"
+            class="form-control rounded-border" id="ifsc">
+          <label class="error jquery-validation-error small form-text"
+            *ngIf="!stepper2.get('ifsc')?.valid && (stepper2.get('ifsc')?.dirty || stepper2.get('ifsc')?.touched) && qualificationChips.length == 0">
+            IFSC is Required</label>
+        </div>
+
+        <div class="col-12 mt-3">
+          <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(4)">Proceed
+            <i class="material-icons arrow-icon icon-center">arrow_forward</i>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6 image-container">
+      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor">
+    </div>
+  </div>
+
+  <div class="row m-3" *ngIf="showFourth">
+    <div class="col-12 m-3">
+      <div class="step-indicator">
+        <div class="step step-3 cursor" (click)="onCollapseStepper(3)">4</div>
+        <div class="step step-4 cursor">
+          <div>5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div>
+        <h4>Good to
+          <span class="tutor-title">Know</span>
+        </h4>
+      </div>
+      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
+        readable
+        content of a page when looking at its layout.
+      </div>
+      <form>
+        <div class="file-uploader mt-4">
+          <input type="file" (change)="onFileSelected($event, 'ug')" id="ug" hidden>
+          <label for="ug" class="file-label">
+            <div class="file-label-content">
+              <i class="material-icons">cloud_upload</i>
+              <span>Upload UG Certificate</span>
+            </div>
+          </label>
+          <div class="file-details">
+            <p>File Name: {{ ugFile?.name }}</p>
+            <p>File Size: {{ ugFile?.size / 1000 }} KB</p>
+          </div>
+        </div>
+        <div class="file-uploader mt-4">
+          <input type="file" (change)="onFileSelected($event, 'pg')" id="pg" hidden>
+          <label for="pg" class="file-label">
+            <div class="file-label-content">
+              <i class="material-icons">cloud_upload</i>
+              <span>Upload PG Certficate</span>
+            </div>
+          </label>
+          <div class="file-details">
+            <p>File Name: {{ pgFile?.name }}</p>
+            <p>File Size: {{ pgFile?.size / 1000 }} KB</p>
+          </div>
+        </div>
+        <div class="file-uploader mt-4">
+          <input type="file" multiple (change)="onFileSelected($event, 'other')" id="other" hidden>
+          <label for="other" class="file-label">
+            <div class="file-label-content">
+              <i class="material-icons">cloud_upload</i>
+              <span>Upload Additional doc</span>
+            </div>
+          </label>
+          <div class="file-details">
+            @for (file of otherFile; let i = $index; track file.name) {
+            <p>File Name: {{ file.name }}</p>
+            <p>File Size: {{ file.size / 1000 }} KB</p>
+            } @empty {
+            <p>File Name: </p>
+            <p>File Size: 0 KB</p>
+            }
+          </div>
+        </div>
+
+        <div class="col-12 mt-3">
+          <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(5)">Submit
+            <!--            <i class="material-icons arrow-icon icon-center">arrow_forward</i>-->
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6 image-container">
+      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor ">
+    </div>
+  </div>
+
+  <div class="row m-3" *ngIf="showFive">
+    <div class="col-12 m-3">
+      <div class="step-indicator">
+        <div class="step step-3 cursor" (click)="onCollapseStepper(4)">5</div>
+        <div class="step step-4 cursor">
+          <div>6</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div>
+        <h4>Good to
+          <span class="tutor-title">Know</span>
+        </h4>
+      </div>
+      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
+        readable
+        content of a page when looking at its layout.
+      </div>
+      <div class="mt-40 text-center">
+        <h5 class="text-success">Conguratulation!</h5>
+        <h4 class="text-info">You become a tutor now!</h4>
+      </div>
+    </div>
+    <div class="col-md-6 image-container">
+      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor ">
+    </div>
+    <!--    <div>-->
+    <!--      <button type="button" class="btn btn-save rounded-border" (click)="stepSubmit(5)"> back-->
+    <!--        <i class="material-icons arrow-icon icon-center" style="width: 30px">arrow_backward</i>-->
+    <!--      </button>-->
+    <!--    </div>-->
+  </div>
+</div>

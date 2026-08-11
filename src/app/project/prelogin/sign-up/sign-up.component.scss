@@ -1,0 +1,31 @@
+.user_selection {
+  h4 {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  button {
+    border: 1px solid #00000033 !important;
+    box-shadow: 0 4px 20px 0 #00000008 !important;
+  }
+
+  button:focus-visible {
+    outline: none !important;
+  }
+}
+
+
+select option[disabled] {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+}
+
+select {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 8px 16px;
+  line-height: 1.5 !important;
+}

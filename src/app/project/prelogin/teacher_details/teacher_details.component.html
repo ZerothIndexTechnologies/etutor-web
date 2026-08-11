@@ -1,0 +1,156 @@
+<!--<div class="body">-->
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row d-flex justify-content-between">
+      <div class="col-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="col-12 image-section">
+              <img class="student-image" [src]="teacherDetails.profile_image[0]" [alt]="teacherDetails.first_name + ' ' + teacherDetails.last_name">
+            </div>
+            <div class="col-12 text-center mt-3 mb-4">
+              <p class="text-capitalize mb-0">{{teacherDetails.first_name + ' ' + teacherDetails.last_name}}</p>
+              <span class="text-capitalize">{{teacherDetails.city}} (Online)</span>
+            </div>
+            <div class="col-12 px-3">
+              <p class="mb-0 d-flex justify-content-between">
+                <span class="card_content">Response Time</span>
+                <span><b>1h</b></span>
+              </p>
+              <p class="mb-0 d-flex justify-content-between">
+                <span class="card_content">Number of students</span>
+                <span><b>50+</b></span>
+              </p>
+              <button class="w-100 mt-3">1st class free</button>
+              <button class="w-100 my-3 outline_button">Reserve a class</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-8 d-flex align-items-center">
+        <div class="col-12">
+          <p class="text-start">Masters in Theoretical Physics, former PhD candidate in Taiwan, certified teacher trainer .
+            Courses taken- All boards including US,AUSTRALIAN,SINGAPORE (Maths & Physics), IIT Foundation courses.</p>
+          <div class="card my-4">
+            <div class="card-body d-flex justify-content-around">
+              <button class="w-20 text-capitalize">{{teacherDetails.first_name + ' ' + teacherDetails.last_name}}</button>
+              <button class="w-20">Class</button>
+              <button class="w-20" [routerLink]="['/subscription']">Fees</button>
+              <button class="w-20">Review</button>
+            </div>
+          </div>
+          <h6 class="teacher-content">I have over 7 years of teaching experience. I conducts test (orally/written) after each lesson and gets idea
+            about the tough topics and clear concepts. Experience in hands-on activities gives me upper hand in teaching and
+            students feel more comfortable with the subject. I bet that student falls in love with subject when I teach physics
+            and mathematics.</h6>
+          <div class="col-12 text-start mt-4">
+            <p>Specialties</p>
+            <button class="wo_outline_button me-4">Maths</button>
+            <button class="wo_outline_button">English</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tutorProfile_slider">
+  <div class="container-fluid" style="padding: 74px 100px;">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h2>Similar Maths Teachers In Pune</h2>
+        <img src="app/assets/etutor/home_page/star.png" alt="Star">
+      </div>
+      <div *ngIf="teacherList.length != 0" class="row mt-5 {{teacherList.length <= 3 ? 'setWidth' : ''}}">
+        <owl-carousel-o [options]="customOptions">
+          @for (teacher of teacherList; let i = $index; track teacher.first_name) {
+
+          <ng-template carouselSlide>
+            <div class="carousel-wrapper card m-2">
+<!--              <img class="carousel-img zoom" [src]="envImg + teacher.profile_image[0]" alt="Image">-->
+              <img class="carousel-img zoom" [src]="teacher.profile_image[0]" alt="Image">
+              <div class="card-content">
+                <div class="w-100 slide-img-content ps-2 pe-4">
+                  <div class="text-start w-100">
+                    <p class="mx-font-16 text-white d-flex justify-content-between text-capitalize">{{ teacher.first_name + ' ' + teacher.last_name }}
+          <img style="width: 8% !important" src="app/assets/etutor/home_page/tilted_star.png" alt="Star">
+        </p>
+      </div>
+      <p class="w-100 text-start mx-font-16 text-white">{{ teacher.qualifications }}</p>
+                </div>
+                <p class="text-start carousel-description mx-font-13">{{ teacher.about_you }}</p>
+                <div class="d-flex align-items-center flex-row justify-content-between">
+                  <p class="mb-0"><b>&#8377;850/hr</b></p>
+                  <button (click)="routeToTeacherDetail(teacher)" class="btn btn-slide mx-1">1st class free</button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          }
+        </owl-carousel-o>
+
+      </div>
+
+      <div class="col-12 col-md-12 col-lg-12 mt-3 px-4 d-flex justify-content-center" *ngIf="teacherList.length == 0" >
+        <div class="col-9 col-md-9 col-lg-9 p-5 text-center no_record_div">
+          <span class="no_record">No Teacher Available!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feeback slider seciton starts here -->
+<section class="feedback_slider">
+  <div class="container" style="padding: 0 75px 75px 75px;">
+    <div class="row px-3">
+      <div class="col-12 text-center">
+        <h2>What student say abut us</h2>
+      </div>
+      <div class="row mt-5">
+        <owl-carousel-o [options]="customOptions1">
+          @for (item of items1; let i = $index; track item.img) {
+
+          <ng-template carouselSlide>
+            <!-- <div class="carousel-wrapper card m-2">
+              <img class="carousel-img zoom" [src]="item.img" alt="Image">
+              <div class="card-content">
+                <div class="w-100 slide-img-content d-flex flex-row justify-content-between">
+                  <div class="text-start w-75">
+                    <p class="mx-font-16">{{ item.name }}</p>
+                    <p class="mx-font-16">{{ item.location }}</p>
+                  </div>
+                  <p class="w-50"><span class="rating">{{ item.rating }}</span></p>
+                </div>
+                <p class="text-start carousel-description mx-font-13">{{ item.description }}</p>
+                <div class="d-flex flex-row justify-content-between">
+                  <p><b>{{ item.price }}</b></p>
+                  <button class="mx-font-11 btn btn-slide mx-1">1st class free</button>
+                </div>
+              </div>
+            </div> -->
+
+            <div class="feedback_card card m-2">
+              <div class="card-body">
+                <!-- <h5 class="card-title">{{ item.name }}</h5> -->
+                <p class="card-text text-start">{{ item.description }}</p>
+                <div class="d-flex flex-row">
+                  <img [src]="item.img" alt="img">
+                  <div class="d-flex mx-3 flex-column align-self-end align-items-start">
+                    <p class="mx-m-b-1">{{item.name}}</p>
+                    <p class="role">{{item.role}}</p>
+                  </div>
+                </div>
+                <!-- <p class="card-text"><small class="text-muted">Rating: {{ item.rating }}</small></p> -->
+              </div>
+
+            </div>
+          </ng-template>
+          }
+        </owl-carousel-o>
+
+      </div>
+    </div>
+  </div>
+</section>
