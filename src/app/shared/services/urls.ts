@@ -1,5 +1,6 @@
 export class Urls {
   public static readonly login = 'user/login';
+  public static readonly forgotPassword = 'user/forgotPassword';
   public static readonly verifyUser = 'user/verifyUser';
   public static readonly getConfiguration = 'common/getConfiguration';
   public static readonly signup = 'user/signup';
@@ -22,4 +23,6 @@ export class Urls {
   public static readonly addStudentToClass = 'user/userSubscription';
   public static readonly studentProfile = 'user/studentList';
   public static readonly teacherProfile = 'user/getTeacherList';
+  public static readonly notifyTeacherProfileStatus = 'common/notifyTeacherProfileStatus';
+  public static readonly sendClassReminderEmail = 'teacher/sendClassReminderEmail';
 }

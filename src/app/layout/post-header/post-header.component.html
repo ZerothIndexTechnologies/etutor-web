@@ -42,26 +42,45 @@
 </nav>
 
 <ng-template #prompt let-c="close" let-d="dismiss">
-  <div class="shadow-none card p-4">
-    <div class="card-body">
+  <div class="shadow-none card p-4 border-0 rounded-3">
+    <div class="card-body text-center p-3">
       <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '0' || teacherStatus == '0'">
-        <h6 class="text-warning mx-font-19 font-weight-bold">Approval Pending</h6>
-        <span class="mx-font-14 m-2">Your account is awaiting admin approval. You will be notified once the approval process is complete. </span>
+        <div class="mb-3">
+          <span class="material-icons text-warning" style="font-size: 56px">hourglass_empty</span>
+        </div>
+        <h5 class="text-warning mx-font-20 font-weight-bold">Verification Approval Pending</h5>
+        <p class="text-muted mx-font-14 mt-2">Your tutor verification application is currently under review by our admin team. You will be notified via email once approved.</p>
       </div>
+
       <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '1' || teacherStatus == '1'">
-        <img class="mt-30" style="height: 100px" src="app/assets/etutor/tick.png" alt="Learn More">
-        <h6 class="text-warning mx-font-19 font-weight-bold mt-2">Account Approved</h6>
-        <span class="mx-font-14 m-2">Your account has been successfully approved. You can now access all the features. </span>
+        <div class="mb-3">
+          <span class="material-icons text-success" style="font-size: 56px">check_circle</span>
+        </div>
+        <h5 class="text-success mx-font-20 font-weight-bold">Tutor Account Verified</h5>
+        <p class="text-muted mx-font-14 mt-2">Congratulations! Your tutor application has been verified. You can now schedule live classes and accept students.</p>
       </div>
+
       <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '2' || teacherStatus == '2'">
-        <h6 class="text-warning mx-font-19 font-weight-bold ">Account Rejected</h6>
-        <span class="mx-font-14 m-2">Unfortunately, your account has been rejected. Please contact support for more information.</span>
+        <div class="mb-3">
+          <span class="material-icons text-danger" style="font-size: 56px">gpp_bad</span>
+        </div>
+        <h5 class="text-danger mx-font-20 font-weight-bold">Verification Action Required</h5>
+        <p class="text-muted mx-font-14 mt-1">Your verification application requires attention or missing document updates.</p>
+
+        <div *ngIf="rejectionNotes" class="alert alert-danger text-start mt-3 p-3 rounded-3" style="background-color: #fef2f2; border: 1px solid #fecaca;">
+          <strong class="d-block text-danger mb-1"><i class="material-icons align-middle me-1" style="font-size: 18px">info</i> Admin Feedback / Notes:</strong>
+          <span class="text-dark mx-font-14">{{ rejectionNotes }}</span>
+        </div>
       </div>
     </div>
 
-    <div>
-      <a (click)="closePopup()" type="button" class="btn p-2 p-2 w-75 btn-signup mx-1 rounded-border">
-        {{auth?.teacherVerificationStatus == '1' || teacherStatus == '1' ? 'Continue' : 'Ok'}}</a>
+    <div class="text-center mt-3">
+      <button *ngIf="teacherStatus == '2' || auth?.teacherVerificationStatus == '2'" (click)="toTutor()" type="button" class="btn btn-danger px-4 py-2 rounded-pill font-weight-bold me-2">
+        Update Documents & Re-submit
+      </button>
+      <button (click)="closePopup()" type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill font-weight-bold">
+        {{ (auth?.teacherVerificationStatus == '1' || teacherStatus == '1') ? 'Continue' : 'Close' }}
+      </button>
     </div>
 
   </div>

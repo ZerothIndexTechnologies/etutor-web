@@ -35,6 +35,18 @@
           >
           </ng-select>
         </div>
+        <div class="col-4 filter-fields mt-2 mb-3">
+          <label style="font-size: 14px" class="mb-1">Subject List</label>
+          <ng-select
+            [items]="subjectOptions"
+            placeholder="Please Select"
+            typeToSearchText=""
+            multiple="true"
+            (change)="reserveClassList()"
+            [(ngModel)]="selectedSubject"
+          >
+          </ng-select>
+        </div>
       </div>
       <div class="row">
         <div class="col-md-6 my-3 d-flex flex-column justify-content-center px-2"
@@ -50,7 +62,12 @@
                       </h6>
                     </div>
                     <div class="col-4 text-right" *ngIf="auth.getRoleId() == '3'">
-                      <button (click)="subscribeNow(classData)" style="padding: 6px 12px" type="button" class="btn btn-orange">Subscribe Now</button>
+                      <button *ngIf="classData.is_subscribed == 1" type="button" class="btn btn-success disabled" disabled style="padding: 6px 12px">
+                        ✓ Subscribed
+                      </button>
+                      <button *ngIf="classData.is_subscribed != 1" (click)="subscribeNow(classData)" style="padding: 6px 12px" type="button" class="btn btn-orange">
+                        Subscribe Now
+                      </button>
                     </div>
                   </div>
                   <p class="p-0">

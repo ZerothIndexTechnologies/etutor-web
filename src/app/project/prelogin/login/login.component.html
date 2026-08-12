@@ -13,7 +13,7 @@
       <div class="form-group">
         <label class="p-1" for="email">User Name</label>
         <input type="text" required formControlName="email" class="form-control rounded-border" id="email"
-          placeholder="Enter Your Username" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]{2,26}\.[a-z]{2,10}$">
+          placeholder="Enter Your Username" pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$">
         @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
         <label *ngIf="loginForm.get('email')?.errors?.['required']"
           class="error jquery-validation-error small form-text ">Please
@@ -81,15 +81,18 @@
   </div>
   }
   @if(showForGot) {
-  <div class="col-6 signup-form  align-content-center mt-1">
-    <p class="text-center mx-font-25"><strong>Login</strong></p>
+  <div class="col-6 signup-form align-content-center mt-1">
+    <p class="text-center mx-font-25"><strong>Reset Password</strong></p>
     <p class="text-center">Forgot your password?</p>
-    <form>
+    <form (ngSubmit)="resetPassword()">
       <div class="form-group">
         <label class="p-1" for="mobileNumber">Email Id or Mobile Number</label>
-        <input type="text" class="form-control rounded-border" id="mobileNumber" placeholder="Enter Mobile Number">
+        <input type="text" [(ngModel)]="forgotInput" name="forgotInput" class="form-control rounded-border" id="mobileNumber" placeholder="Enter Email or Mobile Number" required>
       </div>
-      <button type="submit" class="btn w-100 mt-4 rounded-border btn-login btn-block">Verify</button>
+      <button type="submit" class="btn w-100 mt-4 rounded-border btn-login btn-block">Send Reset Link / Password</button>
+      <div class="text-center mt-3">
+        <a class="anchorStyle mx-font-12 cursor" (click)="showForGot = false; showLogin = false">Back to Login</a>
+      </div>
     </form>
   </div>
   }

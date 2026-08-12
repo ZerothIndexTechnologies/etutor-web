@@ -1,11 +1,26 @@
-<!-- <script src="class-list.component.ts"></script> -->
 <section class="mb-3 p-4 profile-section rounded-border">
   <div class="row">
-    <div class="col-12">
-      <h6 class="font-weight-bold">Class List</h6>
+    <div class="col-12 d-flex justify-content-between align-items-center mb-3">
+      <h6 class="font-weight-bold mb-0">Class List <span *ngIf="auth.getRoleId() == '3' && studentGradeName" class="badge bg-primary ms-2" style="font-size: 13px;">Grade: {{studentGradeName}}</span></h6>
+      <div *ngIf="auth.getRoleId() != '3'">
+        <button class="btn btn-orange" (click)="addClass()">Add Class</button>
+      </div>
     </div>
-    <div class="col-12 text-end mb-4" *ngIf="auth.getRoleId() != '3'">
-      <button class="btn btn-orange" (click)="addClass()">Add Class</button>
+
+    <!-- Timezone Sync Bar -->
+    <div class="col-12 mb-3">
+      <div class="bg-light p-3 rounded-border border d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-sm">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-globe text-primary fa-lg me-1"></i>
+          <span class="font-weight-bold text-dark" style="font-size: 14px;">Schedule View Timezone:</span>
+          <select class="form-select form-select-sm w-auto d-inline-block border-primary shadow-sm font-weight-bold" [(ngModel)]="displayTimezone">
+            <option *ngFor="let tz of timezoneList" [value]="tz.code">{{tz.name}} ({{tz.offset}})</option>
+          </select>
+        </div>
+        <div class="text-muted" style="font-size: 12px;">
+          <i class="fas fa-sync-alt me-1 text-success"></i> Auto-converts class slots dynamically across UTC, IST, EST, PST & GMT.
+        </div>
+      </div>
     </div>
 
     <div class="col-12">
@@ -17,19 +32,25 @@
               <div class="row p-2 cursor">
                 <div class="col-12">
                   <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-md-5">
                       <h6 class="mb-2">
                         <span class="font-weight-bold" style="font-size: 18px">{{classData.subject}}</span>
                       </h6>
                     </div>
-                    <div class="col-md-3 text-right">
-                      <div *ngIf="auth.getRoleId() != '3'">
-                        <i class="fa fa-link" title="Update Meeting Link" (click)="updateMeetingLink(classData)"></i>
-                        <i class="fa fa-plus ms-3" title="Add More Session" (click)="editClass(classData)"></i>
-                        <i class="far fa-trash-alt ms-3" title="Delete Class" (click)="deleteClass(classData)"></i>
-                      </div>
-                      <div *ngIf="auth.getRoleId() == '3'">
-                        <button (click)="joinNow(classData)" style="padding: 6px 12px" class="btn btn-orange">Join Now</button>
+                    <div class="col-md-7 text-right d-flex justify-content-end align-items-center gap-1 flex-wrap">
+                      <button (click)="joinLiveRoom(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm">
+                        <i class="fas fa-video me-1"></i> Live Room
+                      </button>
+                      <button *ngIf="auth.getRoleId() != '3'" (click)="send10MinReminder(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-outline-warning btn-sm rounded-pill font-weight-bold shadow-sm text-dark" title="Send 10-Minute Alert Email to Students">
+                        <i class="fas fa-bell me-1 text-warning"></i> Send 10-Min Alert
+                      </button>
+                      <button *ngIf="auth.getRoleId() == '3'" (click)="subscribeLiveClass(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-warning btn-sm rounded-pill font-weight-bold shadow-sm text-dark">
+                        <i class="fas fa-star me-1"></i> Subscribe Live Class
+                      </button>
+                      <div *ngIf="auth.getRoleId() != '3'" class="d-inline-flex align-items-center ms-2">
+                        <i class="fa fa-link cursor" title="Update Meeting Link" (click)="updateMeetingLink(classData)"></i>
+                        <i class="fa fa-plus ms-2 cursor" title="Add More Session" (click)="editClass(classData)"></i>
+                        <i class="far fa-trash-alt ms-2 cursor" title="Delete Class" (click)="deleteClass(classData)"></i>
                       </div>
                     </div>
                   </div>
@@ -41,10 +62,10 @@
                   </p>
                   <p class="p-0">
                     <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Time:</span>
-                    <i style="font-size: 13px" class="fas fa-clock ms-1"></i>
+                    <i style="font-size: 13px" class="fas fa-clock ms-1 text-primary"></i>
                     <span style="font-size: 14px;"
-                          class="t-name font-weight-bold ms-1">{{classData.start_time}}</span>-<span style="font-size: 14px;"
-                                                                                                     class="t-name font-weight-bold">{{classData.end_time}}</span>
+                          class="t-name font-weight-bold ms-1">{{getFormattedTime(classData.start_time)}}</span> - <span style="font-size: 14px;"
+                                                                                                     class="t-name font-weight-bold">{{getFormattedTime(classData.end_time)}}</span>
                   </p>
                   <p class="p-0" *ngIf="auth.getRoleId() != '3'">
                     <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Amount</span><br>
@@ -105,19 +126,36 @@
 
 <ng-template #meetingLink>
   <div class="card">
-    <div class="card-header py-3">
-      <span style="font-size: 16px" class="text-capitalize col-12 font-weight-bold mb-0">Update Meeting Link</span>
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+      <span style="font-size: 16px" class="text-capitalize font-weight-bold mb-0"><i class="fas fa-video me-2 text-primary"></i> Update Virtual Classroom Link</span>
+      <button type="button" class="btn-close" (click)="closePopup()"></button>
     </div>
     <div class="card-body">
       <div class="col-12">
-        <input [(ngModel)]="meetingLinkValue" class="form-control" type="url" placeholder="Zoom Meeting Link">
+        <label class="form-label font-weight-bold">Live Virtual Classroom URL</label>
+        <div class="input-group">
+          <input [(ngModel)]="meetingLinkValue" class="form-control" type="url" placeholder="https://meet.jit.si/Etutor_Class_...">
+          <button type="button" class="btn btn-outline-primary" (click)="generateJitsiLinkForClassList()" title="Auto-Generate Link">
+            <i class="fas fa-magic me-1"></i> Auto-Generate
+          </button>
+        </div>
       </div>
     </div>
     <div class="card-footer">
       <div class="col-12 d-flex justify-content-end">
-        <button (click)="closePopup()" class="btn btn-outline-danger">No</button>
-        <button (click)="updateClassMeetingLink()" style="padding: 6px 12px; border-radius: 4px" class="ms-3 btn btn-orange">Save</button>
+        <button (click)="closePopup()" class="btn btn-outline-secondary">Cancel</button>
+        <button (click)="updateClassMeetingLink()" style="padding: 6px 12px; border-radius: 4px" class="ms-3 btn btn-orange">Save Link</button>
       </div>
     </div>
   </div>
 </ng-template>
+
+<!-- Embedded Live Virtual Classroom Modal -->
+<app-live-classroom-modal
+  [isOpen]="isLiveClassOpen"
+  [roomName]="activeRoomName"
+  [roomTitle]="activeRoomTitle"
+  [userName]="currentUserName"
+  [isTeacher]="auth.getRoleId() != '3'"
+  (onClose)="closeLiveClass()">
+</app-live-classroom-modal>

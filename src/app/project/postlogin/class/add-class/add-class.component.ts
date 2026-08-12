@@ -1,7 +1,7 @@
 import {Component, inject, TemplateRef, ViewChild} from '@angular/core';
 import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {NgxMaterialTimepickerModule} from "ngx-material-timepicker";
-import {AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators} from "@angular/forms";
+import {AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Urls} from "../../../../shared/services/urls";
 import {AuthService} from "../../../../shared/services/auth.service";
@@ -9,6 +9,7 @@ import {HelperService} from "../../../../shared/services/helper.service";
 import {CustomValidationService} from "../../../../shared/services/customValidations.service";
 import {SessionConstants} from "../../../../shared/services/sessionConstants";
 import {Dialog} from "@angular/cdk/dialog";
+import {TimezoneService} from "../../../../shared/services/timezone.service";
 
 @Component({
   selector: 'app-add-class',
@@ -18,6 +19,7 @@ import {Dialog} from "@angular/cdk/dialog";
     NgIf,
     NgxMaterialTimepickerModule,
     ReactiveFormsModule,
+    FormsModule,
     NgClass
   ],
   templateUrl: './add-class.component.html',
@@ -31,6 +33,10 @@ export class AddClassComponent {
   public auth = inject(AuthService);
   public helper = inject(HelperService);
   public customValidater = inject(CustomValidationService);
+  public timezoneService = inject(TimezoneService);
+  public selectedTimezone: string = this.timezoneService.getUserTimezone();
+  public timezoneList = this.timezoneService.TIMEZONES;
+
   public subjectList: any = [];
   protected curriculumList: any = [];
   protected gradeList: any = [];
@@ -59,13 +65,81 @@ export class AddClassComponent {
       },
       {validators: this.startTimeBeforeEndTimeValidator()}
     );
-    this.gradeList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).grade;
-    this.curriculumList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).curriculum;
+    try {
+      const config = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData) || '{}');
+      this.gradeList = (config && config.grade && config.grade.length) ? config.grade : [
+        { id: 1, displayname: '1 Grade' }, { id: 2, displayname: '2 Grade' },
+        { id: 3, displayname: '3 Grade' }, { id: 4, displayname: '4 Grade' },
+        { id: 5, displayname: '5 Grade' }, { id: 6, displayname: '6 Grade' },
+        { id: 7, displayname: '7 Grade' }, { id: 8, displayname: '8 Grade' },
+        { id: 9, displayname: '9 Grade' }, { id: 10, displayname: '10 Grade' },
+        { id: 11, displayname: '11 Grade' }, { id: 12, displayname: '12 Grade' }
+      ];
+      this.curriculumList = (config && config.curriculum && config.curriculum.length) ? config.curriculum : [
+        { id: 1, curriculum_type: 'CBSE' }, { id: 2, curriculum_type: 'ICSE' },
+        { id: 3, curriculum_type: 'State Board' }, { id: 4, curriculum_type: 'IB' },
+        { id: 5, curriculum_type: 'IGCSE' }
+      ];
+      this.subjectList = this.mergeSubjects(config && config.subjects ? config.subjects : []);
+    } catch (e) {
+      console.warn('Error reading configData:', e);
+      this.subjectList = this.mergeSubjects([]);
+    }
     this.daysArray();
     if (this.type != 'add') {
       const editClassData = JSON.parse(this.auth.getLocalStorage('editClass'));
       this.editClass(editClassData);
     }
+  }
+
+  public DEFAULT_GOVERNMENT_SUBJECTS: any[] = [
+    { id: 1, subject: 'Mathematics', subject_name: 'Mathematics' },
+    { id: 2, subject: 'English', subject_name: 'English' },
+    { id: 3, subject: 'Science', subject_name: 'Science' },
+    { id: 4, subject: 'Social Science', subject_name: 'Social Science' },
+    { id: 5, subject: 'Environmental Studies (EVS)', subject_name: 'Environmental Studies (EVS)' },
+    { id: 6, subject: 'Physics', subject_name: 'Physics' },
+    { id: 7, subject: 'Chemistry', subject_name: 'Chemistry' },
+    { id: 8, subject: 'Biology', subject_name: 'Biology' },
+    { id: 9, subject: 'Computer Science', subject_name: 'Computer Science' },
+    { id: 10, subject: 'Informatics Practices', subject_name: 'Informatics Practices' },
+    { id: 11, subject: 'Accountancy', subject_name: 'Accountancy' },
+    { id: 12, subject: 'Business Studies', subject_name: 'Business Studies' },
+    { id: 13, subject: 'Economics', subject_name: 'Economics' },
+    { id: 14, subject: 'History', subject_name: 'History' },
+    { id: 15, subject: 'Geography', subject_name: 'Geography' },
+    { id: 16, subject: 'Political Science', subject_name: 'Political Science' },
+    { id: 17, subject: 'Psychology', subject_name: 'Psychology' },
+    { id: 18, subject: 'Sociology', subject_name: 'Sociology' },
+    { id: 19, subject: 'Hindi', subject_name: 'Hindi' },
+    { id: 20, subject: 'Sanskrit', subject_name: 'Sanskrit' },
+    { id: 21, subject: 'Tamil', subject_name: 'Tamil' },
+    { id: 22, subject: 'Physical Education', subject_name: 'Physical Education' },
+    { id: 23, subject: 'Yoga', subject_name: 'Yoga' },
+    { id: 24, subject: 'Piano', subject_name: 'Piano' },
+    { id: 25, subject: 'Guitar', subject_name: 'Guitar' }
+  ];
+
+  getSubjectName(subject: any): string {
+    if (!subject) return '';
+    if (typeof subject === 'string') return subject;
+    return subject.subject_name || subject.subject || subject.displayname || String(subject);
+  }
+
+  getSubjectValue(subject: any): string {
+    return this.getSubjectName(subject).toLowerCase();
+  }
+
+  mergeSubjects(apiSubjects: any[]): any[] {
+    const combined = [...(apiSubjects || []), ...this.DEFAULT_GOVERNMENT_SUBJECTS];
+    const uniqueMap = new Map();
+    combined.forEach(item => {
+      const name = this.getSubjectName(item).trim();
+      if (name && !uniqueMap.has(name.toLowerCase())) {
+        uniqueMap.set(name.toLowerCase(), item);
+      }
+    });
+    return Array.from(uniqueMap.values());
   }
 
   editClass(classDetail: any) {
@@ -97,16 +171,32 @@ export class AddClassComponent {
       this.auth.postService(payload, Urls.subjectList).subscribe(
         (successData: any) => {
           console.log(successData, 'successData');
-          this.subjectList = successData.IsSuccess && successData.ResponseObject.length != 0 ? successData.ResponseObject : [];
-          this.classForm.controls['subject'].patchValue(editClass);
+          const apiList = successData.IsSuccess && successData.ResponseObject ? successData.ResponseObject : [];
+          this.subjectList = this.mergeSubjects(apiList);
+          if (editClass) {
+            this.classForm.controls['subject'].patchValue(editClass);
+          }
           if (this.type == 'moreSession') {
             this.disableAllField();
           }
           this.getTeacherClassDetails();
         },
-        (error: any) => console.error(error, 'subject_error')
+        (error: any) => {
+          console.error(error, 'subject_error');
+          this.subjectList = this.mergeSubjects([]);
+        }
       );
+    } else {
+      this.subjectList = this.mergeSubjects([]);
     }
+  }
+
+  generateJitsiLink() {
+    const rawSubject = this.classForm.controls['subject'].value || 'Class';
+    const sanitizedSubject = rawSubject.replace(/[^a-zA-Z0-9]/g, '_');
+    const roomUrl = `https://meet.jit.si/Etutor_Class_${sanitizedSubject}_${Date.now()}`;
+    this.classForm.controls['meeting_link'].setValue(roomUrl);
+    this.helper.presentToast('Jitsi Live Classroom URL auto-generated!');
   }
 
   submitClass() {
@@ -114,9 +204,18 @@ export class AddClassComponent {
     if (this.classForm.valid && !this.checkForValidAmount && !this.checkValidAmountPerMonthOrYear('amount_quarter')
       && !this.checkValidAmountPerMonthOrYear('amount_half_year') && !this.checkValidAmountPerMonthOrYear('amount_year')) {
       if (this.daysList.some((day: any) => day.selected)) {
-        const meetingValue = this.classForm.controls['meeting_link'].value ?? ''
-        const meeting_link = meetingValue != '' ? (meetingValue.includes('https') ? meetingValue : meetingValue.includes('http') ?
-          meetingValue.replace(/^http:\/\//, 'https://') : 'https://' + meetingValue) : '';
+        let meetingValue = this.classForm.controls['meeting_link'].value ?? '';
+        if (!meetingValue) {
+          const rawSub = this.classForm.controls['subject'].value || 'Class';
+          meetingValue = `https://meet.jit.si/Etutor_Class_${rawSub.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+        }
+        const meeting_link = meetingValue.includes('https') ? meetingValue : meetingValue.includes('http') ?
+          meetingValue.replace(/^http:\/\//, 'https://') : 'https://' + meetingValue;
+        const rawStartTime = this.classForm.controls['start_time'].value;
+        const rawEndTime = this.classForm.controls['end_time'].value;
+        const utcStartTime = this.timezoneService.convertLocalToUtc(rawStartTime, this.selectedTimezone);
+        const utcEndTime = this.timezoneService.convertLocalToUtc(rawEndTime, this.selectedTimezone);
+
         const classPayload: any = {
           classes: [{
               meeting_link,
@@ -126,8 +225,9 @@ export class AddClassComponent {
               days: this.daysList.filter((day: any) => {
                   return day.selected;
                 }).map((value: any) => value.value).toString(),
-              start_time: this.classForm.controls['start_time'].value,
-              end_time: this.classForm.controls['end_time'].value,
+              start_time: utcStartTime,
+              end_time: utcEndTime,
+              timezone: this.selectedTimezone,
               teacher_id: this.auth.getUserId(),
               monthly_amount: this.classForm.controls['amount_month'].value,
               quarterly_amount: this.classForm.controls['amount_quarter'].value,

@@ -35,66 +35,78 @@
           </div>
 
           <div class="mx-5 profile-info mt-4">
-            <p class="fw-bold mx-font-19">{{(user.first_name + ' ' + user.last_name).toUpperCase()}}</p>
-            <span class="text-black-50 fw-medium mx-font-16">{{user.mobile_number}}</span>
+            <p class="fw-bold mx-font-19">{{getFullName()}}</p>
+            <span class="text-black-50 fw-medium mx-font-16">{{user?.mobile_number || ''}}</span>
           </div>
         </div>
         <div class="form-group mt-3">
           <label for="address">Address<span class="text-danger">*</span></label>
           <input placeholder="Enter Your Address" formControlName="address" class="form-control" id="address"
+            [class.is-invalid]="stepper.get('address')?.invalid && (stepper.get('address')?.touched || submittedStep1)"
             required />
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper.get('address')?.valid && (stepper.get('address')?.dirty || stepper.get('address')?.touched)">Address
-            is Required</label>
+          <div class="text-danger small font-weight-bold mt-1"
+            *ngIf="stepper.get('address')?.invalid && (stepper.get('address')?.touched || submittedStep1)">
+            Address is required
+          </div>
         </div>
-        <div class="form-group mt-1">
+        <div class="form-group mt-2">
           <label for="about">About you<span class="text-danger">*</span></label>
-          <input placeholder="Enter About You" formControlName="aboutInfo" class="form-control" id="about" required />
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper.get('aboutInfo')?.valid && (stepper.get('aboutInfo')?.dirty || stepper.get('aboutInfo')?.touched)">
-            About you is Required</label>
-
+          <input placeholder="Enter About You" formControlName="aboutInfo" class="form-control" id="about"
+            [class.is-invalid]="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)"
+            required />
+          <div class="text-danger small font-weight-bold mt-1"
+            *ngIf="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)">
+            About you is required
+          </div>
         </div>
-        <div class="form-group mt-1">
+        <div class="form-group mt-2">
           <label for="lang">Language Proficiency<span class="text-danger">*</span></label>
-          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center">
+          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center"
+            [class.is-invalid]="stepper.get('language')?.invalid && langChips.length === 0 && (stepper.get('language')?.touched || submittedStep1)">
             <div *ngFor="let chip of langChips" class="chip d-flex align-items-center">
               <span>{{ chip }}</span>
               <button type="button" class="btn-close" aria-label="Close" (click)="removeChip(chip)"></button>
             </div>
-            <input style="padding: 8px 4px" placeholder="Enter Your Language Proficiency" type="text"
+            <input style="padding: 8px 4px" placeholder="Enter Your Language Proficiency (Press Enter)" type="text"
               class="border-0 flex-grow-1" id="lang" formControlName="language"
               (keydown)="handleKeyDown($event, 'language')">
           </div>
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper.get('language')?.valid && (stepper.get('language')?.dirty || stepper.get('language')?.touched) && langChips.length == 0">
-            Language Proficiency is Required</label>
+          <div class="text-danger small font-weight-bold mt-1"
+            *ngIf="stepper.get('language')?.invalid && langChips.length === 0 && (stepper.get('language')?.touched || submittedStep1)">
+            Language Proficiency is required
+          </div>
         </div>
 
-        <div class="form-group mt-1">
+        <div class="form-group mt-2">
           <label for="pin">Pincode<span class="text-danger">*</span></label>
-          <input (input)="getCityAndStateListByPincode()" placeholder="Enter Your Pincode" type="text"
-            formControlName="pin" required class="form-control" id="pin">
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper.get('pin')?.valid && (stepper.get('pin')?.dirty || stepper.get('pin')?.touched)">
-            Pincode is Required</label>
+          <input placeholder="Enter Your Pincode" type="text"
+            formControlName="pin" required class="form-control" id="pin"
+            [class.is-invalid]="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
+          <div class="text-danger small font-weight-bold mt-1"
+            *ngIf="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
+            Pincode is required
+          </div>
         </div>
         <div class="row">
-          <div class="form-group mt-1 w-50">
+          <div class="form-group mt-2 w-50">
             <label for="city">City<span class="text-danger">*</span></label>
-            <input readonly placeholder="Enter Your City" type="text" formControlName="city" required
-              class="form-control" id="city">
-            <label class="error jquery-validation-error small form-text"
-              *ngIf="!stepper.get('city')?.valid && (stepper.get('city')?.dirty || stepper.get('city')?.touched)">
-              City is Required</label>
+            <input placeholder="Enter Your City" type="text" formControlName="city" required
+              class="form-control" id="city"
+              [class.is-invalid]="stepper.get('city')?.invalid && (stepper.get('city')?.touched || submittedStep1)">
+            <div class="text-danger small font-weight-bold mt-1"
+              *ngIf="stepper.get('city')?.invalid && (stepper.get('city')?.touched || submittedStep1)">
+              City is required
+            </div>
           </div>
-          <div class="form-group mt-1 w-50">
+          <div class="form-group mt-2 w-50">
             <label for="state">State<span class="text-danger">*</span></label>
-            <input readonly placeholder="Enter Your State" type="text" formControlName="state" required
-              class="form-control" id="state">
-            <label class="error jquery-validation-error small form-text"
-              *ngIf="!stepper.get('state')?.valid && (stepper.get('state')?.dirty || stepper.get('state')?.touched)">
-              State is Required</label>
+            <input placeholder="Enter Your State" type="text" formControlName="state" required
+              class="form-control" id="state"
+              [class.is-invalid]="stepper.get('state')?.invalid && (stepper.get('state')?.touched || submittedStep1)">
+            <div class="text-danger small font-weight-bold mt-1"
+              *ngIf="stepper.get('state')?.invalid && (stepper.get('state')?.touched || submittedStep1)">
+              State is required
+            </div>
           </div>
 
           <div class="col-12 mt-3">

@@ -1,11 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HelperService } from '../../../shared/services/helper.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ApiService } from '../../../shared/services/api.service';
@@ -13,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SignUpComponent } from '../sign-up/sign-up.component';
 import { Urls } from '../../../shared/services/urls';
 import { CustomValidationService } from '../../../shared/services/customValidations.service';
-import {NgIf, NgClass} from '@angular/common';
+import { NgIf, NgClass } from '@angular/common';
 
 export const params = {
   email: 'mobile',
@@ -23,7 +18,7 @@ export const params = {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgClass],
+  imports: [ReactiveFormsModule, FormsModule, NgIf, NgClass],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -33,12 +28,41 @@ export class LoginComponent {
   showForGot: any = false;
   user: any;
   showPwd: boolean = false;
+  forgotInput: string = '';
 
   constructor(private route: Router, public customValidater: CustomValidationService, private fb: FormBuilder,
               private helper: HelperService, private auth: AuthService, private api: ApiService, private pop: MatDialog) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
+    });
+  }
+
+  resetPassword() {
+    if (!this.forgotInput || !this.forgotInput.trim()) {
+      this.helper.presentErrorToast('Please enter your Email Id or Mobile Number');
+      return;
+    }
+
+    const payload = {
+      email_or_mobile: this.forgotInput.trim(),
+      is_teacher: this.user === '1'
+    };
+
+    this.auth.postService(payload, Urls.forgotPassword).subscribe({
+      next: (res: any) => {
+        if (res.IsSuccess) {
+          this.helper.presentToast(res.ResponseObject || 'New password sent to your email');
+          this.showForGot = false;
+          this.showLogin = false;
+        } else {
+          this.helper.presentErrorToast(res.ErrorObject || 'Failed to reset password');
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.helper.presentErrorToast('Server error while resetting password');
+      }
     });
   }
 

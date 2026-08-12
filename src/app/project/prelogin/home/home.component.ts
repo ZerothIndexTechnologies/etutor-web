@@ -173,93 +173,53 @@ export class HomeComponent implements OnDestroy {
   private subjectListImage = [
     {
       src: 'app/assets/etutor/home_page/math.png',
-      title: 'Maths',
-      link: '/maths',
+      title: 'Mathematics',
+      aliases: ['Mathematics', 'Maths', 'Math'],
     },
     {
       src: 'app/assets/etutor/home_page/english.png',
       title: 'English',
-      link: '/english',
-    },
-    {
-      src: 'app/assets/etutor/home_page/yoga.png',
-      title: 'Yoga',
-      link: '/yoga',
-    },
-    {
-      src: 'app/assets/etutor/home_page/guitar.png',
-      title: 'Guitar',
-      link: '/guitar',
-    },
-    {
-      src: 'app/assets/etutor/home_page/piano.png',
-      title: 'Piano',
-      link: '/piano',
-    },
-    {
-      src: 'app/assets/etutor/home_page/social.png',
-      title: 'Social Science',
-      link: '/social',
+      aliases: ['English'],
     },
     {
       src: 'app/assets/etutor/home_page/science.png',
       title: 'Science',
-      link: '/science',
+      aliases: ['Science'],
     },
     {
-      src: 'app/assets/etutor/home_page/chemistry.png',
-      title: 'Chemistry',
-      link: '/chemistry',
+      src: 'app/assets/etutor/home_page/social.png',
+      title: 'Social',
+      aliases: ['Social', 'Social Science', 'Social Studies'],
     },
     {
       src: 'app/assets/etutor/home_page/physics.png',
       title: 'Physics',
-      link: '/physics',
-    },
-  ];
-
-  protected subjectList: any = [];
-
-  icons = [
-    {
-      src: 'app/assets/etutor/home_page/math.png',
-      title: 'Maths',
-      link: '/maths',
+      aliases: ['Physics'],
     },
     {
-      src: 'app/assets/etutor/home_page/english.png',
-      title: 'English',
-      link: '/english',
+      src: 'app/assets/etutor/home_page/chemistry.png',
+      title: 'Chemistry',
+      aliases: ['Chemistry'],
+    },
+    {
+      src: 'app/assets/etutor/home_page/science.png',
+      title: 'Biology',
+      aliases: ['Biology'],
     },
     {
       src: 'app/assets/etutor/home_page/yoga.png',
       title: 'Yoga',
-      link: '/yoga',
+      aliases: ['Yoga'],
     },
     {
       src: 'app/assets/etutor/home_page/guitar.png',
       title: 'Guitar',
-      link: '/guitar',
+      aliases: ['Guitar'],
     },
     {
-      src: 'app/assets/etutor/home_page/math.png',
-      title: 'Maths',
-      link: '/maths',
-    },
-    {
-      src: 'app/assets/etutor/home_page/english.png',
-      title: 'English',
-      link: '/english',
-    },
-    {
-      src: 'app/assets/etutor/home_page/yoga.png',
-      title: 'Yoga',
-      link: '/yoga',
-    },
-    {
-      src: 'app/assets/etutor/home_page/guitar.png',
-      title: 'Guitar',
-      link: '/guitar',
+      src: 'app/assets/etutor/home_page/piano.png',
+      title: 'Piano',
+      aliases: ['Piano'],
     },
   ];
 
@@ -283,6 +243,8 @@ export class HomeComponent implements OnDestroy {
     { name: 'Social Science' },
   ];
 
+  protected subjectList: any = [];
+
   auth = inject(AuthService);
   router = inject(Router);
   constructor() {
@@ -290,8 +252,37 @@ export class HomeComponent implements OnDestroy {
     if (element) {
       element.style.overflowX = 'hidden';
     }
-    console.log(JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)), 'confifDara');
-    this.subjectList = this.mergeSubjectData(this.subjectListImage, JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).subjects);
+    
+    let subjects = [];
+    try {
+      const config = this.auth.getLocalStorage(SessionConstants.configData);
+      if (config) {
+        const parsed = JSON.parse(config);
+        subjects = parsed?.subjects || [];
+      }
+    } catch (e) {
+      console.warn('Config data parse error', e);
+    }
+
+    if (!subjects || subjects.length === 0) {
+      subjects = [
+        { subject: 'Mathematics' },
+        { subject: 'English' },
+        { subject: 'Science' },
+        { subject: 'Social' },
+        { subject: 'Environment Studies (EVS)' },
+        { subject: 'Physics' },
+        { subject: 'Chemistry' },
+        { subject: 'Biology' },
+        { subject: 'Computer Science' },
+        { subject: 'Informatics Practices' },
+        { subject: 'Accountancy' },
+        { subject: 'Business Studies' },
+        { subject: 'Economics' },
+      ];
+    }
+
+    this.subjectList = this.mergeSubjectData(this.subjectListImage, subjects);
   }
 
   ngOnDestroy() {
@@ -308,12 +299,54 @@ export class HomeComponent implements OnDestroy {
 
   mergeSubjectData(subjectListImage: any[], array2: any[]): any[] {
     return array2.map(item => {
-      const matchedSubject = subjectListImage.find(subject => subject.title === item.subject);
-      if (matchedSubject) {
-        return { ...item, src: matchedSubject.src };
+      const titleName = (item.subject || item.title || '').trim().toLowerCase();
+      
+      let iconSrc = 'app/assets/etutor/home_page/science.png';
+
+      if (titleName.includes('math')) {
+        iconSrc = 'app/assets/etutor/home_page/math.png';
+      } else if (titleName.includes('english')) {
+        iconSrc = 'app/assets/etutor/home_page/english.png';
+      } else if (titleName.includes('physic')) {
+        iconSrc = 'app/assets/etutor/home_page/physics.png';
+      } else if (titleName.includes('chemist')) {
+        iconSrc = 'app/assets/etutor/home_page/chemistry.png';
+      } else if (titleName.includes('biol')) {
+        iconSrc = 'app/assets/etutor/home_page/science.png';
+      } else if (titleName.includes('social') || titleName.includes('evs') || titleName.includes('environ')) {
+        iconSrc = 'app/assets/etutor/home_page/social.png';
+      } else if (titleName.includes('comput') || titleName.includes('informa') || titleName.includes('program')) {
+        iconSrc = 'app/assets/etutor/home_page/book_lesson.svg';
+      } else if (titleName.includes('account') || titleName.includes('busi') || titleName.includes('econ')) {
+        iconSrc = 'app/assets/etutor/home_page/review_chart.svg';
+      } else if (titleName.includes('histor') || titleName.includes('geogr') || titleName.includes('polit') || titleName.includes('psych') || titleName.includes('soci')) {
+        iconSrc = 'app/assets/etutor/home_page/share_goal.svg';
+      } else if (titleName.includes('hind') || titleName.includes('sanskr') || titleName.includes('tamil') || titleName.includes('language')) {
+        iconSrc = 'app/assets/etutor/home_page/english.png';
+      } else if (titleName.includes('guitar')) {
+        iconSrc = 'app/assets/etutor/home_page/guitar.png';
+      } else if (titleName.includes('piano')) {
+        iconSrc = 'app/assets/etutor/home_page/piano.png';
+      } else if (titleName.includes('yoga') || titleName.includes('sport') || titleName.includes('physic')) {
+        iconSrc = 'app/assets/etutor/home_page/yoga.png';
       } else {
-        return item;
+        const matched = subjectListImage.find(subj => {
+          const primary = subj.title.toLowerCase();
+          return titleName === primary || titleName.includes(primary) || primary.includes(titleName);
+        });
+        if (matched) {
+          iconSrc = matched.src;
+        }
       }
+
+      return { ...item, src: iconSrc };
     });
+  }
+
+  onImgError(event: Event) {
+    const target = event.target as HTMLImageElement | null;
+    if (target) {
+      target.src = 'app/assets/etutor/home_page/science.png';
+    }
   }
 }

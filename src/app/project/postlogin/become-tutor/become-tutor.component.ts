@@ -72,18 +72,100 @@ export class BecomeTutorComponent implements OnInit {
     });
   }
 
+  getFullName(): string {
+    if (!this.user) return 'TEACHER PROFILE';
+    const first = (this.user.first_name || '').trim();
+    const last = (this.user.last_name || '').trim();
+    const fullName = `${first} ${last}`.trim();
+    return fullName ? fullName.toUpperCase() : 'TEACHER PROFILE';
+  }
+
   ngOnInit(): void {
     this.onCollapseStepper(1);
-    const configData = JSON.parse(this.auth.getLocalStorage('configData'));
+    const configData = JSON.parse(this.auth.getLocalStorage('configData') || '{}');
     this.curriculumList =
-      configData.curriculum.length > 0 ? configData.curriculum : [];
+      configData && configData.curriculum && configData.curriculum.length > 0 ? configData.curriculum : [];
     this.proofList =
-      configData.identification_proof.length > 0
+      configData && configData.identification_proof && configData.identification_proof.length > 0
         ? configData.identification_proof
         : [];
-    console.log(this.proofList, 'profiel')
+    console.log(this.proofList, 'profiel');
     this.stepper2.controls['identity'].patchValue('Aadhar Card');
     this.stepper2.controls['identity'].disable();
+
+    if (this.user) {
+      this.patchData(this.user);
+    }
+
+    const payload = {
+      filter_by: 'teacher',
+      filter_value: this.auth.getUserId()
+    };
+    this.auth.postService(payload, Urls.teacherProfile).subscribe({
+      next: (res: any) => {
+        if (res.IsSuccess && res.ResponseObject && res.ResponseObject.length > 0) {
+          const teacherData = res.ResponseObject[0];
+          this.patchData(teacherData);
+        }
+      },
+      error: (err: any) => console.error(err, 'error fetching teacher profile for patch')
+    });
+  }
+
+  patchData(data: any): void {
+    if (!data) return;
+
+    // Patch Step 1 (Personal Details)
+    this.stepper.patchValue({
+      address: data.address || '',
+      aboutInfo: data.about_you || data.comment || data.aboutInfo || '',
+      language: data.languages_known || data.language || '',
+      city: data.city || '',
+      state: data.state || '',
+      pin: data.pincode || data.pin || '',
+    });
+
+    const langs = data.languages_known || data.language;
+    if (langs) {
+      this.langChips = Array.isArray(langs)
+        ? langs
+        : String(langs).split(',').map((s: string) => s.trim()).filter((s: string) => s);
+    }
+
+    // Patch Step 2 (Qualifications & Teaching Details)
+    this.stepper1.patchValue({
+      qualification: data.qualifications || data.qualification || '',
+      exp: data.experience || data.experience_in_yrs || data.exp || '',
+      subTeach: data.subjects_you_teach || data.subTeach || '',
+      curriculum: data.curriculum_type || data.curriculum || '',
+    });
+
+    const qual = data.qualifications || data.qualification;
+    if (qual) {
+      this.qualificationChips = Array.isArray(qual)
+        ? qual
+        : String(qual).split(',').map((s: string) => s.trim()).filter((s: string) => s);
+    }
+
+    const subs = data.subjects_you_teach || data.subTeach;
+    if (subs) {
+      this.subjectChips = Array.isArray(subs)
+        ? subs
+        : String(subs).split(',').map((s: string) => s.trim()).filter((s: string) => s);
+    }
+
+    // Patch Step 3 (Bank & Identity Details)
+    const proofId = data.identification_proof_id || data.identification || 'Aadhar Card';
+    const bName = data.bank_name || data.bankName || '';
+    const bAcc = data.bank_account_number || data.bankAccnum || '';
+    const ifscCode = data.IFSC_code || data.ifsc || '';
+
+    this.stepper2.patchValue({
+      identity: proofId,
+      bankName: bName,
+      bankAccnum: bAcc,
+      ifsc: ifscCode,
+    });
   }
 
   onCollapseStepper(v: any) {
@@ -117,18 +199,25 @@ export class BecomeTutorComponent implements OnInit {
     }
   }
 
+  submittedStep1 = false;
+  submittedStep2 = false;
+  submittedStep3 = false;
+
   stepSubmit(v: number) {
     if (v == 2) {
+      this.submittedStep1 = true;
       if (this.langChips.length > 0) {
-        this.stepper.controls['language'].patchValue(this.langChips);
+        this.stepper.controls['language'].patchValue(this.langChips.join(','));
       }
 
+      this.stepper.markAllAsTouched();
+      this.customValidater.validateAllFormFields(this.stepper);
+
       if (this.stepper.invalid) {
-        this.customValidater.validateAllFormFields(this.stepper);
-        this.helper.presentErrorToast('Form is Invalid');
+        this.helper.presentErrorToast('Please fill all required fields');
         return;
-      } else if (!this.profileBase64) {
-        this.helper.presentErrorToast('Upload profile');
+      } else if (!this.profileBase64 && !this.user?.profile_image && !this.user?.is_document_uploaded && !this.user?.address) {
+        this.helper.presentErrorToast('Please upload a profile picture');
         return;
       }
       this.showFirst = false;
@@ -138,17 +227,20 @@ export class BecomeTutorComponent implements OnInit {
       this.showFive = false;
     }
     if (v == 3) {
+      this.submittedStep2 = true;
       if (this.qualificationChips.length > 0) {
         this.stepper1.controls['qualification'].patchValue(
-          this.qualificationChips
+          this.qualificationChips.join(',')
         );
       }
       if (this.subjectChips.length > 0) {
-        this.stepper1.controls['subTeach'].patchValue(this.subjectChips);
+        this.stepper1.controls['subTeach'].patchValue(this.subjectChips.join(','));
       }
+      this.stepper1.markAllAsTouched();
+      this.customValidater.validateAllFormFields(this.stepper1);
+
       if (this.stepper1.invalid) {
-        this.customValidater.validateAllFormFields(this.stepper1);
-        this.helper.presentErrorToast('Form is Invalid');
+        this.helper.presentErrorToast('Please fill all required qualification fields');
         return;
       }
 
@@ -159,15 +251,17 @@ export class BecomeTutorComponent implements OnInit {
       this.showFive = false;
     }
     if (v == 4) {
+      this.submittedStep3 = true;
+      this.stepper2.markAllAsTouched();
+      this.customValidater.validateAllFormFields(this.stepper2);
+
       if (this.stepper2.invalid) {
-        this.customValidater.validateAllFormFields(this.stepper2);
-        this.helper.presentErrorToast('Form is Invalid');
+        this.helper.presentErrorToast('Please fill all required bank and identity fields');
         return;
-      } else if (!this.identityBase64) {
-        this.helper.presentErrorToast('Upload the mandatory documents');
+      } else if (!this.identityBase64 && !this.user?.is_document_uploaded) {
+        this.helper.presentErrorToast('Please upload an identity proof document');
         return;
       }
-      console.log(this.stepper2, 'dasda');
       this.showFirst = false;
       this.showSecond = false;
       this.showThird = false;
@@ -381,17 +475,6 @@ export class BecomeTutorComponent implements OnInit {
   }
 
   getCityAndStateListByPincode() {
-    if (this.stepper.value.pin.trim().length == 6) {
-      const payload = {
-        pincode: this.stepper.value.pin
-      };
-      this.auth.postService(payload, Urls.getStateByPincode).subscribe((successData: any) => {
-        console.log(successData, 'suuccesData');
-        if (successData.IsSuccess) {
-          this.stepper.get('city')?.patchValue(successData.ResponseObject.city)
-          this.stepper.get('state')?.patchValue(successData.ResponseObject.state)
-        }
-      }, (error: any) => console.error(error, 'error_Pincode'))
-    }
+    // Automatic city & state selection via pincode removed per user requirement
   }
 }

@@ -15,6 +15,8 @@ import {Dialog} from '@angular/cdk/dialog';
 import {NgIf} from "@angular/common";
 import {SseClient} from "ngx-sse-client";
 
+import {Urls} from '../../../shared/services/urls';
+
 @Component({
   selector: 'app-myaccount',
   standalone: true,
@@ -45,6 +47,26 @@ export class myAccountComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.auth.getRoleId() != '3') {
+      const userId = this.auth.getUserId();
+      if (userId) {
+        this.auth.http.get<any>(`${Urls.notifyTeacherProfileStatus}?id=${userId}`).subscribe({
+          next: (res: any) => {
+            if (res && res.IsSuccess && res.ResponseObject) {
+              try {
+                const userDetails = JSON.parse(this.auth.getLocalStorage('user') || '{}');
+                userDetails.is_account_verified = res.ResponseObject.is_account_verified;
+                if (res.ResponseObject.rejection_notes) {
+                  userDetails.rejection_notes = res.ResponseObject.rejection_notes;
+                }
+                this.auth.setLocalStorage('user', JSON.stringify(userDetails));
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          },
+          error: (err) => console.error(err)
+        });
+      }
       this.sidebarMenus = [
         {
           title: 'General',
@@ -139,5 +161,9 @@ export class myAccountComponent implements OnInit {
       console.log(menu)
     });
     this.router.navigateByUrl(menu.url);
+  }
+
+  navigateToGeneral() {
+    this.router.navigateByUrl('/myaccount/general');
   }
 }

@@ -43,7 +43,7 @@ export class SignUpComponent {
       email: ['', [Validators.required, Validators.email]],
       gender: ['', Validators.required],
       grade: [''],
-      otp: ['', Validators.required],
+      otp: [''],
     });
   }
 
@@ -67,9 +67,11 @@ export class SignUpComponent {
 
       this.auth.postService(reqObj, Urls.verifyUser).subscribe({next: (successData) => {
           if (successData.IsSuccess) {
-            this.helper.presentToast('OTP has sent successfully to given Mail ID');
+            this.helper.presentToast(successData.ResponseObject || 'OTP has sent successfully to given Mail ID');
             this.resendOTP ? this.resendOTP = false : this.resendOTP = false;
             !this.showOTP ? this.showOTP = true: this.showOTP = true;
+            this.signupForm.get('otp')?.setValidators([Validators.required]);
+            this.signupForm.get('otp')?.updateValueAndValidity();
             this.startCountdown();
           } else {
             this.showOTP = false;
@@ -83,9 +85,11 @@ export class SignUpComponent {
     }
   }
 
-  // submitting after enterign otp
   onSubmit(formObj: FormGroup) {
-    console.log('sertvice')
+    if (!this.showOTP) {
+      this.sendOTP(formObj);
+      return;
+    }
     if (formObj.invalid) {
       this.customValidation.validateAllFormFields(formObj);
       return;
@@ -103,11 +107,15 @@ export class SignUpComponent {
     this.auth.postService(reqObj, Urls.signup).subscribe({
       next: (successData) => {
         if (successData.IsSuccess) {
-          this.helper.presentToast('Your account created successfully, please login to configure classes');
+          this.helper.presentToast(successData.ResponseObject || 'Your account created successfully, please login');
           this.pop.closeAll();
-          this.router.navigateByUrl('tutor');
+          if (this.user === '1') {
+            this.router.navigateByUrl('tutor');
+          } else {
+            this.openLogin();
+          }
         } else {
-          this.helper.presentToast(successData.ResponseObject);
+          this.helper.presentErrorToast(successData.ErrorObject || successData.ResponseObject || 'Registration failed');
         }
       },
       error: (error) => {

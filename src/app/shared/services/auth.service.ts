@@ -28,7 +28,7 @@ export class AuthService {
       role_id: this.getRoleId(),
     };
     const updatedData =
-      url != 'user/login' && url != 'forgotPassword'
+      url != 'user/login' && url != 'user/forgotPassword' && url != 'user/verifyUser' && url != 'user/signup'
         ? {...jsonStructure, ...data}
         : data;
     const json = JSON.stringify(updatedData);
@@ -149,7 +149,23 @@ export class AuthService {
   }
 
   get teacherVerificationStatus() {
-    const userDetails = JSON.parse(this.getLocalStorage('user'));
-    return userDetails.is_account_verified ?? '';
+    try {
+      const userDetails = JSON.parse(this.getLocalStorage('user') || '{}');
+      return userDetails ? userDetails.is_account_verified : '0';
+    } catch (e) {
+      return '0';
+    }
+  }
+
+  get teacherRejectionNotes() {
+    try {
+      const userDetails = JSON.parse(this.getLocalStorage('user') || '{}');
+      if (userDetails && userDetails.rejection_notes) return userDetails.rejection_notes;
+      if (userDetails && userDetails.admin_notes) return userDetails.admin_notes;
+      if (userDetails && userDetails.rejection_reason) return userDetails.rejection_reason;
+      return 'Please re-upload a clear government-issued ID proof and valid teaching degree / experience certificates for verification review.';
+    } catch (e) {
+      return 'Please re-upload a clear government-issued ID proof and valid teaching degree / experience certificates for verification review.';
+    }
   }
 }

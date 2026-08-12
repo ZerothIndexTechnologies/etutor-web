@@ -26,6 +26,9 @@ import {
   MatCardHeader,
 } from '@angular/material/card';
 import {Router} from "@angular/router";
+import { LiveClassroomModalComponent } from '../../../../shared/live-classroom-modal/live-classroom-modal.component';
+
+import { TimezoneService } from '../../../../shared/services/timezone.service';
 
 @Component({
   selector: 'app-class-list',
@@ -46,7 +49,8 @@ import {Router} from "@angular/router";
     MatCard,
     MatCardHeader,
     MatCardContent,
-    MatCardFooter
+    MatCardFooter,
+    LiveClassroomModalComponent
   ],
   templateUrl: './class-list.component.html',
   styleUrl: './class-list.component.scss',
@@ -58,11 +62,25 @@ export class ClassListComponent implements OnInit {
   protected classListdata: any = [];
   protected classData: any = {};
   helper = inject(HelperService);
+  timezoneService = inject(TimezoneService);
+  public displayTimezone: string = this.timezoneService.getUserTimezone();
+  public timezoneList = this.timezoneService.TIMEZONES;
+
   protected type = '';
   public meetingLinkValue = '';
+
+  public isLiveClassOpen: boolean = false;
+  public activeRoomName: string = '';
+  public activeRoomTitle: string = '';
+  public currentUserName: string = 'User';
+
   @ViewChild('addOrUpdateClass') modalContent!: TemplateRef<any>;
   @ViewChild('deleteClassConfirmation') deleteClassConfirmation!: TemplateRef<any>;
   @ViewChild('meetingLink') meetingLink!: TemplateRef<any>;
+
+  getFormattedTime(timeStr: string): string {
+    return this.timezoneService.convertUtcToDisplay(timeStr, this.displayTimezone);
+  }
 
   constructor(private fb: FormBuilder, private router: Router, protected auth: AuthService, private dialog: MatDialog) {
     this.subjectList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).subjects;
@@ -70,8 +88,42 @@ export class ClassListComponent implements OnInit {
     this.curriculumList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).curriculum;
   }
 
+  public verificationStatus: string = '0';
+  public rejectionNotes: string = '';
+
   ngOnInit() {
     this.classList();
+    if (this.auth.getRoleId() == '2') {
+      this.loadTeacherVerificationStatus();
+    }
+  }
+
+  loadTeacherVerificationStatus() {
+    const url = 'common/notifyTeacherProfileStatus?id=' + this.auth.getUserId();
+    this.auth.postService({}, url).subscribe({
+      next: (res: any) => {
+        if (res.IsSuccess && res.ResponseObject) {
+          this.verificationStatus = res.ResponseObject.is_account_verified ?? '0';
+          this.rejectionNotes = res.ResponseObject.rejection_notes ?? '';
+        }
+      },
+      error: (err: any) => console.error(err, 'error fetching teacher status in class list')
+    });
+  }
+
+  send10MinReminder(classDetail: any) {
+    if (!classDetail || !classDetail.id) return;
+    const payload = { class_id: classDetail.id };
+    this.auth.postService(payload, Urls.sendClassReminderEmail || 'teacher/sendClassReminderEmail').subscribe({
+      next: (res: any) => {
+        if (res.IsSuccess) {
+          this.helper.presentToast(res.ResponseObject || '10-minute pre-class alert emails sent!');
+        } else {
+          this.helper.presentErrorToast(res.ErrorObject || 'Failed to send alert emails');
+        }
+      },
+      error: () => this.helper.presentErrorToast('Error sending 10-minute alert emails')
+    });
   }
 
   editClass(classDetail: any) {
@@ -107,29 +159,73 @@ export class ClassListComponent implements OnInit {
   }
 
   joinNow(classData: any) {
-    if(classData.meeting_link) {
-        window.open(classData.meeting_link, '_blank')
-    } else {
-      this.helper.presentErrorToast('The meeting link for this class is not updated for this class.');
-    }
+    this.joinLiveRoom(classData);
   }
 
-  classList() {
-    const payload  = {
-      grade: [],
-      teacher_id: []
+  joinLiveRoom(classData: any) {
+    const sanitizedTitle = (classData.subject || 'Class').replace(/[^a-zA-Z0-9]/g, '_');
+    const classId = classData.class_id || Date.now();
+    this.activeRoomName = `Etutor_Class_${sanitizedTitle}_${classId}`;
+    this.activeRoomTitle = `${classData.subject || 'Class'} (${classData.start_time || 'Live Session'})`;
+
+    try {
+      const userDetails = this.auth.getUserDetails();
+      if (userDetails && userDetails.name) {
+        this.currentUserName = userDetails.name;
+      } else if (userDetails && userDetails.first_name) {
+        this.currentUserName = `${userDetails.first_name} ${userDetails.last_name || ''}`.trim();
+      } else {
+        this.currentUserName = this.auth.getRoleId() == '3' ? 'Student' : 'Teacher';
+      }
+    } catch (e) {
+      this.currentUserName = this.auth.getRoleId() == '3' ? 'Student' : 'Teacher';
     }
+
+    this.isLiveClassOpen = true;
+  }
+
+  closeLiveClass() {
+    this.isLiveClassOpen = false;
+  }
+
+  public studentGradeName: string = '';
+
+  classList() {
+    const isStudent = this.auth.getRoleId() == '3';
+    let userGradeId: any = null;
+    let currentUserId: any = this.auth.getUserId();
+
+    if (isStudent) {
+      try {
+        const studentDetails = this.auth.getUserDetails();
+        if (studentDetails && studentDetails.grade) {
+          userGradeId = studentDetails.grade;
+        }
+      } catch (e) {
+        console.warn('Could not parse student details', e);
+      }
+    }
+
+    const payload = {
+      grade: userGradeId ? [userGradeId] : [],
+      user_id: currentUserId,
+      teacher_id: !isStudent && currentUserId ? [currentUserId] : []
+    };
+
     this.auth.postService(payload, Urls.classList).subscribe(
       (successData: any) => {
-        if (successData.IsSuccess) {
-          successData.ResponseObject.forEach((classData: any) => {
+        let classes: any[] = [];
+        if (successData.IsSuccess && Array.isArray(successData.ResponseObject)) {
+          classes = successData.ResponseObject;
+          
+          classes.forEach((classData: any) => {
             const gradeDetails = this.gradeList.find(
               (grade: any) => grade.id == classData.grade
             );
             const curriculumDetails = this.curriculumList.find(
               (curriculum: any) => curriculum.id == classData.curriculum_id
             );
-            const fullNameOfDays = classData.days.split(',');
+            const fullNameOfDays = (classData.days || '').split(',');
             let fullDays: any = [];
             fullNameOfDays.forEach((days: string) => {
               fullDays.push(
@@ -141,16 +237,34 @@ export class ClassListComponent implements OnInit {
               ? curriculumDetails.curriculum_type
               : '';
           });
-        } else {
+
+          // Client-side filtering as safeguard
+          if (!isStudent && currentUserId) {
+            // For Teacher: show classes created by this teacher
+            classes = classes.filter((item: any) => item.teacher_id == currentUserId);
+          } else if (isStudent) {
+            // For Student: show classes matching student's registered grade OR explicitly subscribed classes
+            classes = classes.filter((item: any) => (userGradeId && item.grade == userGradeId) || item.is_subscribed == 1);
+            if (userGradeId) {
+              const matchedGrade = this.gradeList.find((g: any) => g.id == userGradeId);
+              if (matchedGrade) {
+                this.studentGradeName = matchedGrade.displayname;
+              }
+            }
+          }
+        } else if (!successData.IsSuccess) {
           this.helper.presentErrorToast(successData.ErrorObject);
         }
-        this.classListdata = successData.IsSuccess
-          ? successData.ResponseObject
-          : [];
+
+        this.classListdata = classes;
         console.log(this.classListdata, 'classListdata');
       },
       (error) => console.error(error, 'error')
     );
+  }
+
+  subscribeLiveClass(classData: any) {
+    this.router.navigate(['/subscription'], { queryParams: { class_id: classData.class_id, subject: classData.subject } });
   }
 
   closePopup() {
@@ -170,6 +284,12 @@ export class ClassListComponent implements OnInit {
         this.helper.presentErrorToast(successData.ErrorObject);
       }
     }, (error) => console.error(error, 'class_delete'))
+  }
+
+  generateJitsiLinkForClassList() {
+    const subj = (this.classData.subject || 'Class').replace(/[^a-zA-Z0-9]/g, '_');
+    this.meetingLinkValue = `https://meet.jit.si/Etutor_Class_${subj}_${Date.now()}`;
+    this.helper.presentToast('Jitsi Live Classroom URL auto-generated!');
   }
 
   updateClassMeetingLink() {

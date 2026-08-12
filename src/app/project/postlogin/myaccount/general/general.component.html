@@ -2,8 +2,52 @@
 <div class="container">
 <!--    @if (auth.getUserType === '1') {-->
     <!-- Teacher Profile form starts here -->
-    <div class="row" *ngIf="auth.getUserType === '1'">
+    <div class="row" *ngIf="auth.getUserType === '1' || auth.getRoleId() == '2'">
         <div class="col-md-12">
+            <!-- Teacher Verification Visual Status Banner -->
+            <div class="mb-4">
+              <!-- Pending Approval (0) -->
+              <div *ngIf="verificationStatus == '0' || auth.teacherVerificationStatus == '0'" class="alert alert-warning d-flex align-items-center p-3 rounded-3 shadow-sm" style="background-color: #fffbebf5; border: 1px solid #fef08a;">
+                <span class="material-icons text-warning me-3" style="font-size: 32px">hourglass_empty</span>
+                <div>
+                  <h6 class="mb-1 fw-bold text-dark">⏳ Verification Pending Approval</h6>
+                  <span class="text-secondary mx-font-14">Your tutor verification application is currently under review by our admin team. You will be notified via email once approved.</span>
+                </div>
+              </div>
+
+              <!-- Verified (1) -->
+              <div *ngIf="verificationStatus == '1' || auth.teacherVerificationStatus == '1'" class="alert alert-success d-flex align-items-center p-3 rounded-3 shadow-sm" style="background-color: #f0fdf4; border: 1px solid #bbf7d0;">
+                <span class="material-icons text-success me-3" style="font-size: 32px">check_circle</span>
+                <div>
+                  <h6 class="mb-1 fw-bold text-success">✅ Verified Tutor Account</h6>
+                  <span class="text-secondary mx-font-14">Your tutor account is verified. You are fully authorized to schedule and host live classes.</span>
+                </div>
+              </div>
+
+              <!-- Action Required / Declined (2) -->
+              <div *ngIf="verificationStatus == '2' || auth.teacherVerificationStatus == '2'" class="alert alert-danger p-3 rounded-3 shadow-sm" style="background-color: #fef2f2; border: 1px solid #fecaca;">
+                <div class="d-flex align-items-center mb-2">
+                  <span class="material-icons text-danger me-3" style="font-size: 32px">gpp_bad</span>
+                  <div>
+                    <h6 class="mb-1 fw-bold text-danger">❌ Verification Action Required / Declined</h6>
+                    <span class="text-dark mx-font-14">Your verification application requires document updates or re-submission.</span>
+                  </div>
+                </div>
+                <div *ngIf="rejectionNotes" class="bg-white p-3 rounded mt-2 border text-start">
+                  <strong class="text-danger d-block mb-1"><i class="material-icons align-middle me-1" style="font-size: 18px">info</i> Admin Feedback & Notes:</strong>
+                  <span class="text-dark mx-font-14">{{ rejectionNotes }}</span>
+                </div>
+                <div class="mt-3">
+                  <button (click)="editProfileDetails = true" type="button" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 rounded-pill me-2">
+                    Update Profile Details Below
+                  </button>
+                  <button (click)="routeToTutor()" type="button" class="btn btn-outline-danger btn-sm font-weight-bold px-3 py-2 rounded-pill">
+                    Re-upload Verification Documents
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div class="profile-section p-4 mb-3 rounded-border">
                 <div class="row">
                     <div class="col-md-6 d-flex text-center align-items-center">
@@ -36,56 +80,90 @@
                 <div class="mt-2">
                   <h6 class="mx-font-20 fw-bold">General Info<span><i (click)="editProfileDetails = !editProfileDetails" class="material-icons mt-2">edit</i></span></h6>
                 </div>
-                <form [formGroup]="teacherForm">
+                <form [formGroup]="teacherForm" (ngSubmit)="submitTeacherForm()">
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="subjects">Subjects</label>
-                                <input type="text" formControlName="subject" class="form-control" id="subjects">
+                                <label for="subjects">Subjects<span class="text-danger">*</span></label>
+                                <input type="text" formControlName="subject" class="form-control" id="subjects"
+                                  [class.is-invalid]="teacherForm.get('subject')?.invalid && (teacherForm.get('subject')?.touched || submittedTeacher)">
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('subject')?.invalid && (teacherForm.get('subject')?.touched || submittedTeacher)">
+                                  Subject is required
+                                </div>
                             </div>
-                            <div class="form-group  mt-2">
-                                <label for="gender">Gender</label>
-                                <select formControlName="gender" class="form-control rounded-border" id="gender">
+                            <div class="form-group mt-2">
+                                <label for="gender">Gender<span class="text-danger">*</span></label>
+                                <select formControlName="gender" class="form-control rounded-border" id="gender"
+                                  [class.is-invalid]="teacherForm.get('gender')?.invalid && (teacherForm.get('gender')?.touched || submittedTeacher)">
+                                    <option value="">Please Select</option>
                                     <option>Male</option>
                                     <option>Female</option>
                                     <option>Other</option>
                                 </select>
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('gender')?.invalid && (teacherForm.get('gender')?.touched || submittedTeacher)">
+                                  Gender is required
+                                </div>
                             </div>
                             <div class="form-group mt-2">
-                                <label for="languages">Languages</label>
-                                <input type="text" formControlName="language" class="form-control" id="languages">
+                                <label for="languages">Languages<span class="text-danger">*</span></label>
+                                <input type="text" formControlName="language" class="form-control" id="languages"
+                                  [class.is-invalid]="teacherForm.get('language')?.invalid && (teacherForm.get('language')?.touched || submittedTeacher)">
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('language')?.invalid && (teacherForm.get('language')?.touched || submittedTeacher)">
+                                  Language is required
+                                </div>
                             </div>
                             <div class="form-group mt-2">
-                                <label for="mobile">Mobile Number</label>
-                                <input type="text" formControlName="mobile" class="form-control" id="mobile">
+                                <label for="mobile">Mobile Number<span class="text-danger">*</span></label>
+                                <input type="text" formControlName="mobile" class="form-control" id="mobile"
+                                  [class.is-invalid]="teacherForm.get('mobile')?.invalid && (teacherForm.get('mobile')?.touched || submittedTeacher)">
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('mobile')?.invalid && (teacherForm.get('mobile')?.touched || submittedTeacher)">
+                                  Mobile Number is required
+                                </div>
                             </div>
                             <div class="form-group mt-2">
                                 <label for="identfication">Identification</label>
-                                <input type="text" formControlName="identification" class="form-control"
-                                    id="identfication">
+                                <input type="text" formControlName="identification" class="form-control" id="identfication">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="qualfication">Qualification</label>
-                                <input type="text" formControlName="qualification" class="form-control"
-                                    id="qualfication" />
+                                <label for="qualfication">Qualification<span class="text-danger">*</span></label>
+                                <input type="text" formControlName="qualification" class="form-control" id="qualfication"
+                                  [class.is-invalid]="teacherForm.get('qualification')?.invalid && (teacherForm.get('qualification')?.touched || submittedTeacher)">
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('qualification')?.invalid && (teacherForm.get('qualification')?.touched || submittedTeacher)">
+                                  Qualification is required
+                                </div>
                             </div>
                             <div class="form-group mt-2">
                                 <label for="duration">Duration</label>
                                 <input type="text" class="form-control" formControlName="duration" id="duration" />
                             </div>
                             <div class="form-group mt-2">
-                                <label for="mail">Mail ID</label>
-                                <input type="email" class="form-control" formControlName="mail" id="mail">
+                                <label for="mail">Mail ID<span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" formControlName="mail" id="mail"
+                                  [class.is-invalid]="teacherForm.get('mail')?.invalid && (teacherForm.get('mail')?.touched || submittedTeacher)">
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('mail')?.invalid && (teacherForm.get('mail')?.touched || submittedTeacher)">
+                                  Valid Mail ID is required
+                                </div>
                             </div>
                             <div class="form-group mt-2">
-                                <label for="address">Address</label>
-                                <input type="text" class="form-control" formControlName="address" id="address" />
+                                <label for="address">Address<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" formControlName="address" id="address"
+                                  [class.is-invalid]="teacherForm.get('address')?.invalid && (teacherForm.get('address')?.touched || submittedTeacher)">
+                                <div class="text-danger small font-weight-bold mt-1"
+                                  *ngIf="teacherForm.get('address')?.invalid && (teacherForm.get('address')?.touched || submittedTeacher)">
+                                  Address is required
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-2 text-end">
+                    <div class="mt-3 text-end">
                         <button type="button" (click)="editProfileDetails = false" class="btn mx-2 rounded-border">Cancel</button>
                         <button type="submit" class="btn btn-save rounded-border">Save</button>
                     </div>
@@ -119,22 +197,25 @@
                         </div>
                     </div>
                     <div class="col-md-6 d-flex flex-column">
-                        <div class="card p-2">
+                        <div class="card p-3 shadow-sm border-0 rounded-3" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
                             <div>
-                                <p class="mx-font-14 m-0 fw-bold">Purchases Class</p>
-                                <span class="text-black-50 mx-font-14 fw-bold">English</span>
+                                <p class="mx-font-14 m-0 fw-bold text-primary">Purchases / Subscribed Classes</p>
+                                <span class="text-dark mx-font-15 fw-bold">{{ activeSubscribedSubjects || 'No Active Subscriptions Yet' }}</span>
                             </div>
                             <div>
-                                <p class="mx-font-14 m-0 mt-3 fw-bold">Beginner Level</p>
-                                <span class="text-black-50 mx-font-14 fw-bold">Recommended Experience</span>
+                                <p class="mx-font-14 m-0 mt-3 fw-bold text-primary">Grade & Curriculum</p>
+                                <span class="text-dark mx-font-14 fw-bold">
+                                  {{ studentGradeName || 'Grade Not Set' }} <span *ngIf="studentCurriculumName">({{ studentCurriculumName }})</span>
+                                </span>
                             </div>
                             <div>
-                                <p class="mx-font-14 fw-bold mt-3">6 Months at 10 Hours A Week</p>
+                                <p class="mx-font-14 m-0 mt-3 fw-bold text-primary">Active Learning Track</p>
+                                <span class="text-muted mx-font-13">6 Months at 10 Hours A Week</span>
                             </div>
 
                             <div>
-                                <p class="mx-font-14 m-0 fw-bold mt-2">Flexible Schedule</p>
-                                <span class="text-black-50 mx-font-14 fw-bold">Learn At Your Own Pace</span>
+                                <p class="mx-font-14 m-0 fw-bold mt-2 text-primary">Schedule Type</p>
+                                <span class="text-muted mx-font-13">Flexible Schedule &bull; Learn At Your Own Pace</span>
                             </div>
                         </div>
                     </div>
@@ -142,67 +223,102 @@
                 <div class="mt-2">
                     <h6 class="mx-font-20 fw-bold">General Info<span><i (click)="editProfileDetails = !editProfileDetails" class="material-icons mt-2">edit</i></span></h6>
                 </div>
-                <form [formGroup]="studentForm">
+                <form [formGroup]="studentForm" (ngSubmit)="submitStudentForm()">
                     <div class="row">
                         <div class="col-md-6">
                           <div class="form-group my-2">
-                            <label>First Name</label>
-                            <input placeholder="First Name" type="text" class="form-control"/>
+                            <label>First Name<span class="text-danger">*</span></label>
+                            <input placeholder="First Name" type="text" formControlName="firstName" class="form-control"
+                              [class.is-invalid]="studentForm.get('firstName')?.invalid && (studentForm.get('firstName')?.touched || submittedStudent)"/>
+                            <div class="text-danger small font-weight-bold mt-1"
+                              *ngIf="studentForm.get('firstName')?.invalid && (studentForm.get('firstName')?.touched || submittedStudent)">
+                              First Name is required
+                            </div>
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group my-2">
-                            <label>Last Name</label>
-                            <input placeholder="Last Name" type="text" class="form-control"/>
+                            <label>Last Name<span class="text-danger">*</span></label>
+                            <input placeholder="Last Name" type="text" formControlName="lastName" class="form-control"
+                              [class.is-invalid]="studentForm.get('lastName')?.invalid && (studentForm.get('lastName')?.touched || submittedStudent)"/>
+                            <div class="text-danger small font-weight-bold mt-1"
+                              *ngIf="studentForm.get('lastName')?.invalid && (studentForm.get('lastName')?.touched || submittedStudent)">
+                              Last Name is required
+                            </div>
                           </div>
                         </div>
                       <div class="col-md-6">
                         <div class="form-group my-2">
-                          <label>Email Id</label>
-                          <input placeholder="Email Id" type="email" class="form-control"/>
+                          <label>Email Id<span class="text-danger">*</span></label>
+                          <input placeholder="Email Id" type="email" formControlName="mail" class="form-control"
+                            [class.is-invalid]="studentForm.get('mail')?.invalid && (studentForm.get('mail')?.touched || submittedStudent)"/>
+                          <div class="text-danger small font-weight-bold mt-1"
+                            *ngIf="studentForm.get('mail')?.invalid && (studentForm.get('mail')?.touched || submittedStudent)">
+                            Valid Email Id is required
+                          </div>
                         </div>
                       </div>
                       <div class="col-md-6">
                         <div class="form-group my-2">
-                          <label>Mobile Number</label>
-                          <input placeholder="Mobile Number" type="text" class="form-control"/>
+                          <label>Mobile Number<span class="text-danger">*</span></label>
+                          <input placeholder="Mobile Number" type="text" formControlName="mobile" class="form-control"
+                            [class.is-invalid]="studentForm.get('mobile')?.invalid && (studentForm.get('mobile')?.touched || submittedStudent)"/>
+                          <div class="text-danger small font-weight-bold mt-1"
+                            *ngIf="studentForm.get('mobile')?.invalid && (studentForm.get('mobile')?.touched || submittedStudent)">
+                            Mobile Number is required
+                          </div>
                         </div>
                       </div>
                         <div class="col-md-6">
                           <div class="form-group my-2">
-                            <label>Gender</label>
-                            <select class="form-control rounded-border">
-                              <option selected disabled>Please Select</option>
-                              <option>Male</option>
-                              <option>Female</option>
-                              <option>Other</option>
+                            <label>Gender<span class="text-danger">*</span></label>
+                            <select formControlName="gender" class="form-control rounded-border"
+                              [class.is-invalid]="studentForm.get('gender')?.invalid && (studentForm.get('gender')?.touched || submittedStudent)">
+                              <option value="" disabled>Please Select</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                              <option value="Other">Other</option>
                             </select>
+                            <div class="text-danger small font-weight-bold mt-1"
+                              *ngIf="studentForm.get('gender')?.invalid && (studentForm.get('gender')?.touched || submittedStudent)">
+                              Gender is required
+                            </div>
                           </div>
                         </div>
                       <div class="col-md-6 form-group my-2">
-                        <label>Grade List</label>
+                        <label>Grade List<span class="text-danger">*</span></label>
                         <ng-select class="profile"
+                          formControlName="grade"
                           [items]="gradeListData"
                           bindLabel="displayname"
                           bindValue="id"
                           placeholder="Please Select"
                           typeToSearchText=""
-                          multiple="true"
+                          [class.is-invalid]="studentForm.get('grade')?.invalid && (studentForm.get('grade')?.touched || submittedStudent)"
                         >
                         </ng-select>
+                        <div class="text-danger small font-weight-bold mt-1"
+                          *ngIf="studentForm.get('grade')?.invalid && (studentForm.get('grade')?.touched || submittedStudent)">
+                          Grade is required
+                        </div>
                       </div>
 
                       <div class="col-md-6 form-group my-2">
-                        <label>Curriculum Type List</label>
+                        <label>Curriculum Type List<span class="text-danger">*</span></label>
                         <ng-select class="profile"
-                                   [items]="curriculumList"
-                                   bindLabel="curriculum_type"
-                                   bindValue="id"
-                                   placeholder="Please Select"
-                                   typeToSearchText=""
-                                   multiple="true"
+                          formControlName="curriculum"
+                          [items]="curriculumList"
+                          bindLabel="curriculum_type"
+                          bindValue="id"
+                          placeholder="Please Select"
+                          typeToSearchText=""
+                          [class.is-invalid]="studentForm.get('curriculum')?.invalid && (studentForm.get('curriculum')?.touched || submittedStudent)"
                         >
                         </ng-select>
+                        <div class="text-danger small font-weight-bold mt-1"
+                          *ngIf="studentForm.get('curriculum')?.invalid && (studentForm.get('curriculum')?.touched || submittedStudent)">
+                          Curriculum Type is required
+                        </div>
                       </div>
 
                     </div>

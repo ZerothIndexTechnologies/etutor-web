@@ -59,18 +59,16 @@
     </div>
   </section>
 
-  <section>
-    <div class="p-5 container d-flex justify-content-between">
-      @for (subjectData of subjectList; let i = $index; track subjectData.subject) {
-<!--      <div (click)="routeToSubjectDetail(subjectData)" class="course_icon cursor">-->
-<!--        <img [src]="subjectData.src" [alt]="subjectData.subject">-->
-<!--        <p>{{subjectData.subject == 'Social Science' ? 'Social' : subjectData.subject}}</p>-->
-<!--      </div>-->
-      <div class="course_icon cursor">
-        <img [src]="subjectData.src" [alt]="subjectData.subject">
-        <p>{{subjectData.subject == 'Social Science' ? 'Social' : subjectData.subject}}</p>
+  <section class="subjects-section py-4">
+    <div class="container">
+      <div class="subject-grid">
+        @for (subjectData of subjectList; let i = $index; track subjectData.subject) {
+        <div (click)="routeToSubjectDetail(subjectData)" class="course_icon cursor">
+          <img [src]="subjectData.src" [alt]="subjectData.subject" (error)="onImgError($event)">
+          <p>{{subjectData.subject}}</p>
+        </div>
+        }
       </div>
-      }
     </div>
   </section>
 
@@ -192,7 +190,7 @@
         </div>
         <div class="row mt-5">
           <owl-carousel-o [options]="customOptions">
-            @for (item of items; let i = $index; track item.img) {
+            @for (item of items; let i = $index; track i) {
 
             <ng-template carouselSlide>
               <div class="carousel-wrapper card m-2">
@@ -252,7 +250,7 @@
         </div>
         <div class="row mt-5">
           <owl-carousel-o [options]="customOptions1">
-            @for (item of items1; let i = $index; track item.img) {
+            @for (item of items1; let i = $index; track i) {
 
             <ng-template carouselSlide>
               <!-- <div class="carousel-wrapper card m-2">

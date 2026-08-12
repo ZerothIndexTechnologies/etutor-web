@@ -37,13 +37,13 @@
         <label class="p-1" for="mobileNumber">Mobile Number<span class="error">*</span></label>
         <div class="input-group">
           <div style="width: 10%" class="input-group-append rounded-border d-flex align-items-center justify-content-center">
-            <img style="width: 75%; padding: 0 2px" src="app/assets/etutor/indian_flag.png">
+            <img style="width: 75%; padding: 0 2px" src="assets/etutor/indian_flag.png">
           </div>
           <div style="padding-left: 4px" class="input-group-append rounded-border d-flex align-items-center justify-content-center">
             <span style="font-size: 14px">+91</span>
           </div>
           <input style="border-left: 0;padding-left: 6px;" (keypress)="numberValidation($event)" autocomplete="off" formControlName="mobile_number"
-          (focusout)="sendOTP(signupForm)" type="text" maxlength="10" class="form-control rounded-border"
+          type="text" maxlength="10" class="form-control rounded-border"
           id="mobileNumber" placeholder="Enter Mobile Number">
         </div>
 
@@ -84,8 +84,8 @@
       }
       <div class="form-group mb-2">
         <label for="emailID">Email ID<span class="error">*</span></label>
-        <input autocomplete="off" formControlName="email" type="email" (focusout)="sendOTP(signupForm)"
-          class="form-control rounded-border" id="emailID" placeholder="Enter Mail ID" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]{2,26}\.[a-z]{2,10}$">
+        <input autocomplete="off" formControlName="email" type="email"
+          class="form-control rounded-border" id="emailID" placeholder="Enter Mail ID" pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$">
         @if (signupForm.get('email')?.touched && signupForm.get('email')?.invalid) {
         <label *ngIf="signupForm.get('email')?.errors?.['required']"
           class="error jquery-validation-error small form-text ">Please

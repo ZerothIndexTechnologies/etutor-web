@@ -6,6 +6,7 @@ import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Urls} from "../../../../shared/services/urls";
 import {CustomValidationService} from "../../../../shared/services/customValidations.service";
 import {NgIf} from "@angular/common";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-change-password',
@@ -18,9 +19,10 @@ import {NgIf} from "@angular/common";
 })
 export class ChangePasswordComponent {
   auth = inject(AuthService);
-  public validation = inject(CustomValidationService)
+  public validation = inject(CustomValidationService);
   private formBuilder = inject(FormBuilder);
   private helper = inject(HelperService);
+  private router = inject(Router);
   public sameOldPassword = false;
   public accountForm: FormGroup;
   public passwordValid = true;
@@ -71,9 +73,11 @@ export class ChangePasswordComponent {
   }
 
   changePasswordSuccess(successData: any) {
-
     if (successData.IsSuccess) {
-      this.helper.presentToast(successData.ResponseObject);
+      this.helper.presentToast(successData.ResponseObject || 'Password updated successfully!');
+      setTimeout(() => {
+        this.router.navigate(['/home']);
+      }, 500);
     } else {
       this.helper.presentErrorToast(successData.ErrorObject);
     }

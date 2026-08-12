@@ -12,8 +12,8 @@ export const AppInterceptor: HttpInterceptorFn = (req, next) => {
   const api = inject(ApiService);
   const accesstoken =
     req.url == 'user/login'
-      ? auth.getLocalStorage('login_accesstoken')
-      : auth.getAccessToken() ? auth.getAccessToken() : [];
+      ? (auth.getLocalStorage('login_accesstoken') || '')
+      : (auth.getAccessToken() || '');
   const url = environment.apiHost + req.url;
   let authReq: any;
   authReq = req.clone({
@@ -21,7 +21,7 @@ export const AppInterceptor: HttpInterceptorFn = (req, next) => {
     setHeaders: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      accesstoken,
+      accesstoken: accesstoken ? accesstoken : '',
     },
   });
   return next(authReq).pipe(

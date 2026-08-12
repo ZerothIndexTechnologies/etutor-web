@@ -32,11 +32,12 @@
                 *ngIf="classForm.get('grade')?.enabled && !classForm.get('grade')?.valid && (classForm.get('grade')?.dirty || classForm.get('grade')?.touched)">Section
               is required</em>
           </div>
-          <div class="col-12 text-start mb-3" *ngIf="classForm.get('grade')?.value && classForm.get('curriculum')?.value">
+          <div class="col-12 text-start mb-3">
             <label class="form-label font-weight-bold">Select Subject</label>
             <select (change)="getTeacherClassDetails()" class="form-select select-board" formControlName="subject">
               <option value="" selected disabled>Please Select</option>
-              <option [ngValue]="subject.subject_name.toLowerCase()" *ngFor="let subject of subjectList">{{subject.subject_name}}
+              <option [value]="getSubjectValue(subject)" *ngFor="let subject of subjectList">
+                {{getSubjectName(subject)}}
               </option>
             </select>
             <em class="error"
@@ -60,11 +61,16 @@
             </div>
 
           </div>
-          <div class="col-6 row mb-3 timing-container">
-            <label class="form-label text-start font-weight-bold">Select Timing</label>
+          <div class="col-12 row mb-3 timing-container align-items-end">
+            <div class="col-4 text-start">
+              <label class="form-label text-start font-weight-bold mb-1"><i class="fas fa-globe text-primary me-1"></i> Timezone</label>
+              <select class="form-select bg-white border shadow-sm py-2" [(ngModel)]="selectedTimezone" [ngModelOptions]="{standalone: true}">
+                <option *ngFor="let tz of timezoneList" [value]="tz.code">{{tz.name}} ({{tz.offset}})</option>
+              </select>
+            </div>
             <div class="col-4 text-start">
               <div class="timepicker-card p-2">
-                <label class="col-12 text-center">Start Time</label>
+                <label class="col-12 text-center font-weight-bold">Start Time</label>
                 <input readonly placeholder="00:00" class="timepicker-input cursor" [ngxTimepicker]="picker"
                        formControlName="start_time"/>
                 <ngx-material-timepicker #picker></ngx-material-timepicker>
@@ -75,7 +81,7 @@
             </div>
             <div class="col-4 text-center">
               <div class="timepicker-card p-2">
-                <label class="col-12 text-center">End Time</label>
+                <label class="col-12 text-center font-weight-bold">End Time</label>
                 <input readonly placeholder="00:00" class="timepicker-input cursor" [ngxTimepicker]="picker1"
                   formControlName="end_time"/>
                 <ngx-material-timepicker #picker1></ngx-material-timepicker>
@@ -90,9 +96,12 @@
           </div>
 
           <div class="col-6 text-start align-content-center">
-            <label class="form-label font-weight-bold">Meeting Link</label>
-            <div class="form-group">
-              <input formControlName="meeting_link" class="form-control" type="url" placeholder="Zoom Meeting Link">
+            <label class="form-label font-weight-bold"><i class="fas fa-video me-1 text-primary"></i> Live Virtual Classroom Link</label>
+            <div class="input-group">
+              <input formControlName="meeting_link" class="form-control" type="url" placeholder="https://meet.jit.si/Etutor_Class_...">
+              <button type="button" class="btn btn-outline-primary" (click)="generateJitsiLink()" title="Auto-generate Live Classroom link">
+                <i class="fas fa-magic me-1"></i> Auto-Generate Link
+              </button>
             </div>
           </div>
           <!--          <div class="col-12 row mb-3 timing-container">-->

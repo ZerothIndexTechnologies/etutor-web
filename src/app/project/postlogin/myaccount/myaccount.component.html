@@ -24,6 +24,53 @@
         </nav>
     </div>
     <div class="col-md-10">
+
+        <!-- Teacher Verification Status Banners -->
+        <ng-container *ngIf="auth.getUserType === '1'">
+            <!-- Verified Teacher (Status 1) -->
+            <div *ngIf="auth.teacherVerificationStatus == '1'" class="alert alert-success border-0 shadow-sm rounded-3 p-3 mb-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-success"><i class="fas fa-certificate me-1"></i> Verified Teacher Account</h6>
+                        <p class="mb-0 text-muted" style="font-size: 13px;">Your application has been approved by the Admin team. You have full permission to publish classes and launch 1-click live classroom sessions.</p>
+                    </div>
+                </div>
+                <span class="badge bg-success px-3 py-2 fs-6 rounded-pill shadow-sm"><i class="fas fa-shield-alt me-1"></i> Account Verified</span>
+            </div>
+
+            <!-- Pending Approval / In Review (Status 0 or default) -->
+            <div *ngIf="auth.teacherVerificationStatus == '0' || !auth.teacherVerificationStatus" class="alert alert-warning border-0 shadow-sm rounded-3 p-3 mb-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-hourglass-half fa-2x text-warning me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-user-clock me-1"></i> Verification Pending Approval</h6>
+                        <p class="mb-0 text-muted" style="font-size: 13px;">Your teacher documents are currently under review by our Admin team. Some publishing features may be restricted until approval.</p>
+                    </div>
+                </div>
+                <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill shadow-sm"><i class="fas fa-clock me-1"></i> Under Review</span>
+            </div>
+
+            <!-- Action Required / Application Rejected (Status 2) -->
+            <div *ngIf="auth.teacherVerificationStatus == '2'" class="alert alert-danger border-0 shadow-sm rounded-3 p-3 mb-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger me-3 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-danger"><i class="fas fa-file-excel me-1"></i> Action Required: Application Verification Declined</h6>
+                            <p class="mb-2 text-dark" style="font-size: 13px;">
+                                <strong>Admin Review Notes:</strong> {{auth.teacherRejectionNotes}}
+                            </p>
+                            <button class="btn btn-sm btn-danger rounded-pill px-3 font-weight-bold shadow-sm" (click)="navigateToGeneral()">
+                                <i class="fas fa-file-upload me-1"></i> Update & Re-upload Documents
+                            </button>
+                        </div>
+                    </div>
+                    <span class="badge bg-danger px-3 py-2 fs-6 rounded-pill shadow-sm"><i class="fas fa-ban me-1"></i> Action Required</span>
+                </div>
+            </div>
+        </ng-container>
+
         <router-outlet />
     </div>
 </section>
