@@ -37,6 +37,7 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
 
   public loading: boolean = true;
   public errorMessage: string = '';
+  public participantCount: number = 1;
   private api: any = null;
 
   constructor(
@@ -151,12 +152,20 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
         startWithAudioMuted: !this.isTeacher,
         startWithVideoMuted: false,
         prejoinPageEnabled: false,
-        disableDeepLinking: true
+        disableDeepLinking: true,
+        enableEndConference: this.isTeacher,
+        fileRecordingsEnabled: false,
+        liveStreamingEnabled: false,
+        localRecording: {
+          enabled: false
+        },
+        enableLobby: true,
+        autoKnockLobby: true
       },
       interfaceConfigOverwrite: {
         TOOLBAR_BUTTONS: [
-          'microphone', 'camera', 'desktop', 'chat', 'raisehand',
-          'tileview', 'fullscreen', 'hangup', 'settings', 'recording', 'livestreaming'
+          'microphone', 'camera', 'desktop', 'chat', 'raisehand', 'participants-pane',
+          'tileview', 'fullscreen', 'hangup', 'settings', 'end-conference'
         ],
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
@@ -166,6 +175,18 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
 
     try {
       this.api = new JitsiMeetExternalAPI(domain, options);
+
+      this.api.addEventListener('videoConferenceJoined', () => {
+        this.updateParticipantCount();
+      });
+
+      this.api.addEventListener('participantJoined', () => {
+        this.updateParticipantCount();
+      });
+
+      this.api.addEventListener('participantLeft', () => {
+        this.updateParticipantCount();
+      });
 
       this.api.addEventListener('readyToClose', () => {
         this.closeModal();
@@ -177,6 +198,43 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
     } catch (err: any) {
       this.errorMessage = 'Error initializing JaaS Classroom: ' + (err.message || err);
       this.cdr.detectChanges();
+    }
+  }
+
+  private updateParticipantCount(): void {
+    if (this.api) {
+      try {
+        const num = this.api.getNumberOfParticipants();
+        if (num !== undefined && num !== null) {
+          this.participantCount = num;
+          this.cdr.detectChanges();
+        }
+      } catch (e) {}
+    }
+  }
+
+  public endClassForEveryone(): void {
+    if (confirm('Are you sure you want to end this live class session for all participants?')) {
+      if (this.api) {
+        try {
+          this.api.executeCommand('endConference');
+        } catch (e) {
+          try {
+            this.api.executeCommand('hangup');
+          } catch (err) {}
+        }
+      }
+      if (this.classId) {
+        this.authService.postService<any>(
+          { class_id: this.classId, status: 'COMPLETED' },
+          Urls.updateLiveClassStatus
+        ).subscribe({
+          next: () => this.closeModal(),
+          error: () => this.closeModal()
+        });
+      } else {
+        this.closeModal();
+      }
     }
   }
 

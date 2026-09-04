@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HelperService } from '../../../shared/services/helper.service';
@@ -22,19 +22,86 @@ export const params = {
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   showLogin: any = false;
   loginForm: FormGroup;
   showForGot: any = false;
   user: any;
   showPwd: boolean = false;
   forgotInput: string = '';
+  readonly googleClientId = '139081449172-h53j5aghth42fdjr9ljk82u563tnluh7.apps.googleusercontent.com';
 
   constructor(private route: Router, public customValidater: CustomValidationService, private fb: FormBuilder,
               private helper: HelperService, private auth: AuthService, private api: ApiService, private pop: MatDialog) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.initGoogleAuth();
+  }
+
+  initGoogleAuth(): void {
+    if (typeof (window as any).google !== 'undefined') {
+      (window as any).google.accounts.id.initialize({
+        client_id: this.googleClientId,
+        callback: (response: any) => this.handleGoogleCredential(response)
+      });
+
+      const btnContainer = document.getElementById('googleBtnLogin');
+      if (btnContainer) {
+        (window as any).google.accounts.id.renderButton(btnContainer, {
+          theme: 'outline',
+          size: 'large',
+          width: 280,
+          text: 'continue_with'
+        });
+      }
+    } else {
+      setTimeout(() => this.initGoogleAuth(), 500);
+    }
+  }
+
+  handleGoogleCredential(response: any): void {
+    if (!response || !response.credential) return;
+
+    const payload = {
+      id_token: response.credential,
+      is_teacher: this.user === '1',
+      is_signup: false
+    };
+
+    this.auth.postService(payload, Urls.googleAuth).subscribe({
+      next: (res: any) => {
+        if (res && res.IsSuccess && res.ResponseObject) {
+          const userObj = res.ResponseObject;
+          this.pop.closeAll();
+          this.auth.setLocalStorage('token', userObj.accesstoken);
+          this.auth.setLocalStorage('user_id', JSON.stringify(userObj.user_id));
+          this.auth.setLocalStorage('role_id', JSON.stringify(userObj.role_id));
+          this.auth.setLocalStorage('loggedInUser', JSON.stringify(this.user || (userObj.role_id === 2 ? '1' : '0')));
+          this.auth.setLocalStorage('user', JSON.stringify(userObj));
+          this.helper.presentToast('Successfully Logged In with Google!');
+          
+          if (userObj.role_id === 2) {
+            if (userObj.is_document_uploaded) {
+              this.route.navigateByUrl('myaccount/myclasses/list');
+            } else {
+              this.route.navigateByUrl('tutor');
+            }
+          } else {
+            this.route.navigateByUrl('myaccount/myclasses/list');
+          }
+        } else {
+          this.helper.presentErrorToast(res ? res.ErrorObject : 'Google authentication failed.');
+        }
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.helper.presentErrorToast('Server error during Google Login.');
+      }
     });
   }
 
@@ -133,5 +200,6 @@ export class LoginComponent {
     this.showLogin = !this.showLogin;
     this.user = userType;
     this.auth.setLocalStorage('loggedInUser', JSON.stringify(this.user));
+    setTimeout(() => this.initGoogleAuth(), 100);
   }
 }

@@ -1,129 +1,280 @@
-<!-- <script src="reserve-reserve-class-list.component.ts"></script> -->
-<section class="mb-3 p-4 profile-section rounded-border">
-  <div class="row">
-    <div class="col-12">
-      <h6 class="font-weight-bold">Reserve Class List</h6>
+<section class="reserve-class-section">
+  <!-- Page Header with Decorative Education Illustration -->
+  <div class="header-container d-flex justify-content-between align-items-center mb-4">
+    <div class="header-text">
+      <h2 class="page-title">Reserve Class List</h2>
+      <p class="page-subtitle">Discover and subscribe to the best classes for your learning journey.</p>
     </div>
+    
+    <!-- Top-Right Decorative Education Illustration -->
+    <div class="header-illustration">
+      <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Floating decorative dots -->
+        <circle cx="20" cy="18" r="3" fill="#FF7F00" opacity="0.6"/>
+        <circle cx="125" cy="22" r="2.5" fill="#FF7F00" opacity="0.8"/>
+        <circle cx="110" cy="78" r="3.5" fill="#FF7F00" opacity="0.5"/>
+        <circle cx="15" cy="65" r="2" fill="#FF7F00" opacity="0.7"/>
 
-    <div class="col-12">
-      <div class="row">
-        <div class="col-4 filter-fields mt-2 mb-3">
-          <label style="font-size: 14px" class="mb-1">Teacher List</label>
+        <!-- Pale Orange Shadow Base -->
+        <ellipse cx="70" cy="85" rx="55" ry="9" fill="#FFE8D6"/>
+
+        <!-- Stack of Books -->
+        <!-- Bottom Book (Blue Details) -->
+        <path d="M35 74L70 82L105 74V64L70 72L35 64V74Z" fill="#2563EB"/>
+        <path d="M35 64L70 72L105 64L70 56L35 64Z" fill="#3B82F6"/>
+        <path d="M38 66.5L68 73.5" stroke="#EFF6FF" stroke-width="1.5" stroke-linecap="round"/>
+
+        <!-- Middle Book (Orange Cover) -->
+        <path d="M30 60L68 68L102 60V50L68 58L30 50V60Z" fill="#E66E00"/>
+        <path d="M30 50L68 58L102 50L68 42L30 50Z" fill="#FF7F00"/>
+        <path d="M33 52.5L66 59.5" stroke="#FFF0E6" stroke-width="1.5" stroke-linecap="round"/>
+
+        <!-- Top Book (Orange Cover) -->
+        <path d="M38 46L72 53L98 46V37L72 44L38 37V46Z" fill="#D96800"/>
+        <path d="M38 37L72 44L98 37L72 30L38 37Z" fill="#FF8C1A"/>
+
+        <!-- Potted Plant on Books -->
+        <path d="M72 35L66 18H82L76 35H72Z" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+        <ellipse cx="74" cy="18" rx="8" ry="2.5" fill="#E2E8F0"/>
+        
+        <!-- Green Plant Leaves -->
+        <path d="M71 17C64 12 60 4 67 3C73 2 73 13 71 17Z" fill="#10B981"/>
+        <path d="M71 17C66 14 65 8 67 3" stroke="#047857" stroke-width="0.75"/>
+        <path d="M74 17C73 8 77 1 82 4C86 7 78 15 74 17Z" fill="#34D399"/>
+        <path d="M77 17C84 13 90 7 88 12C86 16 80 16 77 17Z" fill="#059669"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Rounded Filter Container -->
+  <div class="filter-container mb-4">
+    <div class="row align-items-center g-3">
+      <!-- Teacher List -->
+      <div class="col-lg-3 col-md-6">
+        <label class="filter-label">Teacher List</label>
+        <div class="filter-select-box">
+          <div class="pastel-icon-circle bg-pastel-orange">
+            <i class="fas fa-chalkboard-teacher text-orange"></i>
+          </div>
           <ng-select
             [items]="teacherList"
             bindLabel="display_name"
             bindValue="teacher_id"
             placeholder="Please Select"
-            typeToSearchText=""
-            multiple="true"
+            [multiple]="true"
             (change)="reserveClassList()"
-            [(ngModel)]="selectedTeacher"
-          >
+            [(ngModel)]="selectedTeacher">
           </ng-select>
         </div>
-        <div class="col-4 filter-fields mt-2 mb-3">
-          <label style="font-size: 14px" class="mb-1">Grade List</label>
+      </div>
+
+      <!-- Grade List -->
+      <div class="col-lg-3 col-md-6">
+        <label class="filter-label">Grade List</label>
+        <div class="filter-select-box">
+          <div class="pastel-icon-circle bg-pastel-purple">
+            <i class="fas fa-book-reader text-purple"></i>
+          </div>
           <ng-select
             [items]="gradeListData"
             bindLabel="displayname"
             bindValue="id"
             placeholder="Please Select"
-            typeToSearchText=""
-            multiple="true"
+            [multiple]="true"
             (change)="reserveClassList()"
-            [(ngModel)]="selectedGrade"
-          >
-          </ng-select>
-        </div>
-        <div class="col-4 filter-fields mt-2 mb-3">
-          <label style="font-size: 14px" class="mb-1">Subject List</label>
-          <ng-select
-            [items]="subjectOptions"
-            placeholder="Please Select"
-            typeToSearchText=""
-            multiple="true"
-            (change)="reserveClassList()"
-            [(ngModel)]="selectedSubject"
-          >
+            [(ngModel)]="selectedGrade">
           </ng-select>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-6 my-3 d-flex flex-column justify-content-center px-2"
-             *ngFor="let classData of classListdata; let i = index">
-          <div class="card class-card class-hover" style="border-radius: 12px">
-            <div class="card-body p-2">
-              <div class="row p-2 cursor">
-                <div class="col-12">
-                  <div class="row">
-                    <div class="col-md-8">
-                      <h6 class="mb-2">
-                        <span class="font-weight-bold" style="font-size: 18px">{{classData.subject ?? '-'}}</span>
-                      </h6>
-                    </div>
-                    <div class="col-4 text-right" *ngIf="auth.getRoleId() == '3'">
-                      <button *ngIf="classData.is_subscribed == 1" type="button" class="btn btn-success disabled" disabled style="padding: 6px 12px">
-                        ✓ Subscribed
-                      </button>
-                      <button *ngIf="classData.is_subscribed != 1" (click)="subscribeNow(classData)" style="padding: 6px 12px" type="button" class="btn btn-orange">
-                        Subscribe Now
-                      </button>
-                    </div>
-                  </div>
-                  <p class="p-0">
-                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Grade:</span><span
-                    class="t-name color-primary font-weight-bold ms-1">{{classData.grade_name ?? '-'}}</span>
-                    <span style="font-size: 13px; color: #777777" class="font-weight-bold ms-2">Curriculum:</span><span
-                    class="t-name font-weight-bold ms-1">{{classData.curriculum_name ?? '-'}}</span>
-                  </p>
-                  <p class="p-0">
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Time:</span>
-                    <i style="font-size: 13px" class="fas fa-clock ms-1"></i>
-                    <span style="font-size: 14px;"
-                          class="t-name font-weight-bold ms-1">{{classData.start_time}}</span>-<span style="font-size: 14px;"
-                                                                                                     class="t-name font-weight-bold">{{classData.end_time}}</span>
-                  </p>
-                  <p class="p-0">
-                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Class Days:</span><span
-                    class="t-name font-weight-bold ms-1">{{classData.days ?? '-'}}</span> &nbsp;<br />
-                  </p>
+
+      <!-- Subject List -->
+      <div class="col-lg-3 col-md-6">
+        <label class="filter-label">Subject List</label>
+        <div class="filter-select-box">
+          <div class="pastel-icon-circle bg-pastel-blue">
+            <i class="fas fa-book text-blue"></i>
+          </div>
+          <ng-select
+            [items]="subjectOptions"
+            placeholder="Please Select"
+            [multiple]="true"
+            (change)="reserveClassList()"
+            [(ngModel)]="selectedSubject">
+          </ng-select>
+        </div>
+      </div>
+
+      <!-- Reset Filters Button -->
+      <div class="col-lg-3 col-md-6 text-lg-end pt-lg-3">
+        <button (click)="resetFilters()" type="button" class="btn-reset-filters">
+          Reset Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Class Cards Grid (Dynamic API Data) -->
+  <div class="row g-4 mb-4" *ngIf="classListdata && classListdata.length > 0">
+    <div class="col-lg-6 col-md-12" *ngFor="let classData of classListdata; let i = index">
+      <div class="class-card-box">
+        <div class="card-body-content">
+          <!-- LEFT: Circular Educational Illustration -->
+          <div class="illustration-circle" [style.background-color]="getSubjectTheme(i).bg">
+            <svg [ngSwitch]="i % 4" width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <!-- CARD 1 Theme: ABC letters & Open Book -->
+              <g *ngSwitchCase="0">
+                <circle cx="36" cy="36" r="34" fill="#FFF0E6"/>
+                <text x="18" y="24" fill="#FF7F00" font-size="13" font-weight="800" font-family="sans-serif">A</text>
+                <text x="31" y="19" fill="#FF8C1A" font-size="15" font-weight="800" font-family="sans-serif">B</text>
+                <text x="46" y="25" fill="#FF7F00" font-size="13" font-weight="800" font-family="sans-serif">C</text>
+                <path d="M18 48C24 44 32 44 36 47C40 44 48 44 54 48V32C48 28 40 28 36 31C32 28 24 28 18 32V48Z" fill="#FF7F00"/>
+                <path d="M36 31V47" stroke="#FFFFFF" stroke-width="2"/>
+                <path d="M22 36C26 34 30 34 33 35.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M50 36C46 34 42 34 39 35.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
+
+              <!-- CARD 2 Theme: Notebook & Pencil -->
+              <g *ngSwitchCase="1">
+                <circle cx="36" cy="36" r="34" fill="#F3E8FF"/>
+                <rect x="22" y="18" width="28" height="36" rx="4" fill="#9333EA"/>
+                <rect x="26" y="22" width="20" height="28" rx="2" fill="#FFFFFF"/>
+                <line x1="29" y1="27" x2="43" y2="27" stroke="#9333EA" stroke-width="2" stroke-linecap="round"/>
+                <line x1="29" y1="33" x2="43" y2="33" stroke="#9333EA" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="21" cy="24" r="2" fill="#7E22CE"/>
+                <circle cx="21" cy="32" r="2" fill="#7E22CE"/>
+                <circle cx="21" cy="40" r="2" fill="#7E22CE"/>
+                <path d="M46 16L54 24L34 44H26V36L46 16Z" fill="#A855F7" stroke="#6B21A8" stroke-width="1"/>
+              </g>
+
+              <!-- CARD 3 Theme: Globe -->
+              <g *ngSwitchCase="2">
+                <circle cx="36" cy="36" r="34" fill="#E6F4EA"/>
+                <path d="M36 50V56M28 56H44" stroke="#16A34A" stroke-width="3" stroke-linecap="round"/>
+                <path d="M20 34C20 44 26 50 36 50C46 50 52 44 52 34" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <circle cx="36" cy="32" r="16" fill="#10B981"/>
+                <path d="M26 30C28 26 33 25 36 28C39 31 36 36 32 37C28 38 25 34 26 30Z" fill="#A7F3D0"/>
+                <path d="M40 34C43 32 48 35 47 38C46 41 42 43 39 40C39 37 38 35 40 34Z" fill="#A7F3D0"/>
+              </g>
+
+              <!-- CARD 4 Theme: Pencil Holder & Books -->
+              <g *ngSwitchDefault>
+                <circle cx="36" cy="36" r="34" fill="#E0F2FE"/>
+                <path d="M24 34L28 52H44L48 34H24Z" fill="#0284C7"/>
+                <ellipse cx="36" cy="34" rx="12" ry="3" fill="#38BDF8"/>
+                <line x1="31" y1="34" x2="26" y2="18" stroke="#0284C7" stroke-width="3" stroke-linecap="round"/>
+                <path d="M26 18L24 14L28 16" fill="#F59E0B"/>
+                <line x1="36" y1="34" x2="36" y2="15" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- RIGHT: Card Details -->
+          <div class="card-details-content">
+            <!-- Subject Title & Buttons -->
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h4 class="subject-title mb-0">{{ classData.subject || 'Subject' }}</h4>
+
+              <div class="d-flex align-items-center gap-2" *ngIf="auth.getRoleId() == '3'">
+                <button *ngIf="classData.is_subscribed == 1" type="button" class="btn-subscribed" disabled>
+                  <i class="fas fa-check me-1"></i> Subscribed
+                </button>
+                <button *ngIf="classData.is_subscribed != 1" (click)="subscribeNow(classData)" type="button" class="btn-subscribe">
+                  Subscribe Now
+                </button>
+                <button (click)="toggleWishlist(classData)" type="button" class="btn-star-circle" [class.active]="classData.is_wishlist" title="Add to Watchlist">
+                  <i [class]="classData.is_wishlist ? 'fas fa-star text-orange' : 'far fa-star text-orange'"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grade & Curriculum -->
+            <div class="meta-info-row mb-2">
+              <span class="meta-item">
+                <span class="meta-label">Grade:</span>
+                <span class="meta-value-orange ms-1">{{ classData.grade_name || classData.grade || '-' }}</span>
+              </span>
+              <span class="meta-divider"></span>
+              <span class="meta-item">
+                <span class="meta-label">Curriculum:</span>
+                <span class="meta-value ms-1">{{ classData.curriculum_name || classData.curriculum || '-' }}</span>
+              </span>
+            </div>
+
+            <!-- Session Time & Class Days -->
+            <div class="schedule-info-row mb-2">
+              <div class="schedule-item">
+                <span class="schedule-label">Session Time:</span>
+                <div class="schedule-value">
+                  <i class="far fa-clock text-orange me-1"></i>
+                  {{ classData.start_time || '00:00:00' }} - {{ classData.end_time || '00:00:00' }}
                 </div>
+              </div>
+
+              <div class="schedule-item ms-md-4">
+                <span class="schedule-label">Class Days:</span>
+                <div class="schedule-value text-orange fw-bold">
+                  <i class="far fa-calendar-alt text-orange me-1"></i>
+                  {{ classData.days || 'Flexible' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Divider -->
+            <div class="card-divider my-2"></div>
+
+            <!-- Footer: Teacher Avatar -->
+            <div class="card-footer-info d-flex align-items-center justify-content-between">
+              <div class="teacher-box d-flex align-items-center gap-2">
+                <div class="teacher-avatar-circle">
+                  <img [src]="getTeacherImage(classData, i)"
+                       alt="Teacher"
+                       class="teacher-avatar-img"
+                       (error)="handleImgError($event, i)" />
+                </div>
+                <span class="teacher-name">{{ getTeacherName(classData) }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="row d-flex justify-content-center" *ngIf="classListdata.length == 0">
-        <img style="width: 25%" src="app/assets/etutor/no_data.svg" alt="">
-        <h6 class="mb-0 text-center font-weight-bold mt-2" style="font-size: 18px">No Class Available</h6>
-      </div>
     </div>
   </div>
+
+  <!-- Empty State (When API returns 0 classes or filters match 0 classes) -->
+  <div class="empty-state-box" *ngIf="!classListdata || classListdata.length === 0">
+    <i class="fas fa-folder-open empty-icon"></i>
+    <h5>No Class Available</h5>
+    <p>Try adjusting your filters or check back later for new class offerings.</p>
+    <button (click)="resetFilters()" type="button" class="btn-reset-filters mt-2">
+      Reset Filters
+    </button>
+  </div>
+
 </section>
 
-
+<!-- Subscription Plan Dialog -->
 <ng-template #showSubscriptionPlan>
-  <div class="card">
-    <div class="card-header py-3">
-      <span style="font-size: 18px" class="text-capitalize col-12 font-weight-bold mb-0">Subscription Plan</span>
+  <div class="card border-0 shadow-lg" style="border-radius: 16px;">
+    <div class="card-header py-3 bg-white border-bottom" style="border-radius: 16px 16px 0 0;">
+      <span style="font-size: 18px" class="text-capitalize col-12 font-weight-bold mb-0 text-dark">Subscription Plan</span>
     </div>
-    <div class="card-body">
-      <div class="row plan-subscription">
+    <div class="card-body p-4">
+      <div class="row plan-subscription g-3">
         <div class="col-md-3" *ngFor="let sub of subscriptionPlan;">
           <div class="w-100">
-            <div class="w-100 plan-card px-1 text-center pt-5 pb-5 my-0">
-              <h5 class="mt-4 mb-2">{{sub.name}} Plan</h5>
-              <p class="mb-3">{{sub.days}} days of amount</p>
-              <div *ngIf="sub.plan_id != '1'" class="plan-price mb-5">₹{{classDetail[sub.key]}}/-</div>
-              <div *ngIf="sub.plan_id == '1'" class="plan-price mb-5">₹0/-</div>
-              <button (click)="userSubscription(sub)" [disabled]="sub.plan_id != '1'" type="button" class="btn btn-orange">Select Now</button>
+            <div class="plan-card-item">
+              <h5 class="mt-2 mb-2 fw-bold text-dark">{{sub.name}} Plan</h5>
+              <p class="mb-3 text-muted" style="font-size: 13px;">{{sub.days}} days of amount</p>
+              <div *ngIf="sub.plan_id != '1'" class="plan-price" style="color: #ff7f00;">₹{{classDetail[sub.key]}}/-</div>
+              <div *ngIf="sub.plan_id == '1'" class="plan-price text-success">₹0/-</div>
+              <button (click)="userSubscription(sub)" [disabled]="sub.plan_id != '1'" type="button" class="btn-subscribe mt-3">Select Now</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="card-footer">
-      <button (click)="closePopup()" type="button" class="btn btn-orange pull-right">Close</button>
+    <div class="card-footer bg-white border-top text-end" style="border-radius: 0 0 16px 16px;">
+      <button (click)="closePopup()" type="button" class="btn btn-outline-secondary rounded-pill px-4">Close</button>
     </div>
   </div>
 </ng-template>

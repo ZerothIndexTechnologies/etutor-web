@@ -1,5 +1,6 @@
 export class Urls {
   public static readonly login = 'user/login';
+  public static readonly googleAuth = 'user/googleAuth';
   public static readonly forgotPassword = 'user/forgotPassword';
   public static readonly verifyUser = 'user/verifyUser';
   public static readonly getConfiguration = 'common/getConfiguration';

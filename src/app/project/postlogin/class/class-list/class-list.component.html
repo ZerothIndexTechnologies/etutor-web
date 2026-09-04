@@ -1,146 +1,228 @@
-<section class="mb-3 p-4 profile-section rounded-border">
-  <div class="row">
-    <div class="col-12 d-flex justify-content-between align-items-center mb-3">
-      <h6 class="font-weight-bold mb-0">Class List <span *ngIf="auth.getRoleId() == '3' && studentGradeName" class="badge bg-primary ms-2" style="font-size: 13px;">Grade: {{studentGradeName}}</span></h6>
-      <div *ngIf="auth.getRoleId() != '3'">
-        <button class="btn btn-orange" (click)="addClass()">Add Class</button>
-      </div>
+<section class="reserve-class-section">
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="page-title d-flex align-items-center gap-2">
+        Class List
+        <span *ngIf="auth.getRoleId() == '3' && studentGradeName" class="badge bg-primary rounded-pill" style="font-size: 13px;">Grade: {{studentGradeName}}</span>
+      </h2>
+      <p class="page-subtitle">Manage and access your scheduled live classes.</p>
     </div>
+    <div *ngIf="auth.getRoleId() != '3'">
+      <button class="btn-reset-filters text-white bg-orange border-0" (click)="addClass()" style="background-color: #ff7f00;">
+        <i class="fas fa-plus me-1"></i> Add Class
+      </button>
+    </div>
+  </div>
 
-    <!-- Timezone Sync Bar -->
-    <div class="col-12 mb-3">
-      <div class="bg-light p-3 rounded-border border d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-sm">
-        <div class="d-flex align-items-center gap-2">
-          <i class="fas fa-globe text-primary fa-lg me-1"></i>
-          <span class="font-weight-bold text-dark" style="font-size: 14px;">Schedule View Timezone:</span>
-          <select class="form-select form-select-sm w-auto d-inline-block border-primary shadow-sm font-weight-bold" [(ngModel)]="displayTimezone">
+  <!-- Timezone Sync Bar -->
+  <div class="filter-container mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="pastel-icon-circle bg-pastel-blue">
+          <i class="fas fa-globe text-blue"></i>
+        </div>
+        <div>
+          <span class="filter-label mb-0" style="font-size: 13px;">Schedule View Timezone:</span>
+          <select class="form-select form-select-sm w-auto d-inline-block border-primary shadow-sm font-weight-bold mt-1" [(ngModel)]="displayTimezone">
             <option *ngFor="let tz of timezoneList" [value]="tz.code">{{tz.name}} ({{tz.offset}})</option>
           </select>
         </div>
-        <div class="text-muted" style="font-size: 12px;">
-          <i class="fas fa-sync-alt me-1 text-success"></i> Auto-converts class slots dynamically across UTC, IST, EST, PST & GMT.
-        </div>
+      </div>
+      <div class="text-muted" style="font-size: 12.5px;">
+        <i class="fas fa-sync-alt me-1 text-success"></i> Auto-converts class slots dynamically across UTC, IST, EST, PST & GMT.
       </div>
     </div>
+  </div>
 
-    <div class="col-12">
-      <div class="row">
-        <div class="col-md-6 my-3 d-flex flex-column justify-content-center px-2"
-             *ngFor="let classData of classListdata; let i = index">
-          <div class="card class-card class-hover" style="border-radius: 12px">
-            <div class="card-body p-2">
-              <div class="row p-2 cursor">
-                <div class="col-12">
-                  <div class="row">
-                    <div class="col-md-5 d-flex align-items-center gap-2">
-                      <h6 class="mb-2">
-                        <span class="font-weight-bold text-capitalize" style="font-size: 18px">{{classData.subject | titlecase}}</span>
-                      </h6>
-                      <span class="badge bg-danger" *ngIf="classData.status === 'LIVE'">LIVE</span>
-                      <span class="badge bg-secondary" *ngIf="classData.status === 'SCHEDULED' || !classData.status">UPCOMING</span>
-                      <span class="badge bg-dark" *ngIf="classData.status === 'COMPLETED'">ENDED</span>
-                    </div>
-                    <div class="col-md-7 text-right d-flex justify-content-end align-items-center gap-1 flex-wrap">
-                      <button (click)="joinLiveRoom(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm" *ngIf="canShowLiveRoomButton(classData)">
-                        <i class="fas fa-video me-1"></i> Live Room
-                      </button>
-                      <button *ngIf="auth.getRoleId() != '3' && canShowLiveRoomButton(classData)" (click)="send10MinReminder(classData)" class="btn btn-warning btn-sm rounded-circle shadow-sm text-dark p-0 d-inline-flex align-items-center justify-content-center" style="width: 30px; height: 30px;" title="Send 10-Minute Alert Email to Students">
-                        <i class="fas fa-bell text-dark" style="font-size: 13px;"></i>
-                      </button>
-                      <span class="badge bg-light text-dark border py-1 px-2 me-1" *ngIf="!canShowLiveRoomButton(classData) && classData.status !== 'COMPLETED' && classData.status !== 'CANCELLED'" style="font-size: 11px;">
-                        <i class="fas fa-clock me-1 text-muted"></i> Opens 15m before start
-                      </span>
-                      <button *ngIf="auth.getRoleId() != '3' && classData.status === 'LIVE'" (click)="endLiveClass(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-danger btn-sm rounded-pill font-weight-bold shadow-sm">
-                        <i class="fas fa-stop-circle me-1"></i> End Class
-                      </button>
-                      <button *ngIf="auth.getRoleId() == '3'" (click)="subscribeLiveClass(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-warning btn-sm rounded-pill font-weight-bold shadow-sm text-dark">
-                        <i class="fas fa-star me-1"></i> Subscribe Live Class
-                      </button>
-                      <div *ngIf="auth.getRoleId() != '3'" class="d-inline-flex align-items-center ms-2">
-                        <i class="fa fa-link cursor" title="Update Meeting Link" (click)="updateMeetingLink(classData)"></i>
-                        <i class="far fa-trash-alt ms-2 cursor" title="Delete Class" (click)="deleteClass(classData)"></i>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="p-0">
-                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Grade:</span><span
-                    class="t-name color-primary font-weight-bold ms-1">{{classData.grade_name ?? '-'}}</span>
-                    <span style="font-size: 13px; color: #777777" class="font-weight-bold ms-2">Curriculum:</span><span
-                    class="t-name font-weight-bold ms-1">{{classData.curriculum_name ?? '-'}}</span>
-                  </p>
-                  <p class="p-0">
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Time:</span>
-                    <i style="font-size: 13px" class="fas fa-clock ms-1 text-primary"></i>
-                    <span style="font-size: 14px;"
-                          class="t-name font-weight-bold ms-1">{{getFormattedTime(classData.start_time)}}</span> - <span style="font-size: 14px;"
-                                                                                                     class="t-name font-weight-bold">{{getFormattedTime(classData.end_time)}}</span>
-                  </p>
-                  <p class="p-0" *ngIf="auth.getRoleId() != '3'">
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Session Amount</span><br>
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Monthly:</span>
-                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
-                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.monthly_amount}}, </span>
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Quarterly:</span>
-                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
-                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.quarterly_amount}}, </span>
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Half Yearly:</span>
-                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
-                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.halfyearly_amount}}, </span>
+  <!-- Class Cards Grid -->
+  <div class="row g-4 mb-4" *ngIf="classListdata && classListdata.length > 0">
+    <div class="col-lg-6 col-md-12" *ngFor="let classData of classListdata; let i = index">
+      <div class="class-card-box">
+        <div class="card-body-content">
+          <!-- LEFT: Circular Educational Illustration -->
+          <div class="illustration-circle" [style.background-color]="getSubjectTheme(i).bg">
+            <svg [ngSwitch]="i % 4" width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <!-- CARD 1 Theme: ABC letters & Open Book -->
+              <g *ngSwitchCase="0">
+                <circle cx="36" cy="36" r="34" fill="#FFF0E6"/>
+                <text x="18" y="24" fill="#FF7F00" font-size="13" font-weight="800" font-family="sans-serif">A</text>
+                <text x="31" y="19" fill="#FF8C1A" font-size="15" font-weight="800" font-family="sans-serif">B</text>
+                <text x="46" y="25" fill="#FF7F00" font-size="13" font-weight="800" font-family="sans-serif">C</text>
+                <path d="M18 48C24 44 32 44 36 47C40 44 48 44 54 48V32C48 28 40 28 36 31C32 28 24 28 18 32V48Z" fill="#FF7F00"/>
+                <path d="M36 31V47" stroke="#FFFFFF" stroke-width="2"/>
+                <path d="M22 36C26 34 30 34 33 35.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M50 36C46 34 42 34 39 35.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
 
-                    <span class="font-weight-bold" style="font-size: 13px; color: #777777">Yearly:</span>
-                    <i style="font-size: 13px" class="fas fa-rupee-sign ms-2"></i>
-                    <span style="font-size: 14px;" class="t-name font-weight-bold ms-1">{{classData.yearly_amount}}</span>
-                  </p>
-                  <p class="p-0">
-                    <span style="font-size: 13px; color: #777777" class="font-weight-bold">Selected Days:</span><span
-                    class="t-name font-weight-bold ms-1">{{classData.days ?? '-'}}</span> &nbsp;<br />
-                  </p>
-                  <p *ngIf="auth.getRoleId() == '3'" class="text-right" style="font-size: 10px">
-                    <span class="notes" *ngIf="!classData.meeting_link"><i class="fa fa-info-circle me-2"></i>The meeting link for this class is not updated for this class.</span></p>
+              <!-- CARD 2 Theme: Notebook & Pencil -->
+              <g *ngSwitchCase="1">
+                <circle cx="36" cy="36" r="34" fill="#F3E8FF"/>
+                <rect x="22" y="18" width="28" height="36" rx="4" fill="#9333EA"/>
+                <rect x="26" y="22" width="20" height="28" rx="2" fill="#FFFFFF"/>
+                <line x1="29" y1="27" x2="43" y2="27" stroke="#9333EA" stroke-width="2" stroke-linecap="round"/>
+                <line x1="29" y1="33" x2="43" y2="33" stroke="#9333EA" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="21" cy="24" r="2" fill="#7E22CE"/>
+                <circle cx="21" cy="32" r="2" fill="#7E22CE"/>
+                <circle cx="21" cy="40" r="2" fill="#7E22CE"/>
+                <path d="M46 16L54 24L34 44H26V36L46 16Z" fill="#A855F7" stroke="#6B21A8" stroke-width="1"/>
+              </g>
+
+              <!-- CARD 3 Theme: Globe -->
+              <g *ngSwitchCase="2">
+                <circle cx="36" cy="36" r="34" fill="#E6F4EA"/>
+                <path d="M36 50V56M28 56H44" stroke="#16A34A" stroke-width="3" stroke-linecap="round"/>
+                <path d="M20 34C20 44 26 50 36 50C46 50 52 44 52 34" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <circle cx="36" cy="32" r="16" fill="#10B981"/>
+                <path d="M26 30C28 26 33 25 36 28C39 31 36 36 32 37C28 38 25 34 26 30Z" fill="#A7F3D0"/>
+                <path d="M40 34C43 32 48 35 47 38C46 41 42 43 39 40C39 37 38 35 40 34Z" fill="#A7F3D0"/>
+              </g>
+
+              <!-- CARD 4 Theme: Pencil Holder & Books -->
+              <g *ngSwitchDefault>
+                <circle cx="36" cy="36" r="34" fill="#E0F2FE"/>
+                <path d="M24 34L28 52H44L48 34H24Z" fill="#0284C7"/>
+                <ellipse cx="36" cy="34" rx="12" ry="3" fill="#38BDF8"/>
+                <line x1="31" y1="34" x2="26" y2="18" stroke="#0284C7" stroke-width="3" stroke-linecap="round"/>
+                <path d="M26 18L24 14L28 16" fill="#F59E0B"/>
+                <line x1="36" y1="34" x2="36" y2="15" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- RIGHT: Card Details -->
+          <div class="card-details-content">
+            <!-- Subject Title, Status & Actions -->
+            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <h4 class="subject-title mb-0 text-capitalize">{{ classData.subject | titlecase }}</h4>
+                <span class="badge bg-danger rounded-pill" *ngIf="classData.status === 'LIVE'">LIVE</span>
+                <span class="badge bg-secondary rounded-pill" *ngIf="classData.status === 'SCHEDULED' || !classData.status">UPCOMING</span>
+                <span class="badge bg-dark rounded-pill" *ngIf="classData.status === 'COMPLETED'">ENDED</span>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button (click)="joinLiveRoom(classData)" style="padding: 5px 14px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm" *ngIf="canShowLiveRoomButton(classData)">
+                  <i class="fas fa-video me-1"></i> Live Room
+                </button>
+                <button *ngIf="auth.getRoleId() != '3' && canShowLiveRoomButton(classData)" (click)="send10MinReminder(classData)" class="btn btn-warning btn-sm rounded-circle shadow-sm text-dark p-0 d-inline-flex align-items-center justify-content-center" style="width: 30px; height: 30px;" title="Send 10-Minute Alert Email to Students">
+                  <i class="fas fa-bell text-dark" style="font-size: 13px;"></i>
+                </button>
+                <span class="badge bg-light text-dark border py-1 px-2" *ngIf="!canShowLiveRoomButton(classData) && classData.status !== 'COMPLETED' && classData.status !== 'CANCELLED'" style="font-size: 11px;">
+                  <i class="fas fa-clock me-1 text-muted"></i> Opens 15m before start
+                </span>
+                <button *ngIf="auth.getRoleId() != '3' && classData.status === 'LIVE'" (click)="endLiveClass(classData)" style="padding: 5px 14px; font-size: 12px;" class="btn btn-danger btn-sm rounded-pill font-weight-bold shadow-sm">
+                  <i class="fas fa-stop-circle me-1"></i> End Class
+                </button>
+                <div *ngIf="auth.getRoleId() != '3'" class="d-inline-flex align-items-center ms-1 gap-2">
+                  <i class="fa fa-link cursor text-primary" title="Update Meeting Link" (click)="updateMeetingLink(classData)"></i>
+                  <i class="far fa-trash-alt cursor text-danger" title="Delete Class" (click)="deleteClass(classData)"></i>
                 </div>
+              </div>
+            </div>
+
+            <!-- Grade & Curriculum -->
+            <div class="meta-info-row mb-2">
+              <span class="meta-item">
+                <span class="meta-label">Grade:</span>
+                <span class="meta-value-orange ms-1">{{ classData.grade_name ?? '-' }}</span>
+              </span>
+              <span class="meta-divider"></span>
+              <span class="meta-item">
+                <span class="meta-label">Curriculum:</span>
+                <span class="meta-value ms-1">{{ classData.curriculum_name ?? '-' }}</span>
+              </span>
+            </div>
+
+            <!-- Session Time & Class Days -->
+            <div class="schedule-info-row mb-2">
+              <div class="schedule-item">
+                <span class="schedule-label">Session Time:</span>
+                <div class="schedule-value">
+                  <i class="far fa-clock text-orange me-1"></i>
+                  {{ getFormattedTime(classData.start_time) }} – {{ getFormattedTime(classData.end_time) }}
+                </div>
+              </div>
+
+              <div class="schedule-item ms-md-4">
+                <span class="schedule-label">Class Days:</span>
+                <div class="schedule-value text-orange fw-bold">
+                  <i class="far fa-calendar-alt text-orange me-1"></i>
+                  {{ classData.days ?? '-' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Teacher Session Amounts (Teacher Role Only) -->
+            <div class="amounts-info-row mb-2 p-2 bg-light rounded-3" *ngIf="auth.getRoleId() != '3'" style="font-size: 12px;">
+              <span class="fw-bold text-muted me-2">Amounts:</span>
+              <span class="me-2">Monthly: <strong>₹{{classData.monthly_amount}}</strong></span>
+              <span class="me-2">Quarterly: <strong>₹{{classData.quarterly_amount}}</strong></span>
+              <span class="me-2">Half Yearly: <strong>₹{{classData.halfyearly_amount}}</strong></span>
+              <span>Yearly: <strong>₹{{classData.yearly_amount}}</strong></span>
+            </div>
+
+            <!-- Meeting Link Missing Note -->
+            <div *ngIf="auth.getRoleId() == '3' && !classData.meeting_link" class="mb-2">
+              <span class="notes small text-danger"><i class="fa fa-info-circle me-1"></i>The meeting link for this class is not updated yet.</span>
+            </div>
+
+            <!-- Bottom Divider -->
+            <div class="card-divider my-2"></div>
+
+            <!-- Footer: Teacher Avatar -->
+            <div class="card-footer-info d-flex align-items-center justify-content-between">
+              <div class="teacher-box d-flex align-items-center gap-2">
+                <div class="teacher-avatar-circle">
+                  <img [src]="getTeacherImage(classData, i)"
+                       alt="Teacher"
+                       class="teacher-avatar-img"
+                       (error)="handleImgError($event, i)" />
+                </div>
+                <span class="teacher-name">{{ getTeacherName(classData) }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="row d-flex justify-content-center" *ngIf="classListdata.length == 0">
-        <img style="width: 25%" src="app/assets/etutor/no_data.svg" alt="">
-        <h6 class="mb-0 text-center font-weight-bold mt-2" style="font-size: 18px">No Class Available</h6>
-      </div>
     </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state-box" *ngIf="!classListdata || classListdata.length === 0">
+    <i class="fas fa-folder-open empty-icon"></i>
+    <h5>No Class Available</h5>
+    <p>Check back later or add new class schedules.</p>
   </div>
 </section>
 
+<!-- Delete Class Modal -->
 <ng-template #deleteClassConfirmation>
-  <div class="card">
-    <div class="card-header py-3">
-      <span style="font-size: 16px" class="text-capitalize col-12 font-weight-bold mb-0">Delete Class</span>
+  <div class="card border-0 shadow-lg" style="border-radius: 16px;">
+    <div class="card-header py-3 bg-white border-bottom">
+      <span style="font-size: 16px" class="text-capitalize font-weight-bold mb-0 text-dark">Delete Class</span>
     </div>
-    <div class="card-body">
-      <div class="col-12">
-        <h6 style="font-size: 16px" class="mb-0">Are you want to delete the <span
-            class="font-weight-bold">{{classData.subject}}</span> class ?</h6>
-      </div>
+    <div class="card-body p-4">
+      <h6 style="font-size: 16px" class="mb-0">Are you sure you want to delete the <span class="font-weight-bold text-danger">{{classData.subject}}</span> class?</h6>
     </div>
-    <div class="card-footer">
-      <div class="col-12 d-flex justify-content-end">
-        <button (click)="closePopup()" class="btn btn-outline-danger">No</button>
-        <button (click)="deleteClassService()" style="padding: 6px 12px; border-radius: 4px" class="ms-3 btn btn-orange">Yes</button>
-      </div>
+    <div class="card-footer bg-white border-top text-end">
+      <button (click)="closePopup()" class="btn btn-outline-secondary rounded-pill px-4 me-2">No</button>
+      <button (click)="deleteClassService()" class="btn btn-danger rounded-pill px-4 font-weight-bold">Yes, Delete</button>
     </div>
   </div>
 </ng-template>
 
-
+<!-- Meeting Link Modal -->
 <ng-template #meetingLink>
-  <div class="card">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-      <span style="font-size: 16px" class="text-capitalize font-weight-bold mb-0"><i class="fas fa-video me-2 text-primary"></i> Update Virtual Classroom Link</span>
+  <div class="card border-0 shadow-lg" style="border-radius: 16px;">
+    <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+      <span style="font-size: 16px" class="text-capitalize font-weight-bold mb-0 text-dark"><i class="fas fa-video me-2 text-primary"></i> Update Virtual Classroom Link</span>
       <button type="button" class="btn-close" (click)="closePopup()"></button>
     </div>
-    <div class="card-body">
+    <div class="card-body p-4">
       <div class="col-12">
-        <label class="form-label font-weight-bold">Live Virtual Classroom URL</label>
+        <label class="form-label font-weight-bold text-dark">Live Virtual Classroom URL</label>
         <div class="input-group">
           <input [(ngModel)]="meetingLinkValue" class="form-control" type="url" placeholder="https://meet.jit.si/Etutor_Class_...">
           <button type="button" class="btn btn-outline-primary" (click)="generateJitsiLinkForClassList()" title="Auto-Generate Link">
@@ -149,11 +231,9 @@
         </div>
       </div>
     </div>
-    <div class="card-footer">
-      <div class="col-12 d-flex justify-content-end">
-        <button (click)="closePopup()" class="btn btn-outline-secondary">Cancel</button>
-        <button (click)="updateClassMeetingLink()" style="padding: 6px 12px; border-radius: 4px" class="ms-3 btn btn-orange">Save Link</button>
-      </div>
+    <div class="card-footer bg-white border-top text-end">
+      <button (click)="closePopup()" class="btn btn-outline-secondary rounded-pill px-4 me-2">Cancel</button>
+      <button (click)="updateClassMeetingLink()" class="btn btn-warning rounded-pill px-4 font-weight-bold text-dark">Save Link</button>
     </div>
   </div>
 </ng-template>

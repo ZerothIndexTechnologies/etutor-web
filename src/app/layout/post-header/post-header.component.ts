@@ -67,6 +67,15 @@ export class PostHeaderComponent implements OnInit, OnDestroy {
     if (this.auth.getRoleId() === '2') {
       this.getTeacherStatus();
     }
+    if (this.auth.isStudentUser) {
+      if (!this.menus.some((m: any) => m.name === 'Watchlist')) {
+        this.menus.push({
+          name: 'Watchlist',
+          url: 'myaccount/reserve-class/list',
+          active: false,
+        });
+      }
+    }
   }
 
   ngOnDestroy() {
@@ -104,6 +113,10 @@ export class PostHeaderComponent implements OnInit, OnDestroy {
 
   toMyaccount() {
     this.router.navigateByUrl('myaccount/myclasses/list');
+  }
+
+  toWishlist() {
+    this.router.navigateByUrl('myaccount/reserve-class/list');
   }
 
   onLogout() {

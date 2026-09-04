@@ -3,8 +3,8 @@
     <i class="material-icons" (click)="closePopup()">close</i>
   </div>
   <!-- rest of the template remains the same -->
-  <div class="col-6 signup-image ">
-    <img class="mt-2 p-1" height="100%" src='app/assets/etutor/signup_background.svg' alt="Learning Image">
+  <div class="col-6 signup-image d-flex align-items-center justify-content-center">
+    <img class="mt-2 p-1 w-100 h-100" src="assets/etutor/signup_background.svg" alt="Learning Image" (error)="$any($event.target).src='app/assets/etutor/signup_background.svg'">
   </div>
   @if (showForm) {
   <div class="col-6 signup-form register mt-1 align-self-center">
@@ -37,14 +37,14 @@
         <label class="p-1" for="mobileNumber">Mobile Number<span class="error">*</span></label>
         <div class="input-group">
           <div style="width: 10%" class="input-group-append rounded-border d-flex align-items-center justify-content-center">
-            <img style="width: 75%; padding: 0 2px" src="assets/etutor/indian_flag.png">
+            <i class="fa fa-phone text-secondary"></i>
           </div>
           <div style="padding-left: 4px" class="input-group-append rounded-border d-flex align-items-center justify-content-center">
-            <span style="font-size: 14px">+91</span>
+            <span style="font-size: 14px">+971</span>
           </div>
           <input style="border-left: 0;padding-left: 6px;" (keypress)="numberValidation($event)" autocomplete="off" formControlName="mobile_number"
           type="text" maxlength="10" class="form-control rounded-border"
-          id="mobileNumber" placeholder="Enter Mobile Number">
+          id="mobileNumber" placeholder="50 123 4567">
         </div>
 
         <label
@@ -124,16 +124,14 @@
       }
       <button type="submit" class="btn w-100 mt-2 rounded-border btn-login btn-block">Signup</button>
     </form>
-  <!--    <div class="line mt-4 mx-h-20">-->
-  <!--      <hr class="left-line">-->
-  <!--      <span class="or-circle mx-font-13">OR</span>-->
-  <!--      <hr class="right-line">-->
-  <!--    </div>-->
-  <!--    <div class="social-login">-->
-  <!--      <img class="mx-2" src="app/assets/etutor/google.svg" alt="Google">-->
-  <!--      <img class="mx-2" src="app/assets/etutor/facebook.svg" alt="Facebook">-->
-  <!--      <img class="mx-2" src="app/assets/etutor/apple.svg" alt="Apple">-->
-  <!--    </div>-->
+    <div class="my-3 text-center">
+      <div class="d-flex align-items-center justify-content-center mb-2">
+        <hr class="flex-grow-1 border-secondary opacity-25 m-0">
+        <span class="px-2 text-muted small font-weight-bold">OR</span>
+        <hr class="flex-grow-1 border-secondary opacity-25 m-0">
+      </div>
+      <div id="googleBtnSignup" class="d-flex justify-content-center"></div>
+    </div>
     <div class="signup-footer mt-2">
       <p class="mx-font-12 mt-3">Already have an account? <a class="anchorStyle cursor" (click)="openLogin()">Login</a></p>
     </div>

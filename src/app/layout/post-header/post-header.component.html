@@ -28,15 +28,14 @@
                 </li> -->
             </ul>
         </div>
-        <div class="ml-auto">
+        <div class="ml-auto d-flex align-items-center gap-2">
           <a *ngIf="auth.getUserType === '1'" class="btn btn-signup mx-1 rounded-border" (click)="toTutor()">Become Tutor</a>
 
-          <a class="btn btn-signup mx-1 rounded-border" (click)="toMyaccount()">My Account</a>
+          <!-- Watchlist Star Icon (Student Only) -->
+          <i *ngIf="auth.isStudentUser" (click)="toWishlist()" class="fas fa-star cursor mx-2" style="font-size: 22px; color: #ff7f00; cursor: pointer; transition: transform 0.2s;" title="Watchlist"></i>
 
-            <i (click)="onLogout()" class="material-icons cursor signout-icon mx-2">exit_to_app</i>
-
-            <!-- <a href="#" class="btn btn-login">Become Tutor</a>
-            <a href="/myaccount" class="btn btn-signup">My Account</a> -->
+          <!-- My Account User Icon -->
+          <i (click)="toMyaccount()" class="fas fa-user-circle cursor mx-2" style="font-size: 26px; color: #ff8c00; cursor: pointer; transition: transform 0.2s;" title="My Account"></i>
         </div>
     </div>
 </nav>
@@ -44,7 +43,7 @@
 <ng-template #prompt let-c="close" let-d="dismiss">
   <div class="shadow-none card p-4 border-0 rounded-3">
     <div class="card-body text-center p-3">
-      <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '0' || teacherStatus == '0'">
+      <div class="col-12" *ngIf="auth.teacherVerificationStatus == '0' || teacherStatus == '0'">
         <div class="mb-3">
           <span class="material-icons text-warning" style="font-size: 56px">hourglass_empty</span>
         </div>
@@ -52,7 +51,7 @@
         <p class="text-muted mx-font-14 mt-2">Your tutor verification application is currently under review by our admin team. You will be notified via email once approved.</p>
       </div>
 
-      <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '1' || teacherStatus == '1'">
+      <div class="col-12" *ngIf="auth.teacherVerificationStatus == '1' || teacherStatus == '1'">
         <div class="mb-3">
           <span class="material-icons text-success" style="font-size: 56px">check_circle</span>
         </div>
@@ -60,7 +59,7 @@
         <p class="text-muted mx-font-14 mt-2">Congratulations! Your tutor application has been verified. You can now schedule live classes and accept students.</p>
       </div>
 
-      <div class="col-12" *ngIf="auth?.teacherVerificationStatus == '2' || teacherStatus == '2'">
+      <div class="col-12" *ngIf="auth.teacherVerificationStatus == '2' || teacherStatus == '2'">
         <div class="mb-3">
           <span class="material-icons text-danger" style="font-size: 56px">gpp_bad</span>
         </div>
@@ -75,11 +74,11 @@
     </div>
 
     <div class="text-center mt-3">
-      <button *ngIf="teacherStatus == '2' || auth?.teacherVerificationStatus == '2'" (click)="toTutor()" type="button" class="btn btn-danger px-4 py-2 rounded-pill font-weight-bold me-2">
+      <button *ngIf="teacherStatus == '2' || auth.teacherVerificationStatus == '2'" (click)="toTutor()" type="button" class="btn btn-danger px-4 py-2 rounded-pill font-weight-bold me-2">
         Update Documents & Re-submit
       </button>
       <button (click)="closePopup()" type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill font-weight-bold">
-        {{ (auth?.teacherVerificationStatus == '1' || teacherStatus == '1') ? 'Continue' : 'Close' }}
+        {{ (auth.teacherVerificationStatus == '1' || teacherStatus == '1') ? 'Continue' : 'Close' }}
       </button>
     </div>
 

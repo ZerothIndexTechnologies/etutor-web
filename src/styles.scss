@@ -595,10 +595,11 @@ input:focus-visible {
 }
 
 .signup-image {
+  min-height: 350px;
   img {
-    object-fit: cover !important;
+    object-fit: contain !important;
     width: 100%;
-    height: 100% !important;
+    max-height: 100% !important;
     border-radius: 10px;
   }
 }
@@ -1871,5 +1872,10 @@ select {
   border-radius: 20px !important;
   font-size: 14px !important;
 }
+
+.card-ribbon {
+  display: none !important;
+}
+
 
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
@@ -23,7 +23,7 @@ import { Router } from '@angular/router';
   styleUrl: './sign-up.component.scss',
 })
 
-export class SignUpComponent {
+export class SignUpComponent implements AfterViewInit {
   signupForm: FormGroup;
   showForm: boolean = false;
   user = '';
@@ -34,6 +34,8 @@ export class SignUpComponent {
   countdown: number = 60;
   isResendDisabled: boolean = false;
   interval: any;
+  readonly googleClientId = '139081449172-h53j5aghth42fdjr9ljk82u563tnluh7.apps.googleusercontent.com';
+
   constructor(private helper: HelperService, public customValidation: CustomValidationService, private api: ApiService,
     public auth: AuthService, private fb: FormBuilder, private pop: MatDialog, private router: Router) {
     this.signupForm = this.fb.group({
@@ -50,6 +52,73 @@ export class SignUpComponent {
   ngOnInit(): void {
     setTimeout(() => {
       this.gradeList = this.auth.getConfigurationData().grade || [];
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.initGoogleAuth();
+  }
+
+  initGoogleAuth(): void {
+    if (typeof (window as any).google !== 'undefined') {
+      (window as any).google.accounts.id.initialize({
+        client_id: this.googleClientId,
+        callback: (response: any) => this.handleGoogleCredential(response)
+      });
+
+      const btnContainer = document.getElementById('googleBtnSignup');
+      if (btnContainer) {
+        (window as any).google.accounts.id.renderButton(btnContainer, {
+          theme: 'outline',
+          size: 'large',
+          width: 280,
+          text: 'signup_with'
+        });
+      }
+    } else {
+      setTimeout(() => this.initGoogleAuth(), 500);
+    }
+  }
+
+  handleGoogleCredential(response: any): void {
+    if (!response || !response.credential) return;
+
+    const payload = {
+      id_token: response.credential,
+      is_teacher: this.user === '1',
+      is_signup: true,
+      grade: this.signupForm.value.grade || 0
+    };
+
+    this.auth.postService(payload, Urls.googleAuth).subscribe({
+      next: (res: any) => {
+        if (res && res.IsSuccess && res.ResponseObject) {
+          const userObj = res.ResponseObject;
+          this.pop.closeAll();
+          this.auth.setLocalStorage('token', userObj.accesstoken);
+          this.auth.setLocalStorage('user_id', JSON.stringify(userObj.user_id));
+          this.auth.setLocalStorage('role_id', JSON.stringify(userObj.role_id));
+          this.auth.setLocalStorage('loggedInUser', JSON.stringify(this.user || (userObj.role_id === 2 ? '1' : '0')));
+          this.auth.setLocalStorage('user', JSON.stringify(userObj));
+          this.helper.presentToast('Successfully Registered with Google!');
+          
+          if (userObj.role_id === 2) {
+            if (userObj.is_document_uploaded) {
+              this.router.navigateByUrl('myaccount/myclasses/list');
+            } else {
+              this.router.navigateByUrl('tutor');
+            }
+          } else {
+            this.router.navigateByUrl('myaccount/myclasses/list');
+          }
+        } else {
+          this.helper.presentErrorToast(res ? res.ErrorObject : 'Google authentication failed.');
+        }
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.helper.presentErrorToast('Server error during Google Sign-Up.');
+      }
     });
   }
 
@@ -157,6 +226,7 @@ export class SignUpComponent {
       this.signupForm.controls['grade'].clearValidators();
       this.signupForm.controls['grade'].updateValueAndValidity();
     }
+    setTimeout(() => this.initGoogleAuth(), 100);
   }
 
   startCountdown() {

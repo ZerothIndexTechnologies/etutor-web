@@ -126,6 +126,22 @@ export class ReserveClassListComponent implements OnInit {
             classData.curriculum_name = curriculumDetails
               ? curriculumDetails.curriculum_type
               : '';
+
+            const tId = classData.teacher_id || classData.tutor_id || classData.created_by || (this.auth.isTeacherUser ? classData.user_id : null);
+            if (tId) {
+              const matchingTeacher = this.teacherList.find(
+                (t: any) => String(t.teacher_id || t.id || t.user_id) === String(tId)
+              );
+              if (matchingTeacher) {
+                if (!classData.teacher_name || classData.teacher_name === 'Teacher') {
+                  classData.teacher_name = matchingTeacher.display_name;
+                }
+                const tImg = matchingTeacher.profile_image || matchingTeacher.profile_picture || matchingTeacher.image || matchingTeacher.avatar;
+                if (tImg && !classData.teacher_image) {
+                  classData.teacher_image = tImg;
+                }
+              }
+            }
           });
 
           if (this.subjectOptions.length === 0 && subjects.size > 0) {
@@ -208,22 +224,208 @@ export class ReserveClassListComponent implements OnInit {
     let teachers = successData.IsSuccess && Array.isArray(successData.ResponseObject)
       ? successData.ResponseObject.filter(
         (user: any, index: number, self: any[]) =>
-          index === self.findIndex((u: any) => (u.teacher_id || u.id) === (user.teacher_id || user.id))
+          index === self.findIndex((u: any) => (u.teacher_id || u.id || u.user_id) === (user.teacher_id || user.id || user.user_id))
       )
       : [];
     teachers.forEach((teacher: any) => {
-      const fn = (teacher.first_name || '').trim();
+      const fn = (teacher.first_name || teacher.name || teacher.full_name || '').trim();
       const ln = (teacher.last_name || '').trim();
       const fullName = (fn + ' ' + ln).trim();
-      teacher.teacher_id = teacher.teacher_id || teacher.id;
-      teacher.display_name = fullName.length > 0 ? fullName : (teacher.email || 'Teacher #' + teacher.teacher_id);
+      teacher.teacher_id = teacher.teacher_id || teacher.id || teacher.user_id;
+      teacher.display_name = fullName.length > 0 ? fullName : (teacher.display_name || teacher.email || 'Teacher #' + teacher.teacher_id);
     });
     this.teacherList = teachers;
+
+    if (this.classListdata && this.classListdata.length > 0) {
+      this.classListdata.forEach((classData: any) => {
+        const tId = classData.teacher_id || classData.tutor_id || classData.created_by || (this.auth.isTeacherUser ? classData.user_id : null);
+        if (!tId) return;
+
+        const matchingTeacher = this.teacherList.find(
+          (t: any) => String(t.teacher_id || t.id || t.user_id) === String(tId)
+        );
+        if (matchingTeacher) {
+          if (!classData.teacher_name || classData.teacher_name === 'Teacher' || classData.teacher_name.includes('undefined')) {
+            if (matchingTeacher.display_name) {
+              classData.teacher_name = matchingTeacher.display_name;
+            }
+          }
+          const tImg = matchingTeacher.profile_image || matchingTeacher.profile_picture || matchingTeacher.image || matchingTeacher.avatar;
+          if (tImg && (!classData.teacher_image || classData.teacher_image === 'null' || classData.teacher_image === 'undefined')) {
+            classData.teacher_image = tImg;
+          }
+        }
+      });
+    }
     console.log(this.teacherList, 'teacherList');
   }
 
   closePopup() {
     this.dialog.closeAll();
+  }
+
+  resetFilters() {
+    this.selectedTeacher = [];
+    this.selectedGrade = [];
+    this.selectedSubject = [];
+    this.reserveClassList();
+  }
+
+  getSubjectTheme(index: number) {
+    const themes = [
+      { bg: '#fff0e6', color: '#ff7f00', icon: 'fa-file-alt' },
+      { bg: '#f3e8ff', color: '#9333ea', icon: 'fa-book-open' },
+      { bg: '#e6f4ea', color: '#16a34a', icon: 'fa-globe' },
+      { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-pencil-alt' },
+      { bg: '#fef3c7', color: '#d97706', icon: 'fa-graduation-cap' }
+    ];
+    return themes[index % themes.length];
+  }
+
+  getTeacherImage(classData: any, index: number = 0): string {
+    const defaultAvatars = [
+      'app/assets/etutor/home_page/tutor_avatar1.svg',
+      'app/assets/etutor/home_page/tutor_avatar2.svg',
+      'app/assets/etutor/home_page/tutor_avatar3.svg',
+      'app/assets/etutor/home_page/tutor_avatar4.svg',
+      'app/assets/etutor/home_page/tutor_avatar5.svg'
+    ];
+
+    const parseImg = (val: any): string | null => {
+      if (!val) return null;
+      if (Array.isArray(val) && val.length > 0) {
+        return parseImg(val[0]);
+      }
+      if (typeof val === 'object' && val !== null) {
+        return parseImg(val.image || val.url || val.path || val.profile_image || val.profile_picture || val.avatar || val.photo);
+      }
+      if (typeof val === 'string' && val.trim().length > 0) {
+        const trimmed = val.trim();
+        if (trimmed !== 'null' && trimmed !== 'undefined' && trimmed.toLowerCase() !== 'null' && trimmed.toLowerCase() !== 'undefined') {
+          return trimmed;
+        }
+      }
+      return null;
+    };
+
+    if (classData) {
+      // 1. Direct image on classData
+      const directImg = parseImg(
+        classData.teacher_image || classData.profile_image || classData.profile_picture || classData.avatar || classData.image || classData.photo
+      );
+      if (directImg) return directImg;
+
+      // 2. Embedded teacher object
+      const tObj = classData.teacher || classData.teacher_details || classData.tutor;
+      if (tObj) {
+        const objImg = parseImg(tObj.profile_image || tObj.profile_picture || tObj.image || tObj.avatar || tObj.photo || tObj.url);
+        if (objImg) return objImg;
+      }
+
+      // 3. Lookup in teacherList by teacher_id / tutor_id / created_by
+      const tId = classData.teacher_id || classData.tutor_id || classData.created_by || (this.auth.isTeacherUser ? classData.user_id : null);
+      if (tId && this.teacherList && this.teacherList.length > 0) {
+        const matchingTeacher = this.teacherList.find(
+          (t: any) => String(t.teacher_id || t.id || t.user_id) === String(tId)
+        );
+        if (matchingTeacher) {
+          const tImg = parseImg(
+            matchingTeacher.profile_image || matchingTeacher.profile_picture || matchingTeacher.image || matchingTeacher.avatar || matchingTeacher.photo
+          );
+          if (tImg) return tImg;
+        }
+      }
+    }
+
+    return defaultAvatars[index % defaultAvatars.length];
+  }
+
+  getTeacherName(classData: any): string {
+    if (!classData) return 'Teacher';
+
+    const isValidName = (name: any): boolean => {
+      if (!name || typeof name !== 'string') return false;
+      const trimmed = name.trim();
+      if (
+        !trimmed ||
+        trimmed.toLowerCase() === 'teacher' ||
+        trimmed.toLowerCase() === 'null' ||
+        trimmed.toLowerCase() === 'undefined' ||
+        trimmed.toLowerCase().includes('undefined') ||
+        trimmed.toLowerCase().includes('null')
+      ) {
+        return false;
+      }
+      if (/^\d+$/.test(trimmed)) return false;
+      return true;
+    };
+
+    // 1. Specific teacher name fields on classData first
+    if (isValidName(classData.teacher_name)) return classData.teacher_name;
+    if (isValidName(classData.teacher_display_name)) return classData.teacher_display_name;
+
+    const teacherFn = (classData.teacher_first_name || '').trim();
+    const teacherLn = (classData.teacher_last_name || '').trim();
+    const teacherFull = (teacherFn + ' ' + teacherLn).trim();
+    if (isValidName(teacherFull)) return teacherFull;
+
+    // 2. Embedded teacher object
+    const tObj = classData.teacher || classData.teacher_details || classData.tutor;
+    if (tObj && typeof tObj === 'object') {
+      if (isValidName(tObj.display_name)) return tObj.display_name;
+      const fn = (tObj.first_name || tObj.name || '').trim();
+      const ln = (tObj.last_name || '').trim();
+      const full = (fn + ' ' + ln).trim();
+      if (isValidName(full)) return full;
+      if (isValidName(tObj.name)) return tObj.name;
+    }
+
+    // 3. Matching teacher in teacherList by ID (teacher_id / tutor_id / created_by)
+    const tId = classData.teacher_id || classData.tutor_id || classData.created_by || (this.auth.isTeacherUser ? classData.user_id : null);
+    if (tId && this.teacherList && this.teacherList.length > 0) {
+      const matchingTeacher = this.teacherList.find(
+        (t: any) => String(t.teacher_id || t.id || t.user_id) === String(tId)
+      );
+      if (matchingTeacher) {
+        if (isValidName(matchingTeacher.display_name)) return matchingTeacher.display_name;
+        const fn = (matchingTeacher.first_name || matchingTeacher.name || '').trim();
+        const ln = (matchingTeacher.last_name || '').trim();
+        const full = (fn + ' ' + ln).trim();
+        if (isValidName(full)) return full;
+      }
+    }
+
+    // 4. Fallback to first_name/last_name only if teacher role or teacher_id matches user
+    const fn = (classData.first_name || '').trim();
+    const ln = (classData.last_name || '').trim();
+    const full = (fn + ' ' + ln).trim();
+    if (isValidName(full)) {
+      if (this.auth.isTeacherUser || String(classData.teacher_id) === String(this.auth.getUserId())) {
+        return full;
+      }
+    }
+
+    return 'Teacher';
+  }
+
+  handleImgError(event: any, index: number = 0) {
+    const defaultAvatars = [
+      'app/assets/etutor/home_page/tutor_avatar1.svg',
+      'app/assets/etutor/home_page/tutor_avatar2.svg',
+      'app/assets/etutor/home_page/tutor_avatar3.svg',
+      'app/assets/etutor/home_page/tutor_avatar4.svg',
+      'app/assets/etutor/home_page/tutor_avatar5.svg'
+    ];
+    event.target.src = defaultAvatars[index % defaultAvatars.length];
+  }
+
+  toggleWishlist(classData: any) {
+    classData.is_wishlist = !classData.is_wishlist;
+    if (classData.is_wishlist) {
+      this.helper.presentToast('Added to Watchlist!');
+    } else {
+      this.helper.presentToast('Removed from Watchlist');
+    }
   }
 
   userSubscription(value: any) {

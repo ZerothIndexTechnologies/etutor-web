@@ -2,7 +2,7 @@ import {Component, inject, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {AuthService} from '../../../../shared/services/auth.service';
 import {ReactiveFormsModule} from '@angular/forms';
-import {NgIf} from "@angular/common";
+import {NgIf, NgFor, CommonModule} from "@angular/common";
 import {ApiService} from "../../../../shared/services/api.service";
 import {Urls} from "../../../../shared/services/urls";
 import {NgSelectComponent} from "@ng-select/ng-select";
@@ -14,7 +14,7 @@ import {CustomValidationService} from '../../../../shared/services/customValidat
 @Component({
   selector: 'app-general',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgSelectComponent, RouterLink],
+  imports: [ReactiveFormsModule, NgIf, NgFor, NgSelectComponent, RouterLink, CommonModule],
   templateUrl: './general.component.html',
   styleUrl: './general.component.scss',
 })
@@ -35,6 +35,8 @@ export class GeneralComponent implements OnInit {
   public submittedTeacher = false;
   public submittedStudent = false;
 
+  public activeStudentTab: string = 'general';
+  public subscribedClassesList: any[] = [];
   public activeSubscribedSubjects: string = '';
   public studentGradeName: string = '';
   public studentCurriculumName: string = '';
@@ -80,11 +82,11 @@ export class GeneralComponent implements OnInit {
 
   profileList() {
     const isTeacher = this.isTeacher;
-    const payload = isTeacher ? { filter_by: 'teacher', filter_value: this.auth.getUserId() } : { user_id: this.auth.getUserId() };
-    const url = isTeacher ? Urls.teacherProfile : Urls.studentProfile;
-    const localUser = JSON.parse(this.auth.getLocalStorage('user') || '{}');
+    const currentUserId = String(this.auth.getUserId());
+    const localUser = this.auth.getUserDetails() || JSON.parse(this.auth.getLocalStorage('user') || '{}');
 
-    if (localUser) {
+    if (localUser && Object.keys(localUser).length > 0) {
+      this.profileData = { ...localUser };
       if (isTeacher) {
         this.patchTeacherForm(localUser);
       } else {
@@ -92,11 +94,26 @@ export class GeneralComponent implements OnInit {
       }
     }
 
+    const payload = isTeacher
+      ? { filter_by: 'teacher', filter_value: currentUserId, user_id: currentUserId }
+      : { user_id: currentUserId, student_id: currentUserId };
+    const url = isTeacher ? Urls.teacherProfile : Urls.studentProfile;
+
     this.auth.postService(payload, url).subscribe({
       next: (successData: any) => {
         console.log(successData, 'profileList successData');
-        if (successData.IsSuccess) {
-          const fetchedData = successData.ResponseObject && successData.ResponseObject.length != 0 ? successData.ResponseObject[0] : {};
+        if (successData && successData.IsSuccess && successData.ResponseObject) {
+          let fetchedData: any = {};
+          if (Array.isArray(successData.ResponseObject)) {
+            const matched = successData.ResponseObject.find(
+              (item: any) =>
+                String(item.user_id || item.id || item.student_id || item.teacher_id) === currentUserId
+            );
+            fetchedData = matched || (successData.ResponseObject.length > 0 ? successData.ResponseObject[0] : {});
+          } else if (typeof successData.ResponseObject === 'object') {
+            fetchedData = successData.ResponseObject;
+          }
+
           const combinedData = { ...localUser, ...fetchedData };
           this.profileData = combinedData;
 
@@ -137,6 +154,7 @@ export class GeneralComponent implements OnInit {
     this.auth.postService(payload, Urls.classList).subscribe({
       next: (res: any) => {
         if (res.IsSuccess && Array.isArray(res.ResponseObject)) {
+          this.subscribedClassesList = res.ResponseObject;
           const subjects = new Set<string>();
           res.ResponseObject.forEach((item: any) => {
             if (item.subject) subjects.add(item.subject.trim());
@@ -146,6 +164,10 @@ export class GeneralComponent implements OnInit {
       },
       error: (err: any) => console.error(err, 'error_load_subscriptions')
     });
+  }
+
+  setStudentTab(tab: string): void {
+    this.activeStudentTab = tab;
   }
 
   patchTeacherForm(data: any) {
@@ -165,20 +187,11 @@ export class GeneralComponent implements OnInit {
 
   patchStudentForm(data: any) {
     if (!data) return;
-    this.studentForm.patchValue({
-      firstName: data?.first_name || '',
-      lastName: data?.last_name || '',
-      mail: data?.email || data?.mail || '',
-      mobile: data?.mobile_number || data?.mobile || '',
-      gender: data?.gender || '',
-      grade: data?.grade || data?.class || null,
-      curriculum: data?.curriculum_type || data?.curriculum || null,
-    });
 
-    const gradeId = data?.grade || data?.class;
-    const curriculumId = data?.curriculum_type || data?.curriculum;
+    const gradeId = data?.grade || data?.class || null;
+    let curriculumId = data?.curriculum_type || data?.curriculum || null;
 
-    const matchedGrade = this.gradeListData.find((g: any) => g.id == gradeId);
+    const matchedGrade = this.gradeListData.find((g: any) => g.id == gradeId || g.displayname == gradeId);
     if (matchedGrade) {
       this.studentGradeName = matchedGrade.displayname;
     }
@@ -186,9 +199,20 @@ export class GeneralComponent implements OnInit {
     const matchedCurriculum = this.curriculumList.find((c: any) => c.id == curriculumId || c.curriculum_type == curriculumId);
     if (matchedCurriculum) {
       this.studentCurriculumName = matchedCurriculum.curriculum_type;
+      curriculumId = matchedCurriculum.id;
     } else if (typeof curriculumId === 'string') {
       this.studentCurriculumName = curriculumId;
     }
+
+    this.studentForm.patchValue({
+      firstName: data?.first_name || '',
+      lastName: data?.last_name || '',
+      mail: data?.email || data?.mail || '',
+      mobile: data?.mobile_number || data?.mobile || '',
+      gender: data?.gender || '',
+      grade: matchedGrade ? matchedGrade.id : gradeId,
+      curriculum: curriculumId,
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -204,6 +228,13 @@ export class GeneralComponent implements OnInit {
     const reader = new FileReader();
     reader.onload = () => {
       this.profileBase64 = reader.result;
+      if (this.profileData) {
+        this.profileData.profile_image = this.profileBase64;
+      }
+      const localUser = JSON.parse(this.auth.getLocalStorage('user') || '{}');
+      localUser.profile_image = this.profileBase64;
+      this.auth.setLocalStorage('user', JSON.stringify(localUser));
+      this.helper.presentToast('Profile picture updated successfully');
     };
     reader.readAsDataURL(file);
   }
@@ -289,5 +320,37 @@ export class GeneralComponent implements OnInit {
       },
       error: () => this.helper.presentErrorToast('Error saving student profile')
     });
+  }
+
+  getProfileImage(): string {
+    if (this.profileBase64) return this.profileBase64;
+    const img = this.profileData?.profile_image || this.profileData?.profile_picture || this.profileData?.avatar || this.profileData?.image;
+    if (img && typeof img === 'string' && img.trim().length > 0 && img !== 'null' && img !== 'undefined') {
+      return img.trim();
+    }
+    return 'app/assets/etutor/avatar.svg';
+  }
+
+  handleAvatarError(event: any): void {
+    event.target.src = 'app/assets/etutor/avatar.svg';
+  }
+
+  toggleEditMode(): void {
+    this.editProfileDetails = !this.editProfileDetails;
+  }
+
+  resetForm(): void {
+    const localUser = this.auth.getUserDetails() || JSON.parse(this.auth.getLocalStorage('user') || '{}');
+    if (this.isTeacher) {
+      this.patchTeacherForm(localUser);
+    } else {
+      this.patchStudentForm(localUser);
+    }
+    this.editProfileDetails = false;
+  }
+
+  onLogout(): void {
+    this.auth.signOut();
+    this.helper.presentToast('Successfully Logged Out');
   }
 }

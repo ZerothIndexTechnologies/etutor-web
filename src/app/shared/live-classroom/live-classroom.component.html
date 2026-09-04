@@ -9,11 +9,19 @@
         </span>
         <h4 class="mb-0 text-white font-weight-bold">{{ roomTitle }}</h4>
         <span class="badge bg-primary text-uppercase ms-2" *ngIf="isModerator">Moderator</span>
+        <span class="badge bg-dark border border-secondary text-white rounded-pill px-3 py-1 ms-2 font-weight-bold d-inline-flex align-items-center" *ngIf="!loading && !errorMessage">
+          <i class="fa fa-users text-info me-1"></i> {{ participantCount }} {{ participantCount === 1 ? 'Participant' : 'Participants' }}
+        </span>
       </div>
 
-      <button type="button" class="btn-close-modal" (click)="closeClassroom()" aria-label="Close">
-        <i class="fa fa-times"></i>
-      </button>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 font-weight-bold me-2" (click)="endClassForEveryone()" *ngIf="isModerator && !loading && !errorMessage">
+          <i class="fa fa-power-off me-1"></i> End Class for Everyone
+        </button>
+        <button type="button" class="btn-close-modal" (click)="closeClassroom()" aria-label="Close">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Modal Body / JaaS Frame Container -->

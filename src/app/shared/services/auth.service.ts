@@ -165,6 +165,10 @@ export class AuthService {
     }
   }
 
+  get isStudentUser(): boolean {
+    return !this.isTeacherUser;
+  }
+
   get teacherVerificationStatus() {
     try {
       const userDetails = JSON.parse(this.getLocalStorage('user') || '{}');

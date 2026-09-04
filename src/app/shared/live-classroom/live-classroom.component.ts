@@ -23,6 +23,7 @@ export class LiveClassroomComponent implements OnInit, OnDestroy {
   api: any = null;
   roomTitle: string = 'Live Classroom';
   isModerator: boolean = false;
+  participantCount: number = 1;
 
   constructor(
     private authService: AuthService,
@@ -124,17 +125,25 @@ export class LiveClassroomComponent implements OnInit, OnDestroy {
         startWithAudioMuted: !this.isModerator,
         startWithVideoMuted: false,
         prejoinPageEnabled: false,
-        disableDeepLinking: true
+        disableDeepLinking: true,
+        enableEndConference: this.isModerator,
+        fileRecordingsEnabled: false,
+        liveStreamingEnabled: false,
+        localRecording: {
+          enabled: false
+        },
+        enableLobby: true,
+        autoKnockLobby: true
       },
       interfaceConfigOverwrite: {
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
         TOOLBAR_BUTTONS: [
           'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting',
-          'fullscreen', 'fudiagnostics', 'hangup', 'chat', 'recording',
-          'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+          'fullscreen', 'fudiagnostics', 'hangup', 'chat', 'participants-pane',
+          'etherpad', 'sharedvideo', 'settings', 'raisehand',
           'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
-          'tileview', 'select-background', 'download', 'help', 'mute-everyone', 'security'
+          'tileview', 'select-background', 'download', 'help', 'mute-everyone', 'security', 'end-conference'
         ]
       }
     };
@@ -144,6 +153,15 @@ export class LiveClassroomComponent implements OnInit, OnDestroy {
 
       this.api.addEventListener('videoConferenceJoined', (participant: any) => {
         console.log('Joined JaaS Live Classroom:', participant);
+        this.updateParticipantCount();
+      });
+
+      this.api.addEventListener('participantJoined', () => {
+        this.updateParticipantCount();
+      });
+
+      this.api.addEventListener('participantLeft', () => {
+        this.updateParticipantCount();
       });
 
       this.api.addEventListener('videoConferenceLeft', () => {
@@ -157,6 +175,43 @@ export class LiveClassroomComponent implements OnInit, OnDestroy {
     } catch (e: any) {
       this.errorMessage = 'Failed to initialize JaaS Classroom: ' + (e.message || e);
       this.cdr.detectChanges();
+    }
+  }
+
+  private updateParticipantCount(): void {
+    if (this.api) {
+      try {
+        const num = this.api.getNumberOfParticipants();
+        if (num !== undefined && num !== null) {
+          this.participantCount = num;
+          this.cdr.detectChanges();
+        }
+      } catch (e) {}
+    }
+  }
+
+  endClassForEveryone(): void {
+    if (confirm('Are you sure you want to end this live class session for all participants?')) {
+      if (this.api) {
+        try {
+          this.api.executeCommand('endConference');
+        } catch (e) {
+          try {
+            this.api.executeCommand('hangup');
+          } catch (err) {}
+        }
+      }
+      if (this.classId) {
+        this.authService.postService<any>(
+          { class_id: this.classId, status: 'COMPLETED' },
+          Urls.updateLiveClassStatus
+        ).subscribe({
+          next: () => this.closeClassroom(),
+          error: () => this.closeClassroom()
+        });
+      } else {
+        this.closeClassroom();
+      }
     }
   }
 
