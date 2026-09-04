@@ -1,0 +1,18 @@
+.admin-sidebar {
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  .nav-link {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    &.active {
+      background: #2563eb !important;
+      font-weight: bold;
+    }
+  }
+}
+
+.table {
+  font-size: 13.5px;
+}

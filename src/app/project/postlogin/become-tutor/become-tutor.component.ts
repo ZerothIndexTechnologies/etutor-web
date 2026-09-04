@@ -1,18 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '../../../shared/services/auth.service';
-import { ReactiveFormsModule } from '@angular/forms';
 import { Urls } from '../../../shared/services/urls';
 import { HelperService } from '../../../shared/services/helper.service';
-import { NgForOf } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
-import {CustomValidationService} from "../../../shared/services/customValidations.service";
+import { DecimalPipe, NgForOf, NgIf } from '@angular/common';
+import { CustomValidationService } from "../../../shared/services/customValidations.service";
 
 @Component({
   selector: 'app-become-tutor',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, NgForOf, NgIf],
+  imports: [ReactiveFormsModule, FormsModule, NgForOf, NgIf, DecimalPipe],
   templateUrl: './become-tutor.component.html',
   styleUrl: './become-tutor.component.scss',
 })

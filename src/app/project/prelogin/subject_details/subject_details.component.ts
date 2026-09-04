@@ -330,12 +330,19 @@ export class SubjectDetailsComponent {
   ];
 
   constructor() {
-    this.subjectDetails = JSON.parse(this.auth.getLocalStorage(SessionConstants.subject_details));
-    console.log(this.subjectDetails);
+    try {
+      const details = this.auth.getLocalStorage(SessionConstants.subject_details);
+      this.subjectDetails = details ? JSON.parse(details) : {};
+    } catch(e) { this.subjectDetails = {}; }
+
     this.envImg = this.environment.imgUrl;
-    console.log(this.envImg, 'envImg');
-    this.subjectListData = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).subjects;
-    this.selectedSubject = [this.subjectDetails.subject];
+    try {
+      const configStr = this.auth.getLocalStorage(SessionConstants.configData);
+      const config = configStr ? JSON.parse(configStr) : null;
+      this.subjectListData = config?.subjects || [];
+    } catch (e) { this.subjectListData = []; }
+
+    this.selectedSubject = [this.subjectDetails?.subject || ''];
     this.curriculumList();
     this.gradeList();
     this.stateList();
@@ -346,7 +353,7 @@ export class SubjectDetailsComponent {
   routeToTeacherDetail(data: any) {
     const teacherListpayload = {
       filter_by: 'subject',
-      filter_value: [this.subjectDetails.subject],
+      filter_value: [this.subjectDetails?.subject || ''],
     };
     this.auth.setLocalStorage(
       'subject_TeacherList',
@@ -383,11 +390,19 @@ export class SubjectDetailsComponent {
   }
 
   curriculumList() {
-    this.curriculumData = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).curriculum;
+    try {
+      const configStr = this.auth.getLocalStorage(SessionConstants.configData);
+      const config = configStr ? JSON.parse(configStr) : null;
+      this.curriculumData = config?.curriculum || [];
+    } catch(e) { this.curriculumData = []; }
   }
 
   gradeList() {
-    this.gradeListData = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).grade;
+    try {
+      const configStr = this.auth.getLocalStorage(SessionConstants.configData);
+      const config = configStr ? JSON.parse(configStr) : null;
+      this.gradeListData = config?.grade || [];
+    } catch(e) { this.gradeListData = []; }
   }
 
   languageList() {

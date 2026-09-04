@@ -7,9 +7,12 @@ import {
   SimpleChanges,
   OnDestroy,
   ElementRef,
-  ViewChild
+  ViewChild,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../services/auth.service';
+import { Urls } from '../services/urls';
 
 declare var JitsiMeetExternalAPI: any;
 
@@ -22,6 +25,7 @@ declare var JitsiMeetExternalAPI: any;
 })
 export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
   @Input() isOpen: boolean = false;
+  @Input() classId: number | null = null;
   @Input() roomName: string = '';
   @Input() roomTitle: string = '';
   @Input() userName: string = '';
@@ -31,82 +35,137 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
 
   @ViewChild('jitsiContainer') jitsiContainer!: ElementRef;
 
+  public loading: boolean = true;
+  public errorMessage: string = '';
   private api: any = null;
+
+  constructor(
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']) {
       if (this.isOpen) {
-        setTimeout(() => this.initJitsi(), 100);
+        this.fetchJwtAndInit();
       } else {
         this.destroyJitsi();
       }
     }
   }
 
-  private initJitsi(): void {
-    this.destroyJitsi();
+  public jaasDirectUrl: string = '';
 
-    if (!this.roomName) return;
+  private fetchJwtAndInit(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
 
-    if (typeof JitsiMeetExternalAPI === 'undefined') {
-      console.error('JitsiMeetExternalAPI is not loaded. Ensure script is included in index.html.');
+    if (!this.classId) {
+      // Fallback if classId not passed directly but roomName exists
+      this.errorMessage = 'Class ID missing for secure JWT initialization.';
+      this.loading = false;
+      this.cdr.detectChanges();
       return;
     }
 
-    const domain = 'meet.jit.si';
-    const container = this.jitsiContainer?.nativeElement;
+    this.authService.postService<any>({ class_id: this.classId }, Urls.joinLiveClass).subscribe({
+      next: (res: any) => {
+        if (res && res.IsSuccess && res.ResponseObject) {
+          const data = res.ResponseObject;
+          this.roomTitle = data.title || this.roomTitle || 'Live Classroom';
+          this.isTeacher = !!data.isModerator;
+          this.jaasDirectUrl = `https://8x8.vc/${data.appId}/${data.cleanRoom || data.roomName}?jwt=${data.jwt}`;
+          this.initJaasIFrame(data.appId, data.cleanRoom || data.roomName, data.jwt);
+        } else {
+          this.loading = false;
+          this.errorMessage = (res && res.ErrorObject) ? res.ErrorObject : 'Unable to join live class. Active subscription required.';
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.errorMessage = (err && err.error && err.error.ErrorObject)
+          ? err.error.ErrorObject
+          : 'Could not connect to backend authorization server.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
+  public openInNewTab(): void {
+    if (this.jaasDirectUrl) {
+      window.open(this.jaasDirectUrl, '_blank');
+      this.closeModal();
+    }
+  }
+
+  private initJaasIFrame(appId: string, roomName: string, jwt: string): void {
+    const scriptUrl = `https://8x8.vc/${appId}/external_api.js`;
+
+    this.loadScript(scriptUrl)
+      .then(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+        setTimeout(() => this.embedJitsi(appId, roomName, jwt), 100);
+      })
+      .catch(() => {
+        this.loading = false;
+        this.errorMessage = 'Failed to load 8x8 JaaS External API script.';
+        this.cdr.detectChanges();
+      });
+  }
+
+  private loadScript(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (typeof JitsiMeetExternalAPI !== 'undefined') {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = url;
+      script.type = 'text/javascript';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = (e) => reject(e);
+      document.head.appendChild(script);
+    });
+  }
+
+  private embedJitsi(appId: string, roomName: string, jwt: string): void {
+    this.destroyJitsi();
+
+    const container = this.jitsiContainer?.nativeElement;
     if (!container) return;
 
+    const domain = '8x8.vc';
+    const fullRoomName = `${appId}/${roomName}`;
+
     const options = {
-      roomName: this.roomName,
+      roomName: fullRoomName,
+      jwt: jwt,
       width: '100%',
       height: '100%',
       parentNode: container,
-      userInfo: {
-        displayName: (this.userName || (this.isTeacher ? 'Teacher Host' : 'Student')) + (this.isTeacher ? ' (Host)' : '')
-      },
       configOverwrite: {
-        startWithAudioMuted: false,
+        startWithAudioMuted: !this.isTeacher,
         startWithVideoMuted: false,
         prejoinPageEnabled: false,
-        enableLobby: false,
-        disableLobby: true,
-        lobby: {
-          enabled: false,
-          autoKnock: false,
-          enableLobbyChat: false
-        },
-        hideLobbyButton: true,
-        enableUserRolesBasedOnToken: false,
-        whiteboard: {
-          enabled: true
-        }
+        disableDeepLinking: true
       },
       interfaceConfigOverwrite: {
         TOOLBAR_BUTTONS: [
-          'microphone', 'camera', 'desktop', 'whiteboard', 'chat', 'raisehand',
-          'tileview', 'fullscreen', 'hangup', 'settings'
+          'microphone', 'camera', 'desktop', 'chat', 'raisehand',
+          'tileview', 'fullscreen', 'hangup', 'settings', 'recording', 'livestreaming'
         ],
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
-        DEFAULT_BACKGROUND: '#1e293b'
+        DEFAULT_BACKGROUND: '#0f172a'
       }
     };
 
     try {
       this.api = new JitsiMeetExternalAPI(domain, options);
-
-      this.api.addEventListener('videoConferenceJoined', (event: any) => {
-        console.log('Video conference joined', event);
-        if (this.isTeacher && this.api) {
-          try {
-            this.api.executeCommand('toggleLobby', false);
-          } catch (e) {
-            console.log('Lobby toggle ignored', e);
-          }
-        }
-      });
 
       this.api.addEventListener('readyToClose', () => {
         this.closeModal();
@@ -115,8 +174,9 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
       this.api.addEventListener('videoConferenceLeft', () => {
         this.closeModal();
       });
-    } catch (err) {
-      console.error('Error initializing Jitsi Meet API:', err);
+    } catch (err: any) {
+      this.errorMessage = 'Error initializing JaaS Classroom: ' + (err.message || err);
+      this.cdr.detectChanges();
     }
   }
 
@@ -129,9 +189,7 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
     if (this.api) {
       try {
         this.api.dispose();
-      } catch (e) {
-        console.warn('Error disposing Jitsi API', e);
-      }
+      } catch (e) {}
       this.api = null;
     }
   }

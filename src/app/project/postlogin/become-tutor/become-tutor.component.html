@@ -1,408 +1,335 @@
-<div class="container">
-  <div class="row m-3" *ngIf="showFirst">
-    <div class="col-12 m-3">
-      <div class="step-indicator">
-        <div class="step step-3">1</div>
-        <div class="step step-4 cursor" (click)="onCollapseStepper(2)">
-          <div>2</div>
+<div class="container py-4">
+  <!-- Top Title & Stepper Card -->
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4 bg-white">
+    <div class="card-body p-4 bg-gradient-dark text-white d-flex flex-column flex-md-row justify-content-between align-items-center">
+      <div>
+        <h3 class="fw-bold mb-1 text-warning"><i class="fas fa-chalkboard-teacher me-2"></i> Teacher Profile Setup & Verification</h3>
+        <p class="text-white-50 mb-0 small">Complete your 5-step application to publish live classes and receive payouts.</p>
+      </div>
+      <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill mt-3 mt-md-0 fw-bold shadow-sm">
+        Step {{ showFirst ? '1' : showSecond ? '2' : showThird ? '3' : showFourth ? '4' : '5' }} of 5
+      </span>
+    </div>
+
+    <!-- Stepper Navigation Header -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="row text-center g-2">
+        <div class="col" (click)="onCollapseStepper(1)" style="cursor: pointer;">
+          <div class="p-2 rounded-3 border" [class.bg-primary]="showFirst" [class.text-white]="showFirst" [class.bg-white]="!showFirst">
+            <div class="fw-bold small">1. Personal</div>
+          </div>
+        </div>
+        <div class="col" (click)="onCollapseStepper(2)" style="cursor: pointer;">
+          <div class="p-2 rounded-3 border" [class.bg-primary]="showSecond" [class.text-white]="showSecond" [class.bg-white]="!showSecond">
+            <div class="fw-bold small">2. Teaching</div>
+          </div>
+        </div>
+        <div class="col" (click)="onCollapseStepper(3)" style="cursor: pointer;">
+          <div class="p-2 rounded-3 border" [class.bg-primary]="showThird" [class.text-white]="showThird" [class.bg-white]="!showThird">
+            <div class="fw-bold small">3. Bank & Identity</div>
+          </div>
+        </div>
+        <div class="col" (click)="onCollapseStepper(4)" style="cursor: pointer;">
+          <div class="p-2 rounded-3 border" [class.bg-primary]="showFourth" [class.text-white]="showFourth" [class.bg-white]="!showFourth">
+            <div class="fw-bold small">4. Documents</div>
+          </div>
+        </div>
+        <div class="col" (click)="onCollapseStepper(5)" style="cursor: pointer;">
+          <div class="p-2 rounded-3 border" [class.bg-success]="showFive" [class.text-white]="showFive" [class.bg-white]="!showFive">
+            <div class="fw-bold small">5. Verified</div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="col-md-6">
-      <div>
-        <h4>Good to
-          <span class="tutor-title">Know</span>
-        </h4>
-      </div>
-      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
-        readable
-        content of a page when looking at its layout.
-      </div>
-      <form [formGroup]="stepper">
-        <div class="d-flex flex-row mt-3">
-          <div>
-            <img *ngIf="!profileBase64" src=" app/assets/etutor/avatar.svg" width="130" height="130"
-              alt="Profile Picture" class="profile-img">
-            <img *ngIf="profileBase64" [src]="profileBase64" height="130" width="130" alt="Profile Picture"
-              class="profile-img">
-
-
-            <div class="profileAdd cursor" (click)="file.click()">
-              <i class="material-icons mx-1">add</i>
+  <!-- STEP 1: Personal Information -->
+  <div class="row" *ngIf="showFirst">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-user-circle text-primary me-2"></i> Step 1: Personal Details & Address</h5>
+        
+        <form [formGroup]="stepper">
+          <!-- Profile Avatar Upload -->
+          <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-4 border">
+            <div class="position-relative me-3">
+              <img *ngIf="!profileBase64" src="app/assets/etutor/avatar.svg" width="90" height="90" class="rounded-circle shadow-sm border border-2 border-primary object-fit-cover">
+              <img *ngIf="profileBase64" [src]="profileBase64" width="90" height="90" class="rounded-circle shadow-sm border border-2 border-primary object-fit-cover">
+              <button type="button" class="btn btn-sm btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow" (click)="file.click()">
+                <i class="material-icons fs-6">add_a_photo</i>
+              </button>
               <input type="file" #file (change)="onFileSelected($event, 'profile')" id="profile" hidden>
             </div>
-          </div>
-
-          <div class="mx-5 profile-info mt-4">
-            <p class="fw-bold mx-font-19">{{getFullName()}}</p>
-            <span class="text-black-50 fw-medium mx-font-16">{{user?.mobile_number || ''}}</span>
-          </div>
-        </div>
-        <div class="form-group mt-3">
-          <label for="address">Address<span class="text-danger">*</span></label>
-          <input placeholder="Enter Your Address" formControlName="address" class="form-control" id="address"
-            [class.is-invalid]="stepper.get('address')?.invalid && (stepper.get('address')?.touched || submittedStep1)"
-            required />
-          <div class="text-danger small font-weight-bold mt-1"
-            *ngIf="stepper.get('address')?.invalid && (stepper.get('address')?.touched || submittedStep1)">
-            Address is required
-          </div>
-        </div>
-        <div class="form-group mt-2">
-          <label for="about">About you<span class="text-danger">*</span></label>
-          <input placeholder="Enter About You" formControlName="aboutInfo" class="form-control" id="about"
-            [class.is-invalid]="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)"
-            required />
-          <div class="text-danger small font-weight-bold mt-1"
-            *ngIf="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)">
-            About you is required
-          </div>
-        </div>
-        <div class="form-group mt-2">
-          <label for="lang">Language Proficiency<span class="text-danger">*</span></label>
-          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center"
-            [class.is-invalid]="stepper.get('language')?.invalid && langChips.length === 0 && (stepper.get('language')?.touched || submittedStep1)">
-            <div *ngFor="let chip of langChips" class="chip d-flex align-items-center">
-              <span>{{ chip }}</span>
-              <button type="button" class="btn-close" aria-label="Close" (click)="removeChip(chip)"></button>
-            </div>
-            <input style="padding: 8px 4px" placeholder="Enter Your Language Proficiency (Press Enter)" type="text"
-              class="border-0 flex-grow-1" id="lang" formControlName="language"
-              (keydown)="handleKeyDown($event, 'language')">
-          </div>
-          <div class="text-danger small font-weight-bold mt-1"
-            *ngIf="stepper.get('language')?.invalid && langChips.length === 0 && (stepper.get('language')?.touched || submittedStep1)">
-            Language Proficiency is required
-          </div>
-        </div>
-
-        <div class="form-group mt-2">
-          <label for="pin">Pincode<span class="text-danger">*</span></label>
-          <input placeholder="Enter Your Pincode" type="text"
-            formControlName="pin" required class="form-control" id="pin"
-            [class.is-invalid]="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
-          <div class="text-danger small font-weight-bold mt-1"
-            *ngIf="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
-            Pincode is required
-          </div>
-        </div>
-        <div class="row">
-          <div class="form-group mt-2 w-50">
-            <label for="city">City<span class="text-danger">*</span></label>
-            <input placeholder="Enter Your City" type="text" formControlName="city" required
-              class="form-control" id="city"
-              [class.is-invalid]="stepper.get('city')?.invalid && (stepper.get('city')?.touched || submittedStep1)">
-            <div class="text-danger small font-weight-bold mt-1"
-              *ngIf="stepper.get('city')?.invalid && (stepper.get('city')?.touched || submittedStep1)">
-              City is required
-            </div>
-          </div>
-          <div class="form-group mt-2 w-50">
-            <label for="state">State<span class="text-danger">*</span></label>
-            <input placeholder="Enter Your State" type="text" formControlName="state" required
-              class="form-control" id="state"
-              [class.is-invalid]="stepper.get('state')?.invalid && (stepper.get('state')?.touched || submittedStep1)">
-            <div class="text-danger small font-weight-bold mt-1"
-              *ngIf="stepper.get('state')?.invalid && (stepper.get('state')?.touched || submittedStep1)">
-              State is required
+            <div>
+              <h6 class="fw-bold mb-0 text-dark">{{ getFullName() }}</h6>
+              <span class="text-muted small">{{ user?.mobile_number || '' }}</span>
+              <div class="small text-primary mt-1 fw-medium" (click)="file.click()" style="cursor: pointer;">Click icon to change photo</div>
             </div>
           </div>
 
-          <div class="col-12 mt-3">
-            <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(2)">Proceed
-              <i class="material-icons arrow-icon icon-center">arrow_forward</i>
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Address <span class="text-danger">*</span></label>
+            <input placeholder="Enter full residence address" formControlName="address" class="form-control form-control-lg rounded-3 fs-6" [class.is-invalid]="stepper.get('address')?.invalid && (stepper.get('address')?.touched || submittedStep1)" />
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">About You <span class="text-danger">*</span></label>
+            <textarea rows="3" placeholder="Brief intro about your teaching bio and background..." formControlName="aboutInfo" class="form-control rounded-3 fs-6" [class.is-invalid]="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)"></textarea>
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Language Proficiency <span class="text-danger">*</span></label>
+            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1" [class.is-invalid]="stepper.get('language')?.invalid && langChips.length === 0 && (stepper.get('language')?.touched || submittedStep1)">
+              <span *ngFor="let chip of langChips" class="badge bg-primary rounded-pill px-3 py-2 d-inline-flex align-items-center">
+                {{ chip }}
+                <i class="fas fa-times ms-2 cursor" (click)="removeChip(chip)"></i>
+              </span>
+              <input placeholder="Type language & press Enter..." type="text" class="border-0 flex-grow-1 bg-transparent py-1 px-2" formControlName="language" (keydown)="handleKeyDown($event, 'language')">
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Pincode <span class="text-danger">*</span></label>
+              <input placeholder="6-digit PIN" type="text" formControlName="pin" class="form-control rounded-3" [class.is-invalid]="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">City <span class="text-danger">*</span></label>
+              <input placeholder="City" type="text" formControlName="city" class="form-control rounded-3" [class.is-invalid]="stepper.get('city')?.invalid && (stepper.get('city')?.touched || submittedStep1)">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">State <span class="text-danger">*</span></label>
+              <input placeholder="State" type="text" formControlName="state" class="form-control rounded-3" [class.is-invalid]="stepper.get('state')?.invalid && (stepper.get('state')?.touched || submittedStep1)">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-lg rounded-pill px-4 float-end shadow-sm" (click)="stepSubmit(2)">
+            Proceed to Teaching Profile <i class="fas fa-arrow-right ms-2"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Guidance Banner Right Side -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-gradient-light text-dark h-100">
+        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-lightbulb text-warning me-2"></i> Teacher Onboarding Guide</h5>
+        <p class="text-muted small mb-3">Providing complete and accurate information speeds up your SuperAdmin approval process within 24 hours.</p>
+        <ul class="list-unstyled small text-secondary lh-lg mb-4">
+          <li><i class="fas fa-check-circle text-success me-2"></i> Upload a clear profile picture.</li>
+          <li><i class="fas fa-check-circle text-success me-2"></i> Specify all languages you can teach in.</li>
+          <li><i class="fas fa-check-circle text-success me-2"></i> Complete address details for localized student matching.</li>
+        </ul>
+        <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Teaching Profile -->
+  <div class="row" *ngIf="showSecond">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-graduation-cap text-success me-2"></i> Step 2: Teaching Experience & Subjects</h5>
+        
+        <form [formGroup]="stepper1">
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Highest Qualification <span class="text-danger">*</span></label>
+            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1">
+              <span *ngFor="let chip of qualificationChips" class="badge bg-success rounded-pill px-3 py-2 d-inline-flex align-items-center">
+                {{ chip }}
+                <i class="fas fa-times ms-2 cursor" (click)="removeQualificationChip(chip)"></i>
+              </span>
+              <input placeholder="Enter degree/qualification & press Enter..." type="text" formControlName="qualification" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'qualification')">
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Teaching Experience (Years) <span class="text-danger">*</span></label>
+            <input placeholder="e.g. 5 Years" formControlName="exp" type="text" class="form-control rounded-3">
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Subjects Taught <span class="text-danger">*</span></label>
+            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1">
+              <span *ngFor="let subject of subjectChips" class="badge bg-info text-dark rounded-pill px-3 py-2 d-inline-flex align-items-center">
+                {{ subject }}
+                <i class="fas fa-times ms-2 cursor" (click)="removeSubjectChip(subject)"></i>
+              </span>
+              <input placeholder="Type subject & press Enter..." type="text" formControlName="subTeach" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'subjectTeach')">
+            </div>
+          </div>
+
+          <div class="form-group mb-4">
+            <label class="form-label fw-bold small">Curriculum <span class="text-danger">*</span></label>
+            <select formControlName="curriculum" class="form-select rounded-3">
+              <option value="" disabled selected>Select Curriculum Type</option>
+              <option *ngFor="let data of curriculumList" [value]="data.curriculum_type">{{ data.curriculum_type }}</option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="onCollapseStepper(1)">
+              <i class="fas fa-arrow-left me-2"></i> Back
+            </button>
+            <button type="button" class="btn btn-success btn-lg rounded-pill px-4 shadow-sm" (click)="stepSubmit(3)">
+              Proceed to Bank & Identity <i class="fas fa-arrow-right ms-2"></i>
             </button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-    <div class="col-md-6 image-container">
-      <img class="mt-2 p-5" style="object-fit: cover;" height="95%" src='app/assets/etutor/becometutor_background.svg'
-        alt="Tutor ">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-light text-dark h-100">
+        <h5 class="fw-bold text-success mb-3"><i class="fas fa-certificate me-2"></i> Teaching Accreditation</h5>
+        <p class="text-muted small">Highlight your specialized subjects and board curriculums to attract relevant students.</p>
+        <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
+      </div>
     </div>
   </div>
 
-  <div class="row m-3" *ngIf="showSecond">
-    <div class="col-12 m-3">
-      <div class="step-indicator">
-        <div class="step step-3 cursor" (click)="onCollapseStepper(1)">2</div>
-        <div class="step step-4 cursor">
-          <div>3</div>
-        </div>
+  <!-- STEP 3: Bank & Identity Proof -->
+  <div class="row" *ngIf="showThird">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-university text-warning me-2"></i> Step 3: Identity Verification & Bank Details</h5>
+        
+        <form [formGroup]="stepper2">
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Identification Proof Type <span class="text-danger">*</span></label>
+            <select formControlName="identity" class="form-select rounded-3">
+              <option *ngFor="let data of proofList" [value]="data.proof_type">{{ data.proof_type }}</option>
+            </select>
+          </div>
+
+          <!-- Document Upload Box -->
+          <div class="border border-2 border-dashed rounded-4 p-4 text-center mb-4 bg-light">
+            <input type="file" (change)="onFileSelected($event, 'identity')" id="identity" hidden>
+            <label for="identity" style="cursor: pointer;" class="mb-0">
+              <i class="fas fa-cloud-upload-alt fa-3x text-warning mb-2"></i>
+              <h6 class="fw-bold text-dark mb-1">Click to Upload Identity Document</h6>
+              <p class="text-muted small mb-2">Supported formats: JPG, PNG, PDF (Max 5MB)</p>
+            </label>
+            <div *ngIf="identityFile" class="badge bg-success px-3 py-2 mt-2">
+              <i class="fas fa-file-alt me-1"></i> {{ identityFile?.name }} ({{ (identityFile?.size / 1000) | number:'1.0-1' }} KB)
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small">Bank Name <span class="text-danger">*</span></label>
+            <input placeholder="e.g. State Bank of India" formControlName="bankName" type="text" class="form-control rounded-3">
+          </div>
+
+          <div class="row g-2 mb-4">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Bank Account Number <span class="text-danger">*</span></label>
+              <input placeholder="Account Number" type="text" formControlName="bankAccnum" class="form-control rounded-3">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">IFSC Code <span class="text-danger">*</span></label>
+              <input placeholder="e.g. SBIN0001234" type="text" formControlName="ifsc" class="form-control rounded-3">
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="onCollapseStepper(2)">
+              <i class="fas fa-arrow-left me-2"></i> Back
+            </button>
+            <button type="button" class="btn btn-warning text-dark fw-bold btn-lg rounded-pill px-4 shadow-sm" (click)="stepSubmit(4)">
+              Proceed to Certificates <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-
-    <div class="col-md-6">
-
-      <div>
-        <h4>Good to
-          <span class="tutor-title">Know</span>
-        </h4>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-light text-dark h-100">
+        <h5 class="fw-bold text-warning mb-3"><i class="fas fa-shield-alt me-2"></i> Secure Payout Processing</h5>
+        <p class="text-muted small">Bank details are encrypted and used solely for direct teacher earnings payouts after class completions.</p>
+        <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
       </div>
-      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
-        readable
-        content of a page when looking at its layout.
-      </div>
-      <form [formGroup]="stepper1">
-
-        <div class="form-group mt-1">
-          <label for="qualif">Qualification</label>
-          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center">
-            <div *ngFor="let chip of qualificationChips" class="chip d-flex align-items-center">
-              <span>{{ chip }}</span>
-              <button type="button" class="btn-close" aria-label="Close"
-                (click)="removeQualificationChip(chip)"></button>
-            </div>
-            <input style="padding: 8px 4px" placeholder="Enter Your Qualification" type="text"
-              formControlName="qualification" class="border-0 flex-grow-1" id="qualif"
-              (keydown)="handleKeyDown($event, 'qualification')">
-          </div>
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper1.get('qualification')?.valid && (stepper1.get('qualification')?.dirty || stepper1.get('pin')?.touched) && qualificationChips.length == 0">
-            Qualification is Required</label>
-        </div>
-        <div class="form-group mt-2">
-          <label class="p-1" for="exp">Experience in Yrs</label>
-          <input placeholder="Enter Your Experience" formControlName="exp" type="text"
-            class="form-control rounded-border" id="exp">
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper1.get('exp')?.valid && (stepper1.get('exp')?.dirty || stepper1.get('exp')?.touched) && qualificationChips.length == 0">
-            Experiences is Required</label>
-        </div>
-
-        <div class="form-group mt-1">
-          <label for="subteach">Subject Teach</label>
-          <div class="chip-input-container rounded-border form-control d-flex flex-wrap align-items-center">
-            <div *ngFor="let subject of subjectChips" class="chip d-flex align-items-center">
-              <span>{{ subject }}</span>
-              <button type="button" class="btn-close" aria-label="Close" (click)="removeSubjectChip(subject)"></button>
-            </div>
-            <input style="padding: 8px 4px" placeholder="Enter the Subject You Teach" type="text"
-              formControlName="subTeach" class="border-0 flex-grow-1" id="subteach"
-              (keydown)="handleKeyDown($event, 'subjectTeach')">
-          </div>
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper1.get('subTeach')?.valid && (stepper1.get('subTeach')?.dirty || stepper1.get('subTeach')?.touched) && qualificationChips.length == 0">
-            Subject Teach is Required</label>
-        </div>
-        <div class="form-group mt-1">
-          <label for="currculum">Curriculum</label>
-          <select style="padding: 8px 16px" formControlName="curriculum" class="form-control rounded-border"
-            id="currculum">
-            <option selected disabled value="">Please Select</option>
-            <option *ngFor="let data of curriculumList" [value]="data.curriculum_type">
-              {{data.curriculum_type}}</option>
-          </select>
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper1.get('curriculum')?.valid && (stepper1.get('curriculum')?.dirty || stepper1.get('curriculum')?.touched) && qualificationChips.length == 0">
-            Currriculum is Required</label>
-        </div>
-
-        <div class="col-12 mt-3">
-          <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(3)">Proceed
-            <i class="material-icons arrow-icon icon-center">arrow_forward</i>
-          </button>
-        </div>
-      </form>
-    </div>
-    <div class="col-md-6 image-container">
-      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor ">
     </div>
   </div>
 
-  <div class="row m-3" *ngIf="showThird">
-    <div class="col-12 m-3">
-      <div class="step-indicator">
-        <div class="step step-3 cursor" (click)="onCollapseStepper(2)">3</div>
-        <div class="step step-4 cursor">
-          <div>4</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-
-      <div>
-        <h4>Good to
-          <span class="tutor-title">Know</span>
-        </h4>
-      </div>
-      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
-        readable
-        content of a page when looking at its layout.
-      </div>
-      <form [formGroup]="stepper2">
-        <div class="form-group mt-3">
-          <label for="proof">Identification Proof</label>
-          <select formControlName="identity" class="form-control rounded-border" id="proof">
-            <option *ngFor="let data of proofList" [value]="data.proof_type">{{data.proof_type}}</option>
-          </select>
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper2.get('identity')?.valid && (stepper2.get('identity')?.dirty || stepper2.get('identity')?.touched) && qualificationChips.length == 0">
-            Identification is Required</label>
-        </div>
-        <div class="file-uploader mt-3">
-          <input type="file" (change)="onFileSelected($event, 'identity')" id="identity" hidden>
-          <label for="identity" class="file-label">
-            <div class="file-label-content">
-              <i class="material-icons">cloud_upload</i>
-              <span>Upload an Identity</span>
+  <!-- STEP 4: Educational Certificates Upload -->
+  <div class="row" *ngIf="showFourth">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-file-pdf text-danger me-2"></i> Step 4: Educational Certificates & Degree Upload</h5>
+        
+        <form>
+          <!-- UG Certificate Upload Box -->
+          <div class="border rounded-4 p-3 mb-3 bg-light d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-upload text-primary me-2"></i> UG Degree Certificate</h6>
+              <span class="text-muted small" *ngIf="!ugFile">No file selected</span>
+              <span class="badge bg-success" *ngIf="ugFile">{{ ugFile?.name }} ({{ (ugFile?.size / 1000) | number:'1.0-1' }} KB)</span>
             </div>
-          </label>
-          <div class="file-details">
-            <p>File Name: {{ identityFile?.name }}</p>
-            <p>File Size: {{ identityFile?.size / 1000 }} KB</p>
+            <input type="file" (change)="onFileSelected($event, 'ug')" id="ug" hidden>
+            <label for="ug" class="btn btn-sm btn-outline-primary rounded-pill px-3 mb-0" style="cursor: pointer;">
+              Choose File
+            </label>
           </div>
-        </div>
 
-        <div class="form-group mt-2">
-          <label for="bankname">Bank Name</label>
-          <input placeholder="Enter Your Bank Name" formControlName="bankName" type="text" class="form-control"
-            id="bankname">
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper2.get('bankName')?.valid && (stepper2.get('bankName')?.dirty || stepper2.get('bankName')?.touched) && qualificationChips.length == 0">
-            Bank Name is Required</label>
-        </div>
-        <div class="form-group mt-2">
-          <label class="p-1" for="bankacc">Bank Account Number</label>
-          <input placeholder="Enter Your Bank Account Number" type="text" formControlName="bankAccnum"
-            class="form-control rounded-border" id="bankacc">
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper2.get('bankAccnum')?.valid && (stepper2.get('bankAccnum')?.dirty || stepper2.get('bankAccnum')?.touched) && qualificationChips.length == 0">
-            Bank Account Number is Required</label>
-        </div>
-        <div class="form-group mt-2">
-          <label class="p-1" for="ifsc">IFSC Code</label>
-          <input placeholder="Enter Your IFSC Code" type="text" formControlName="ifsc"
-            class="form-control rounded-border" id="ifsc">
-          <label class="error jquery-validation-error small form-text"
-            *ngIf="!stepper2.get('ifsc')?.valid && (stepper2.get('ifsc')?.dirty || stepper2.get('ifsc')?.touched) && qualificationChips.length == 0">
-            IFSC is Required</label>
-        </div>
+          <!-- PG Certificate Upload Box -->
+          <div class="border rounded-4 p-3 mb-3 bg-light d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-upload text-primary me-2"></i> PG Degree Certificate (Optional)</h6>
+              <span class="text-muted small" *ngIf="!pgFile">No file selected</span>
+              <span class="badge bg-success" *ngIf="pgFile">{{ pgFile?.name }} ({{ (pgFile?.size / 1000) | number:'1.0-1' }} KB)</span>
+            </div>
+            <input type="file" (change)="onFileSelected($event, 'pg')" id="pg" hidden>
+            <label for="pg" class="btn btn-sm btn-outline-primary rounded-pill px-3 mb-0" style="cursor: pointer;">
+              Choose File
+            </label>
+          </div>
 
-        <div class="col-12 mt-3">
-          <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(4)">Proceed
-            <i class="material-icons arrow-icon icon-center">arrow_forward</i>
-          </button>
-        </div>
-      </form>
+          <!-- Additional Documents Upload Box -->
+          <div class="border rounded-4 p-3 mb-4 bg-light d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-medical text-secondary me-2"></i> Additional Certifications / Experience Letters</h6>
+              <span class="text-muted small" *ngIf="otherFile.length === 0">No files selected</span>
+              <span class="badge bg-info text-dark ms-1" *ngFor="let file of otherFile">{{ file.name }}</span>
+            </div>
+            <input type="file" multiple (change)="onFileSelected($event, 'other')" id="other" hidden>
+            <label for="other" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-0" style="cursor: pointer;">
+              Choose Files
+            </label>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="onCollapseStepper(3)">
+              <i class="fas fa-arrow-left me-2"></i> Back
+            </button>
+            <button type="button" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm fw-bold" (click)="stepSubmit(5)">
+              Submit Application <i class="fas fa-paper-plane ms-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    <div class="col-md-6 image-container">
-      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-light text-dark h-100">
+        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-check-double me-2"></i> Document Verification</h5>
+        <p class="text-muted small">Uploaded educational documents are reviewed by the SuperAdmin team to grant official Teacher Verification status.</p>
+        <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
+      </div>
     </div>
   </div>
 
-  <div class="row m-3" *ngIf="showFourth">
-    <div class="col-12 m-3">
-      <div class="step-indicator">
-        <div class="step step-3 cursor" (click)="onCollapseStepper(3)">4</div>
-        <div class="step step-4 cursor">
-          <div>5</div>
+  <!-- STEP 5: Confirmation Success -->
+  <div class="row" *ngIf="showFive">
+    <div class="col-12 text-center py-5">
+      <div class="card border-0 shadow-lg rounded-4 p-5 bg-white max-w-600 mx-auto">
+        <div class="mb-4">
+          <i class="fas fa-check-circle fa-5x text-success"></i>
         </div>
+        <h2 class="fw-bold text-dark mb-2">Congratulations!</h2>
+        <h4 class="text-primary mb-3">Your Teacher Application Submitted Successfully!</h4>
+        <p class="text-muted mb-4">Our SuperAdmin team will review your identity proof and bank account credentials within 24 hours. You can start creating your live classes right away.</p>
+        <button class="btn btn-success btn-lg rounded-pill px-5 shadow-sm" (click)="onCollapseStepper(1)">
+          <i class="fas fa-home me-2"></i> Go to Dashboard
+        </button>
       </div>
     </div>
-
-    <div class="col-md-6">
-      <div>
-        <h4>Good to
-          <span class="tutor-title">Know</span>
-        </h4>
-      </div>
-      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
-        readable
-        content of a page when looking at its layout.
-      </div>
-      <form>
-        <div class="file-uploader mt-4">
-          <input type="file" (change)="onFileSelected($event, 'ug')" id="ug" hidden>
-          <label for="ug" class="file-label">
-            <div class="file-label-content">
-              <i class="material-icons">cloud_upload</i>
-              <span>Upload UG Certificate</span>
-            </div>
-          </label>
-          <div class="file-details">
-            <p>File Name: {{ ugFile?.name }}</p>
-            <p>File Size: {{ ugFile?.size / 1000 }} KB</p>
-          </div>
-        </div>
-        <div class="file-uploader mt-4">
-          <input type="file" (change)="onFileSelected($event, 'pg')" id="pg" hidden>
-          <label for="pg" class="file-label">
-            <div class="file-label-content">
-              <i class="material-icons">cloud_upload</i>
-              <span>Upload PG Certficate</span>
-            </div>
-          </label>
-          <div class="file-details">
-            <p>File Name: {{ pgFile?.name }}</p>
-            <p>File Size: {{ pgFile?.size / 1000 }} KB</p>
-          </div>
-        </div>
-        <div class="file-uploader mt-4">
-          <input type="file" multiple (change)="onFileSelected($event, 'other')" id="other" hidden>
-          <label for="other" class="file-label">
-            <div class="file-label-content">
-              <i class="material-icons">cloud_upload</i>
-              <span>Upload Additional doc</span>
-            </div>
-          </label>
-          <div class="file-details">
-            @for (file of otherFile; let i = $index; track file.name) {
-            <p>File Name: {{ file.name }}</p>
-            <p>File Size: {{ file.size / 1000 }} KB</p>
-            } @empty {
-            <p>File Name: </p>
-            <p>File Size: 0 KB</p>
-            }
-          </div>
-        </div>
-
-        <div class="col-12 mt-3">
-          <button type="button" class="pull-right btn btn-save rounded-border" (click)="stepSubmit(5)">Submit
-            <!--            <i class="material-icons arrow-icon icon-center">arrow_forward</i>-->
-          </button>
-        </div>
-      </form>
-    </div>
-    <div class="col-md-6 image-container">
-      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor ">
-    </div>
-  </div>
-
-  <div class="row m-3" *ngIf="showFive">
-    <div class="col-12 m-3">
-      <div class="step-indicator">
-        <div class="step step-3 cursor" (click)="onCollapseStepper(4)">5</div>
-        <div class="step step-4 cursor">
-          <div>6</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div>
-        <h4>Good to
-          <span class="tutor-title">Know</span>
-        </h4>
-      </div>
-      <div class="subtitle mx-font-15">It is a long established fact that a reader will be distracted by the
-        readable
-        content of a page when looking at its layout.
-      </div>
-      <div class="mt-40 text-center">
-        <h5 class="text-success">Conguratulation!</h5>
-        <h4 class="text-info">You become a tutor now!</h4>
-      </div>
-    </div>
-    <div class="col-md-6 image-container">
-      <img class="mt-2 p-5" height="95%" src='app/assets/etutor/becometutor_background.svg' alt="Tutor ">
-    </div>
-    <!--    <div>-->
-    <!--      <button type="button" class="btn btn-save rounded-border" (click)="stepSubmit(5)"> back-->
-    <!--        <i class="material-icons arrow-icon icon-center" style="width: 30px">arrow_backward</i>-->
-    <!--      </button>-->
-    <!--    </div>-->
   </div>
 </div>

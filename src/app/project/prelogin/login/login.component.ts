@@ -84,6 +84,7 @@ export class LoginComponent {
             this.auth.setLocalStorage('token', successData.ResponseObject.accesstoken);
             this.auth.setLocalStorage('user_id', JSON.stringify(successData.ResponseObject.user_id));
             this.auth.setLocalStorage('role_id', JSON.stringify(successData.ResponseObject.role_id));
+            this.auth.setLocalStorage('loggedInUser', JSON.stringify(this.user));
             this.auth.setLocalStorage('user', JSON.stringify(successData.ResponseObject));
             this.helper.presentToast('Successfully LoggedIn');
             this.auth.setLocalStorage('login', JSON.stringify(false));

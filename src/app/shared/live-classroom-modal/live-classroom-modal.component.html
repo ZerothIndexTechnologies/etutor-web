@@ -1,23 +1,40 @@
-<div class="live-classroom-backdrop" *ngIf="isOpen" (click)="closeModal()">
-  <div class="live-classroom-modal" (click)="$event.stopPropagation()">
-    <!-- Modal Header -->
-    <div class="modal-header d-flex justify-content-between align-items-center px-4 py-3">
-      <div class="d-flex align-items-center gap-2">
-        <span class="pulse-indicator"></span>
-        <h5 class="m-0 room-title text-white font-weight-bold">
-          <i class="fas fa-video me-2 text-danger"></i>
-          {{ roomTitle || 'Virtual Live Classroom' }}
-        </h5>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <span class="badge bg-success px-3 py-2 rounded-pill"><i class="fas fa-shield-alt me-1"></i> Live WebRTC Session</span>
-        <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Close"></button>
+<div class="live-modal-overlay" *ngIf="isOpen" (click)="closeModal()">
+  <div class="live-modal-container" (click)="$event.stopPropagation()">
+    <div class="live-modal-header">
+      <div class="header-left">
+        <span class="live-badge" *ngIf="!loading && !errorMessage">
+          <span class="pulse-dot"></span> LIVE CLASSROOM
+        </span>
+        <h5 class="modal-title mb-0">{{ roomTitle }}</h5>
+        <span class="badge bg-primary ms-2" *ngIf="isTeacher">HOST / MODERATOR</span>
+      <div class="header-right d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3 me-2" (click)="openInNewTab()" *ngIf="jaasDirectUrl">
+          <i class="fa fa-external-link me-1"></i> Open in New Tab
+        </button>
+        <button class="close-btn" (click)="closeModal()" aria-label="Close">
+          <i class="fa fa-times"></i>
+        </button>
       </div>
     </div>
 
-    <!-- Jitsi Container -->
-    <div class="modal-body p-0">
-      <div #jitsiContainer class="jitsi-container"></div>
+    <div class="live-modal-body">
+      <!-- Loading Spinner -->
+      <div class="jaas-loader-box" *ngIf="loading">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h5 class="text-white mt-3">Connecting to JaaS Secure Classroom...</h5>
+        <p class="text-white-50">Authenticating subscription & generating short-lived JWT</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="jaas-error-box" *ngIf="!loading && errorMessage">
+        <i class="fa fa-exclamation-circle text-danger mb-3" style="font-size: 3rem;"></i>
+        <h4 class="text-white">Unable to Join Class</h4>
+        <p class="text-light mb-4">{{ errorMessage }}</p>
+        <button class="btn btn-outline-light rounded-pill px-4" (click)="closeModal()">Close</button>
+      </div>
+
+      <!-- Jitsi Frame Container -->
+      <div #jitsiContainer class="jitsi-frame" [class.d-none]="loading || errorMessage"></div>
     </div>
   </div>
 </div>

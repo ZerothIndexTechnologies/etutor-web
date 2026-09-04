@@ -39,6 +39,10 @@ export class GeneralComponent implements OnInit {
   public studentGradeName: string = '';
   public studentCurriculumName: string = '';
 
+  get isTeacher(): boolean {
+    return this.auth.isTeacherUser;
+  }
+
   constructor(private fb: FormBuilder, private router: Router) {
     const config = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData) || '{}');
     this.gradeListData = config?.grade || [];
@@ -75,7 +79,7 @@ export class GeneralComponent implements OnInit {
   }
 
   profileList() {
-    const isTeacher = this.auth.getRoleId() === '2';
+    const isTeacher = this.isTeacher;
     const payload = isTeacher ? { filter_by: 'teacher', filter_value: this.auth.getUserId() } : { user_id: this.auth.getUserId() };
     const url = isTeacher ? Urls.teacherProfile : Urls.studentProfile;
     const localUser = JSON.parse(this.auth.getLocalStorage('user') || '{}');

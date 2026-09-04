@@ -25,4 +25,30 @@ export class Urls {
   public static readonly teacherProfile = 'user/getTeacherList';
   public static readonly notifyTeacherProfileStatus = 'common/notifyTeacherProfileStatus';
   public static readonly sendClassReminderEmail = 'teacher/sendClassReminderEmail';
+  public static readonly createLiveClass = 'liveClass/create';
+  public static readonly upcomingLiveClasses = 'liveClass/upcoming';
+  public static readonly joinLiveClass = 'liveClass/join';
+  public static readonly updateLiveClassStatus = 'liveClass/updateStatus';
+  public static readonly getNotifications = 'liveClass/notifications';
+  public static readonly markNotificationRead = 'liveClass/markNotificationRead';
+  public static readonly getTeacherStudents = 'teacher/getTeacherStudents';
+  public static readonly getAttendanceHistory = 'liveClass/getAttendanceHistory';
+
+  // SuperAdmin Endpoints
+  public static readonly adminLogin = 'admin/login';
+  public static readonly adminDashboardStats = 'admin/dashboardStats';
+  public static readonly adminTeachersList = 'admin/getTeachersList';
+  public static readonly adminVerifyTeacher = 'admin/verifyTeacher';
+  public static readonly adminStudentsList = 'admin/getStudentsList';
+  public static readonly adminVerifySubscription = 'admin/verifySubscription';
+  public static readonly adminCountries = 'admin/getCountries';
+  public static readonly adminUpdateCountryStatus = 'admin/updateCountryStatus';
+  public static readonly adminStates = 'admin/getStates';
+  public static readonly adminUpdateStateStatus = 'admin/updateStateStatus';
+  public static readonly adminFeeConfigs = 'admin/getFeeConfigs';
+  public static readonly adminSaveFeeConfig = 'admin/saveFeeConfig';
+  public static readonly adminStudentTransactions = 'admin/getStudentTransactions';
+  public static readonly adminTeacherTransactions = 'admin/getTeacherTransactions';
+  public static readonly adminPaymentSettings = 'admin/getPaymentSettings';
+  public static readonly adminUpdatePaymentSettings = 'admin/updatePaymentSettings';
 }

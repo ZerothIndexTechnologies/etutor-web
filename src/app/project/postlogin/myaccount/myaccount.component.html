@@ -26,7 +26,7 @@
     <div class="col-md-10">
 
         <!-- Teacher Verification Status Banners -->
-        <ng-container *ngIf="auth.getUserType === '1'">
+        <ng-container *ngIf="auth.isTeacherUser">
             <!-- Verified Teacher (Status 1) -->
             <div *ngIf="auth.teacherVerificationStatus == '1'" class="alert alert-success border-0 shadow-sm rounded-3 p-3 mb-3 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">

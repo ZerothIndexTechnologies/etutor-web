@@ -1,20 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 
 export enum Environment {
   Local = 'local',
+  Production = 'production',
 }
 
 @Injectable({ providedIn: 'root' })
 export class EnvironmentService {
   public envProperties = {
-    env: '',
+    env: Environment.Production,
     apiHost: 'https://zerothindex.co.in/e-tution/api/index.php/web/',
     imgUrl: 'https://zerothindex.co.in/',
-    webHost: '',
+    webHost: 'https://zerothindex.co.in',
   };
-  public envRecieved = new BehaviorSubject<boolean>(false);
 
   get env() {
     return this.envProperties.env;
@@ -29,24 +27,36 @@ export class EnvironmentService {
     return this.envProperties.webHost;
   }
 
-  constructor(private http: HttpClient) {
-    this.assignEnvValue('');
+  constructor() {
+    this.assignEnvValue();
   }
 
-  private checkingHostType(): void {}
+  assignEnvValue() {
+    if (typeof window !== 'undefined' && window.location) {
+      const hostname = window.location.hostname;
+      const origin = window.location.origin;
 
-  assignEnvValue(res: any) {
-    const domainName = window && window.location && window.location.hostname;
-    const pathname = window && window.location && window.location.pathname;
-    if (/^.*localhost.*/.test(domainName)) {
-      this.envProperties.env = Environment.Local;
-      // this.envProperties.apiHost = 'https://tutorconnect.edquill.com/admin/';
-      // this.envProperties.imgUrl = 'https://tutorconnect.edquill.com/';
-      // this.envProperties.webHost = 'https://tutorconnect.edquill.com';
-    } else {
-      // this.envProperties.apiHost = 'https://' + domainName + pathname;
-      // this.envProperties.imgUrl = 'https://' + domainName + '/';
-      // this.envProperties.webHost = 'https://' + domainName;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        /*
+        | -------------------------------------------------------------------
+        | LOCAL ENVIRONMENT CONFIGURATION (Commented)
+        | -------------------------------------------------------------------
+        */
+        this.envProperties = {
+          env: Environment.Local,
+          apiHost: 'http://localhost:8000/index.php/web/',
+          imgUrl: 'http://localhost:8000/',
+          webHost: 'http://localhost:4200',
+        };
+      } else {
+        // PRODUCTION ENVIRONMENT CONFIGURATION FOR HOSTINGER
+        this.envProperties = {
+          env: Environment.Production,
+          apiHost: origin + '/e-tution/api/index.php/web/',
+          imgUrl: origin + '/',
+          webHost: origin,
+        };
+      }
     }
   }
 }

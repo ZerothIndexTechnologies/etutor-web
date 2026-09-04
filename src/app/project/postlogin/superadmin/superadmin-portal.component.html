@@ -1,0 +1,448 @@
+<div class="admin-wrapper d-flex min-vh-100 bg-light">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar bg-dark text-white p-3 d-flex flex-column justify-content-between" style="width: 260px; min-width: 260px;">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-4 px-2 pt-2 border-bottom border-secondary pb-3">
+        <i class="fas fa-user-shield text-warning fa-2x"></i>
+        <div>
+          <h5 class="fw-bold mb-0 text-white" style="font-size: 16px;">SuperAdmin</h5>
+          <span class="badge bg-warning text-dark font-weight-bold" style="font-size: 10px;">GOVERNANCE PORTAL</span>
+        </div>
+      </div>
+
+      <nav class="nav flex-column gap-1">
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
+          <i class="fas fa-chart-line text-info"></i> Dashboard
+        </a>
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'teachers'" (click)="setTab('teachers')">
+          <i class="fas fa-chalkboard-teacher text-warning"></i> Teachers & Bank Approvals
+        </a>
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'students'" (click)="setTab('students')">
+          <i class="fas fa-user-graduate text-success"></i> Students & Subscriptions
+        </a>
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'locations'" (click)="setTab('locations')">
+          <i class="fas fa-globe text-primary"></i> Country & State Setup
+        </a>
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'fees'" (click)="setTab('fees')">
+          <i class="fas fa-book-open text-danger"></i> Curriculum & Fee Config
+        </a>
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'transactions'" (click)="setTab('transactions')">
+          <i class="fas fa-receipt text-warning"></i> Transaction History
+        </a>
+        <a class="nav-link text-white rounded-3 py-2.5 px-3 d-flex align-items-center gap-2" [class.active]="activeTab === 'payments'" (click)="setTab('payments')">
+          <i class="fas fa-credit-card text-info"></i> Class Payments Setup
+        </a>
+      </nav>
+    </div>
+
+    <div class="border-top border-secondary pt-3 px-2">
+      <button class="btn btn-outline-danger w-100 rounded-3 d-flex align-items-center justify-content-center gap-2" (click)="logoutAdmin()">
+        <i class="fas fa-sign-out-alt"></i> Logout Session
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-content flex-grow-1 p-4 overflow-auto">
+
+    <!-- TAB 1: DASHBOARD -->
+    <div *ngIf="activeTab === 'dashboard'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">SuperAdmin Overview Dashboard</h4>
+          <p class="text-muted small mb-0">Real-time metrics, live sessions, teacher verifications, and financial totals.</p>
+        </div>
+        <button class="btn btn-sm btn-dark rounded-pill px-3" (click)="loadDashboardStats()">
+          <i class="fas fa-sync-alt me-1"></i> Refresh Data
+        </button>
+      </div>
+
+      <!-- Stats Cards Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-primary">
+            <span class="text-muted small font-weight-bold">TOTAL TEACHERS</span>
+            <h3 class="fw-bold text-dark my-1">{{ stats.totalTeachers || 0 }}</h3>
+            <span class="text-warning small font-weight-bold"><i class="fas fa-clock me-1"></i> {{ stats.pendingTeachers || 0 }} Pending Approval</span>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-success">
+            <span class="text-muted small font-weight-bold">TOTAL STUDENTS</span>
+            <h3 class="fw-bold text-dark my-1">{{ stats.totalStudents || 0 }}</h3>
+            <span class="text-success small font-weight-bold"><i class="fas fa-check-circle me-1"></i> {{ stats.activeSubscriptions || 0 }} Active Subscriptions</span>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-warning">
+            <span class="text-muted small font-weight-bold">PLATFORM REVENUE</span>
+            <h3 class="fw-bold text-dark my-1">₹{{ stats.totalRevenue | number:'1.2-2' }}</h3>
+            <span class="text-muted small"><i class="fas fa-shield-alt me-1"></i> Total Tuition Fees Collected</span>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-danger">
+            <span class="text-muted small font-weight-bold">LIVE CLASSROOMS</span>
+            <h3 class="fw-bold text-dark my-1">{{ stats.liveClasses || 0 }}</h3>
+            <span class="text-danger small font-weight-bold"><i class="fas fa-video me-1"></i> Active Meetings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: TEACHERS LIST & BANK APPROVALS -->
+    <div *ngIf="activeTab === 'teachers'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">Teachers Directory & Bank Account Approvals</h4>
+          <p class="text-muted small mb-0">Approve or reject teacher profile details, identification proof, and bank payout information.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <select class="form-select form-select-sm w-auto border-secondary" [(ngModel)]="teacherFilter" (change)="loadTeachers()">
+            <option value="">All Verification Statuses</option>
+            <option value="0">Pending Verification (0)</option>
+            <option value="1">Approved (1)</option>
+            <option value="2">Rejected (2)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Teacher Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Bank Account</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let teacher of teacherList">
+                <td>#{{ teacher.teacher_id }}</td>
+                <td class="fw-bold text-dark">{{ teacher.name }}</td>
+                <td>{{ teacher.email }}</td>
+                <td>{{ teacher.mobile_number || '-' }}</td>
+                <td>
+                  <span class="small font-weight-bold text-dark">{{ teacher.bank_name || 'State Bank of India' }}</span><br>
+                  <span class="text-muted small">{{ teacher.account_number || 'XXXXXX4920' }} | {{ teacher.ifsc_code || 'SBIN0001234' }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-warning text-dark" *ngIf="teacher.is_account_verified == '0' || teacher.is_account_verified == 'PENDING'">PENDING</span>
+                  <span class="badge bg-success" *ngIf="teacher.is_account_verified == '1'">APPROVED</span>
+                  <span class="badge bg-danger" *ngIf="teacher.is_account_verified == '2'">REJECTED</span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-dark rounded-pill px-3" (click)="openTeacherDetails(teacher)">
+                    <i class="fas fa-search me-1"></i> Review & Approve
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="teacherList.length === 0">
+                <td colspan="7" class="text-center py-4 text-muted">No teachers found matching selected criteria.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: STUDENTS LIST & SUBSCRIPTIONS -->
+    <div *ngIf="activeTab === 'students'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">Student Management & Subscriptions</h4>
+          <p class="text-muted small mb-0">Verify eligibility, view enrolled students, and manage subscription statuses.</p>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Student Name</th>
+                <th>Email</th>
+                <th>Grade</th>
+                <th>Subscription Status</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let st of studentList">
+                <td>#{{ st.student_id }}</td>
+                <td class="fw-bold text-dark">{{ st.name }}</td>
+                <td>{{ st.email }}</td>
+                <td><span class="badge bg-primary">{{ st.grade_name }}</span></td>
+                <td>
+                  <span class="badge bg-success" *ngIf="st.subscription_status === 'ACTIVE'">ACTIVE SUBSCRIPTION</span>
+                  <span class="badge bg-secondary" *ngIf="st.subscription_status !== 'ACTIVE'">INACTIVE</span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-success rounded-pill me-1" *ngIf="st.subscription_status !== 'ACTIVE'" (click)="toggleStudentSubscription(st, '1')">
+                    <i class="fas fa-check me-1"></i> Activate Sub
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger rounded-pill" *ngIf="st.subscription_status === 'ACTIVE'" (click)="toggleStudentSubscription(st, '0')">
+                    <i class="fas fa-ban me-1"></i> Suspend
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="studentList.length === 0">
+                <td colspan="6" class="text-center py-4 text-muted">No students found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: COUNTRY & STATE SETUP -->
+    <div *ngIf="activeTab === 'locations'">
+      <div class="row g-4">
+        <!-- Countries Column -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm rounded-3 p-3">
+            <h5 class="fw-bold mb-3"><i class="fas fa-globe text-primary me-2"></i> Country Master Setup</h5>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr><th>Code</th><th>Country</th><th>Currency</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of countryList">
+                    <td class="fw-bold">{{ c.code }}</td>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.currency }}</td>
+                    <td>
+                      <span class="badge bg-success" *ngIf="c.status == 1">ACTIVE</span>
+                      <span class="badge bg-secondary" *ngIf="c.status != 1">INACTIVE</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-xs btn-sm btn-outline-secondary rounded-pill" (click)="toggleCountryStatus(c)">Toggle</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- States Column -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm rounded-3 p-3">
+            <h5 class="fw-bold mb-3"><i class="fas fa-map-marker-alt text-danger me-2"></i> Relatable State Setup</h5>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr><th>Country</th><th>State Name</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let s of stateList">
+                    <td>{{ s.country_name }}</td>
+                    <td class="fw-bold">{{ s.name }}</td>
+                    <td>
+                      <span class="badge bg-success" *ngIf="s.status == 1">ACTIVE</span>
+                      <span class="badge bg-secondary" *ngIf="s.status != 1">INACTIVE</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-xs btn-sm btn-outline-secondary rounded-pill" (click)="toggleStateStatus(s)">Toggle</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: CURRICULUM & FEES CONFIGURATION -->
+    <div *ngIf="activeTab === 'fees'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">Curriculum & Fees Configuration</h4>
+          <p class="text-muted small mb-0">Configure curriculum fees based on Subject, Grade, School, Teacher, Country, and State.</p>
+        </div>
+        <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="showFeeModal = true">
+          <i class="fas fa-plus me-1"></i> Add Fee Rule
+        </button>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th>Country</th>
+                <th>Subject</th>
+                <th>Monthly Fee</th>
+                <th>Quarterly Fee</th>
+                <th>Half-Yearly Fee</th>
+                <th>Yearly Fee</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let fc of feeConfigList">
+                <td>{{ fc.country_name || 'India' }}</td>
+                <td class="fw-bold text-dark">{{ fc.subject }}</td>
+                <td class="text-success font-weight-bold">₹{{ fc.monthly_fee }}</td>
+                <td class="text-success font-weight-bold">₹{{ fc.quarterly_fee }}</td>
+                <td class="text-success font-weight-bold">₹{{ fc.halfyearly_fee }}</td>
+                <td class="text-success font-weight-bold">₹{{ fc.yearly_fee }}</td>
+                <td><span class="badge bg-success">CONFIGURED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: TRANSACTIONS (STUDENT & TEACHER PAYOUTS WITH FILTERS) -->
+    <div *ngIf="activeTab === 'transactions'">
+      <h4 class="fw-bold mb-3">Financial Audit & Transaction Logs</h4>
+
+      <!-- Student Tuition Transactions -->
+      <div class="card border-0 shadow-sm rounded-3 mb-4 p-3">
+        <h5 class="fw-bold mb-3 text-dark"><i class="fas fa-user-graduate text-primary me-2"></i> Student Tuition Payments</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead class="table-light">
+              <tr><th>Txn ID</th><th>Student</th><th>Email</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let st of studentTxns">
+                <td class="fw-bold text-primary">{{ st.transaction_id }}</td>
+                <td>{{ st.student_name }}</td>
+                <td>{{ st.student_email }}</td>
+                <td class="fw-bold text-success">₹{{ st.amount }}</td>
+                <td>{{ st.payment_method }}</td>
+                <td><span class="badge bg-success">{{ st.payment_status }}</span></td>
+                <td>{{ st.created_at | date:'short' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Teacher Payouts with Multi-Filters -->
+      <div class="card border-0 shadow-sm rounded-3 p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-chalkboard-teacher text-warning me-2"></i> Teacher Transaction Payouts</h5>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="row g-2 mb-3 bg-light p-2 rounded-3 border">
+          <div class="col-md-3">
+            <label class="form-label small font-weight-bold mb-1">Filter Subject</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="payoutFilter.subject" placeholder="e.g. Mathematics">
+          </div>
+          <div class="col-md-3 align-self-end">
+            <button class="btn btn-sm btn-dark w-100" (click)="applyPayoutFilters()">
+              <i class="fas fa-filter me-1"></i> Apply Filters
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead class="table-light">
+              <tr><th>Payout ID</th><th>Teacher</th><th>Country/State</th><th>Subject</th><th>Classes Covered</th><th>Payout Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tp of teacherPayouts">
+                <td class="fw-bold text-dark">{{ tp.payout_id }}</td>
+                <td>{{ tp.teacher_name }}</td>
+                <td>{{ tp.country_name }} ({{ tp.state_name || '-' }})</td>
+                <td><span class="badge bg-info text-dark">{{ tp.subject }}</span></td>
+                <td>{{ tp.classes_covered }} Sessions</td>
+                <td class="fw-bold text-success">₹{{ tp.amount_paid }}</td>
+                <td><span class="badge bg-success">{{ tp.payout_status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: MANAGE CLASS PAYMENTS -->
+    <div *ngIf="activeTab === 'payments'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">Class Payment Gateways & Methods</h4>
+          <p class="text-muted small mb-0">Configure online payment gateways (Cards, Wallets, UPI, NetBanking).</p>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6" *ngFor="let gw of paymentGateways">
+          <div class="card border-0 shadow-sm rounded-3 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas fa-credit-card fa-2x text-primary"></i>
+              <div>
+                <h6 class="fw-bold mb-0 text-dark">{{ gw.gateway_name }}</h6>
+                <span class="small text-muted">Status: {{ gw.is_enabled == 1 ? 'ENABLED' : 'DISABLED' }}</span>
+              </div>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" [checked]="gw.is_enabled == 1" (change)="togglePaymentGateway(gw)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TEACHER APPROVAL MODAL -->
+<div class="modal d-block bg-dark bg-opacity-50" *ngIf="showTeacherModal && selectedTeacher">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold"><i class="fas fa-id-card text-warning me-2"></i> Review Teacher Verification & Bank Details</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeTeacherModal()"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <span class="text-muted small font-weight-bold">TEACHER NAME</span>
+            <h5 class="fw-bold text-dark mb-0">{{ selectedTeacher.name }}</h5>
+            <span class="text-muted small">{{ selectedTeacher.email }} | {{ selectedTeacher.mobile_number }}</span>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted small font-weight-bold">IDENTIFICATION PROOF</span>
+            <p class="fw-bold text-primary mb-0">{{ selectedTeacher.proof_type || 'Aadhaar Card' }} (Verified Image attached)</p>
+          </div>
+        </div>
+
+        <div class="bg-light p-3 rounded-3 border mb-4">
+          <h6 class="fw-bold text-dark mb-2"><i class="fas fa-university text-success me-2"></i> Bank Payout Details</h6>
+          <div class="row g-2 small">
+            <div class="col-md-4"><strong>Bank Name:</strong> {{ selectedTeacher.bank_name || 'State Bank of India' }}</div>
+            <div class="col-md-4"><strong>Account Number:</strong> {{ selectedTeacher.account_number || 'XXXXXX4920' }}</div>
+            <div class="col-md-4"><strong>IFSC Code:</strong> {{ selectedTeacher.ifsc_code || 'SBIN0001234' }}</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label font-weight-bold small">Admin Rejection Notes (Required if Rejecting)</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="rejectionNotes" placeholder="Provide clear reason if rejecting teacher credentials..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button class="btn btn-outline-secondary rounded-pill px-4" (click)="closeTeacherModal()">Close</button>
+        <button class="btn btn-danger rounded-pill px-4" (click)="verifyTeacher('2')"><i class="fas fa-times me-1"></i> Reject Credentials</button>
+        <button class="btn btn-success rounded-pill px-4" (click)="verifyTeacher('1')"><i class="fas fa-check me-1"></i> Approve Teacher & Bank Details</button>
+      </div>
+    </div>
+  </div>
+</div>

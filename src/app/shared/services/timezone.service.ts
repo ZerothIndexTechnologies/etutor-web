@@ -118,6 +118,26 @@ export class TimezoneService {
     return tz.split('/')[1] || tz;
   }
 
+  getStartDateTime(schedDateStr: string, timeStr: string): Date | null {
+    if (!timeStr) return null;
+    try {
+      const normalized = this.parseTimeString(timeStr);
+      const [hStr, mStr] = normalized.split(':');
+      const hours = parseInt(hStr, 10);
+      const minutes = parseInt(mStr, 10);
+
+      let baseDate = new Date();
+      if (schedDateStr && schedDateStr !== '0000-00-00') {
+        const p = new Date(schedDateStr.includes('T') ? schedDateStr : `${schedDateStr}T00:00:00`);
+        if (!isNaN(p.getTime())) baseDate = p;
+      }
+
+      return new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), baseDate.getUTCDate(), hours, minutes, 0));
+    } catch (e) {
+      return null;
+    }
+  }
+
   private parseTimeString(timeStr: string): string {
     const match = timeStr.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
     if (!match) return '00:00:00';

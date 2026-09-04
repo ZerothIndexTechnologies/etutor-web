@@ -1,0 +1,47 @@
+<div class="jaas-modal-backdrop">
+  <div class="jaas-modal-content">
+    
+    <!-- Modal Header -->
+    <div class="jaas-header">
+      <div class="d-flex align-items-center gap-2">
+        <span class="live-indicator-badge" *ngIf="!loading && !errorMessage">
+          <i class="fa fa-circle text-danger me-1 blink"></i> LIVE
+        </span>
+        <h4 class="mb-0 text-white font-weight-bold">{{ roomTitle }}</h4>
+        <span class="badge bg-primary text-uppercase ms-2" *ngIf="isModerator">Moderator</span>
+      </div>
+
+      <button type="button" class="btn-close-modal" (click)="closeClassroom()" aria-label="Close">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body / JaaS Frame Container -->
+    <div class="jaas-body">
+      <!-- Loading State -->
+      <div class="jaas-state-box" *ngIf="loading">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5 class="text-white">Connecting to Secure JaaS Classroom...</h5>
+        <p class="text-white-50 small">Verifying active subscription and generating secure tokens</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="jaas-state-box error-box" *ngIf="!loading && errorMessage">
+        <div class="error-icon-circle mb-3">
+          <i class="fa fa-exclamation-triangle"></i>
+        </div>
+        <h4 class="text-white mb-2">Access Denied</h4>
+        <p class="text-light mb-4">{{ errorMessage }}</p>
+        <button class="btn btn-outline-light rounded-pill px-4" (click)="closeClassroom()">
+          Return to Dashboard
+        </button>
+      </div>
+
+      <!-- Jitsi Frame Host -->
+      <div #jitsiContainer class="jitsi-frame-container" [class.d-none]="loading || errorMessage"></div>
+    </div>
+
+  </div>
+</div>

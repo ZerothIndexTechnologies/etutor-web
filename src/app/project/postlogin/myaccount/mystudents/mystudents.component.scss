@@ -1,0 +1,110 @@
+.student-list-card {
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.student-avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+}
+
+.table-student-list {
+  border-collapse: separate !important;
+  border-spacing: 0 4px !important;
+
+  thead {
+    th {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      padding: 6px 12px;
+    }
+  }
+
+  tbody {
+    tr {
+      background-color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #f8fafc;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+      }
+
+      td {
+        padding: 8px 12px !important;
+        vertical-align: middle;
+        border-top: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+
+        &:first-child {
+          border-left: 3px solid #3b82f6;
+          border-top-left-radius: 8px;
+          border-bottom-left-radius: 8px;
+        }
+
+        &:last-child {
+          border-right: 1px solid #f1f5f9;
+          border-top-right-radius: 8px;
+          border-bottom-right-radius: 8px;
+        }
+      }
+    }
+  }
+}
+
+/* Compact Icon-Only Action Buttons */
+.action-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  font-size: 12px;
+  margin-left: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  outline: none;
+
+  &.action-view {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+
+    &:hover {
+      background-color: #2563eb;
+      color: #ffffff;
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+  }
+
+  &.action-reminder {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+
+    &:hover {
+      background-color: #f59e0b;
+      color: #ffffff;
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+    }
+  }
+}

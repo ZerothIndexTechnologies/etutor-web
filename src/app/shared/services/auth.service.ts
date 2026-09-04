@@ -148,6 +148,23 @@ export class AuthService {
     return JSON.parse(this.getLocalStorage('loggedInUser'));
   }
 
+  get isTeacherUser(): boolean {
+    try {
+      const userStr = this.getLocalStorage('user');
+      if (userStr && userStr !== 'null') {
+        const u = JSON.parse(userStr);
+        if (u.role_id == '2' || u.role_id == 2 || u.user_type == '1' || u.user_type == 1 || u.is_teacher == '1' || u.is_teacher == 1 || u.is_teacher === true) {
+          return true;
+        }
+      }
+      const roleId = String(this.getRoleId());
+      const userType = String(this.getUserType);
+      return roleId === '2' || userType === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
   get teacherVerificationStatus() {
     try {
       const userDetails = JSON.parse(this.getLocalStorage('user') || '{}');

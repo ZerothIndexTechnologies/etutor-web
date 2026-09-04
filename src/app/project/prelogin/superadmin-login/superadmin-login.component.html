@@ -1,0 +1,41 @@
+<div class="admin-login-wrapper d-flex align-items-center justify-content-center min-vh-100 p-3">
+  <div class="card admin-card shadow-lg border-0 rounded-4 overflow-hidden" style="max-width: 440px; width: 100%;">
+    <div class="card-header bg-dark text-white text-center py-4 border-0">
+      <div class="admin-icon-circle mx-auto mb-2">
+        <i class="fas fa-user-shield fa-2x text-warning"></i>
+      </div>
+      <h4 class="fw-bold mb-1">eTutor SuperAdmin</h4>
+      <p class="text-white-50 small mb-0">Platform Governance & Management Portal</p>
+    </div>
+
+    <div class="card-body p-4 bg-white">
+      <form (ngSubmit)="onAdminLogin()">
+        <div class="mb-3">
+          <label class="form-label font-weight-bold text-dark" style="font-size: 13px;">SuperAdmin Username / Email</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 ps-0" [(ngModel)]="email" name="email" placeholder="admin@etutor.com" required>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label font-weight-bold text-dark" style="font-size: 13px;">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+            <input type="password" class="form-control border-start-0 ps-0" [(ngModel)]="password" name="password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 py-2.5 rounded-3 font-weight-bold shadow-sm d-flex align-items-center justify-content-center gap-2" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <i *ngIf="!loading" class="fas fa-sign-in-alt"></i>
+          <span>{{ loading ? 'Authenticating...' : 'Sign In as SuperAdmin' }}</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="card-footer bg-light text-center py-3 border-0 text-muted small">
+      Default Admin: <strong>admin&#64;etutor.com</strong> | Password: <strong>admin123</strong>
+    </div>
+  </div>
+</div>

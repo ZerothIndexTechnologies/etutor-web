@@ -83,18 +83,44 @@ export class ClassListComponent implements OnInit {
   }
 
   constructor(private fb: FormBuilder, private router: Router, protected auth: AuthService, private dialog: MatDialog) {
-    this.subjectList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).subjects;
-    this.gradeList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).grade;
-    this.curriculumList = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData)).curriculum;
+    try {
+      const configStr = this.auth.getLocalStorage(SessionConstants.configData);
+      const config = configStr ? JSON.parse(configStr) : null;
+      this.subjectList = config?.subjects || [];
+      this.gradeList = config?.grade || [];
+      this.curriculumList = config?.curriculum || [];
+    } catch (e) {
+      this.subjectList = [];
+      this.gradeList = [];
+      this.curriculumList = [];
+    }
   }
 
+  public attendanceHistoryList: any[] = [];
+  public activeTab: string = 'classes';
   public verificationStatus: string = '0';
   public rejectionNotes: string = '';
 
+  loadAttendanceHistory(): void {
+    const payload = { student_id: this.auth.getUserId() };
+    this.auth.postService<any>(payload, Urls.getAttendanceHistory).subscribe({
+      next: (res: any) => {
+        if (res && res.IsSuccess && Array.isArray(res.ResponseObject)) {
+          this.attendanceHistoryList = res.ResponseObject;
+        } else {
+          this.attendanceHistoryList = [];
+        }
+      },
+      error: (err: any) => console.error(err)
+    });
+  }
+
   ngOnInit() {
     this.classList();
-    if (this.auth.getRoleId() == '2') {
+    if (this.auth.isTeacherUser) {
       this.loadTeacherVerificationStatus();
+    } else {
+      this.loadAttendanceHistory();
     }
   }
 
@@ -158,34 +184,127 @@ export class ClassListComponent implements OnInit {
     this.router.navigate(['myaccount/myclasses/create-class/add']);
   }
 
+  public activeClassId: number | null = null;
+
   joinNow(classData: any) {
     this.joinLiveRoom(classData);
   }
 
   joinLiveRoom(classData: any) {
-    const sanitizedTitle = (classData.subject || 'Class').replace(/[^a-zA-Z0-9]/g, '_');
-    const classId = classData.class_id || Date.now();
-    this.activeRoomName = `Etutor_Class_${sanitizedTitle}_${classId}`;
-    this.activeRoomTitle = `${classData.subject || 'Class'} (${classData.start_time || 'Live Session'})`;
-
-    try {
-      const userDetails = this.auth.getUserDetails();
-      if (userDetails && userDetails.name) {
-        this.currentUserName = userDetails.name;
-      } else if (userDetails && userDetails.first_name) {
-        this.currentUserName = `${userDetails.first_name} ${userDetails.last_name || ''}`.trim();
-      } else {
-        this.currentUserName = this.auth.getRoleId() == '3' ? 'Student' : 'Teacher';
-      }
-    } catch (e) {
-      this.currentUserName = this.auth.getRoleId() == '3' ? 'Student' : 'Teacher';
+    const classId = classData.id || classData.class_id;
+    if (!classId) {
+      this.helper.presentErrorToast('Invalid Class ID.');
+      return;
     }
 
-    this.isLiveClassOpen = true;
+    this.helper.presentToast('Connecting to secure live classroom...');
+
+    this.auth.postService({ class_id: classId }, Urls.joinLiveClass).subscribe({
+      next: (response: any) => {
+        if (response && response.IsSuccess && response.ResponseObject) {
+          const data = response.ResponseObject;
+          const jaasUrl = `https://8x8.vc/${data.appId}/${data.cleanRoom || data.roomName}?jwt=${data.jwt}`;
+          
+          // Open JaaS meeting in a new browser tab
+          const newTab = window.open(jaasUrl, '_blank');
+          if (!newTab) {
+            // Popup blocker fallback
+            this.activeClassId = classId;
+            this.activeRoomName = data.cleanRoom || data.roomName;
+            this.activeRoomTitle = data.title || classData.subject || 'Live Class';
+            this.isLiveClassOpen = true;
+          }
+        } else {
+          this.helper.presentErrorToast(response?.ErrorObject || 'Failed to join live class. Please check your subscription.');
+        }
+      },
+      error: (err: any) => {
+        const errorMsg = err?.error?.ErrorObject || 'Unable to join live class. Please check your subscription and scheduled start time.';
+        this.helper.presentErrorToast(errorMsg);
+      }
+    });
+  }
+
+  parseTimeToDate(dateStr: string, timeStr: string): Date | null {
+    if (!timeStr) return null;
+    try {
+      const today = new Date();
+      let d = today;
+      if (dateStr && dateStr !== '0000-00-00') {
+        const parsed = new Date(dateStr.includes('T') ? dateStr : `${dateStr}T00:00:00`);
+        if (!isNaN(parsed.getTime())) d = parsed;
+      }
+
+      let hours = 0;
+      let minutes = 0;
+      const timeUpper = timeStr.trim().toUpperCase();
+      const isPM = timeUpper.includes('PM');
+      const isAM = timeUpper.includes('AM');
+
+      const cleanTime = timeUpper.replace(/AM|PM/g, '').trim();
+      const parts = cleanTime.split(':');
+      hours = parseInt(parts[0], 10) || 0;
+      minutes = parseInt(parts[1], 10) || 0;
+
+      if (isPM && hours < 12) hours += 12;
+      if (isAM && hours === 12) hours = 0;
+
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate(), hours, minutes, 0);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  canShowLiveRoomButton(classData: any): boolean {
+    if (!classData) return false;
+    if (classData.status === 'COMPLETED' || classData.status === 'CANCELLED') return false;
+    if (classData.status === 'LIVE') return true;
+
+    try {
+      const schedDate = classData.scheduled_date || classData.created_date || '';
+      const startTimeStr = classData.start_time || '';
+      if (!startTimeStr) return false;
+
+      const startDateTime = this.timezoneService.getStartDateTime(schedDate, startTimeStr);
+      if (!startDateTime) return false;
+
+      const now = new Date();
+      const fifteenMinsBeforeStart = new Date(startDateTime.getTime() - 15 * 60 * 1000);
+
+      let endDateTime: Date | null = null;
+      if (classData.end_time) {
+        endDateTime = this.timezoneService.getStartDateTime(schedDate, classData.end_time);
+      }
+      if (!endDateTime) {
+        endDateTime = new Date(startDateTime.getTime() + 2 * 3600 * 1000);
+      }
+
+      return (now >= fifteenMinsBeforeStart && now <= endDateTime);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  endLiveClass(classData: any) {
+    const classId = classData.id || classData.class_id;
+    if (!classId) return;
+
+    this.auth.postService({ class_id: classId, status: 'COMPLETED' }, Urls.updateLiveClassStatus).subscribe({
+      next: (res: any) => {
+        if (res && res.IsSuccess) {
+          this.helper.presentToast('Class ended and marked as COMPLETED.');
+          this.classList();
+        } else {
+          this.helper.presentErrorToast(res?.ErrorObject || 'Failed to end class.');
+        }
+      },
+      error: () => this.helper.presentErrorToast('Error ending class.')
+    });
   }
 
   closeLiveClass() {
     this.isLiveClassOpen = false;
+    this.activeClassId = null;
   }
 
   public studentGradeName: string = '';

@@ -46,7 +46,7 @@ export class myAccountComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.auth.getRoleId() != '3') {
+    if (this.auth.isTeacherUser) {
       const userId = this.auth.getUserId();
       if (userId) {
         this.auth.http.get<any>(`${Urls.notifyTeacherProfileStatus}?id=${userId}`).subscribe({
@@ -79,6 +79,11 @@ export class myAccountComponent implements OnInit {
           active: true,
         },
         {
+          title: 'My Students',
+          url: '/myaccount/mystudents',
+          active: false,
+        },
+        {
           title: 'Wallet',
           url: '/myaccount/wallet',
           active: false,
@@ -109,6 +114,11 @@ export class myAccountComponent implements OnInit {
         {
           title: 'Reserve Classes',
           url: '/myaccount/reserve-class/list',
+          active: false,
+        },
+        {
+          title: 'Attendance History',
+          url: '/myaccount/attendance-history',
           active: false,
         },
         {

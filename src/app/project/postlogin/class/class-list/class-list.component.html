@@ -32,24 +32,32 @@
               <div class="row p-2 cursor">
                 <div class="col-12">
                   <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-md-5 d-flex align-items-center gap-2">
                       <h6 class="mb-2">
-                        <span class="font-weight-bold" style="font-size: 18px">{{classData.subject}}</span>
+                        <span class="font-weight-bold text-capitalize" style="font-size: 18px">{{classData.subject | titlecase}}</span>
                       </h6>
+                      <span class="badge bg-danger" *ngIf="classData.status === 'LIVE'">LIVE</span>
+                      <span class="badge bg-secondary" *ngIf="classData.status === 'SCHEDULED' || !classData.status">UPCOMING</span>
+                      <span class="badge bg-dark" *ngIf="classData.status === 'COMPLETED'">ENDED</span>
                     </div>
                     <div class="col-md-7 text-right d-flex justify-content-end align-items-center gap-1 flex-wrap">
-                      <button (click)="joinLiveRoom(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm">
+                      <button (click)="joinLiveRoom(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm" *ngIf="canShowLiveRoomButton(classData)">
                         <i class="fas fa-video me-1"></i> Live Room
                       </button>
-                      <button *ngIf="auth.getRoleId() != '3'" (click)="send10MinReminder(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-outline-warning btn-sm rounded-pill font-weight-bold shadow-sm text-dark" title="Send 10-Minute Alert Email to Students">
-                        <i class="fas fa-bell me-1 text-warning"></i> Send 10-Min Alert
+                      <button *ngIf="auth.getRoleId() != '3' && canShowLiveRoomButton(classData)" (click)="send10MinReminder(classData)" class="btn btn-warning btn-sm rounded-circle shadow-sm text-dark p-0 d-inline-flex align-items-center justify-content-center" style="width: 30px; height: 30px;" title="Send 10-Minute Alert Email to Students">
+                        <i class="fas fa-bell text-dark" style="font-size: 13px;"></i>
+                      </button>
+                      <span class="badge bg-light text-dark border py-1 px-2 me-1" *ngIf="!canShowLiveRoomButton(classData) && classData.status !== 'COMPLETED' && classData.status !== 'CANCELLED'" style="font-size: 11px;">
+                        <i class="fas fa-clock me-1 text-muted"></i> Opens 15m before start
+                      </span>
+                      <button *ngIf="auth.getRoleId() != '3' && classData.status === 'LIVE'" (click)="endLiveClass(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-danger btn-sm rounded-pill font-weight-bold shadow-sm">
+                        <i class="fas fa-stop-circle me-1"></i> End Class
                       </button>
                       <button *ngIf="auth.getRoleId() == '3'" (click)="subscribeLiveClass(classData)" style="padding: 4px 10px; font-size: 12px;" class="btn btn-warning btn-sm rounded-pill font-weight-bold shadow-sm text-dark">
                         <i class="fas fa-star me-1"></i> Subscribe Live Class
                       </button>
                       <div *ngIf="auth.getRoleId() != '3'" class="d-inline-flex align-items-center ms-2">
                         <i class="fa fa-link cursor" title="Update Meeting Link" (click)="updateMeetingLink(classData)"></i>
-                        <i class="fa fa-plus ms-2 cursor" title="Add More Session" (click)="editClass(classData)"></i>
                         <i class="far fa-trash-alt ms-2 cursor" title="Delete Class" (click)="deleteClass(classData)"></i>
                       </div>
                     </div>
@@ -153,6 +161,7 @@
 <!-- Embedded Live Virtual Classroom Modal -->
 <app-live-classroom-modal
   [isOpen]="isLiveClassOpen"
+  [classId]="activeClassId"
   [roomName]="activeRoomName"
   [roomTitle]="activeRoomTitle"
   [userName]="currentUserName"

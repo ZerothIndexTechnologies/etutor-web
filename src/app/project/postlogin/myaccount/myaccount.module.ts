@@ -36,9 +36,19 @@ const routes: Routes = [
         loadChildren: () => import('../reserve-class/reserve-class.module').then(m => m.ReserveClassModule)
       },
       {
+        path: 'attendance-history',
+        loadComponent: () => import('./attendance-history/attendance-history.component').then(m => m.AttendanceHistoryComponent),
+        data: { breadcrumb: 'Attendance History' },
+      },
+      {
         path: 'myclasses',
         component: ClassListComponent,
         data: { breadcrumb: 'Classes' },
+      },
+      {
+        path: 'mystudents',
+        loadComponent: () => import('./mystudents/mystudents.component').then(m => m.MyStudentsComponent),
+        data: { breadcrumb: 'My Students' },
       },
       {
         path: 'mymessages',

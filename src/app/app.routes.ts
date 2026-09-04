@@ -64,4 +64,16 @@ export const routes: Routes = [
     path: 'subscription',
     component: PlansSubscriptionComponent,
   },
+  {
+    path: 'teacher/list',
+    loadComponent: () => import('./project/postlogin/class/class-list/class-list.component').then(m => m.ClassListComponent),
+  },
+  {
+    path: 'superadmin/login',
+    loadComponent: () => import('./project/prelogin/superadmin-login/superadmin-login.component').then(m => m.SuperAdminLoginComponent),
+  },
+  {
+    path: 'superadmin',
+    loadComponent: () => import('./project/postlogin/superadmin/superadmin-portal.component').then(m => m.SuperAdminPortalComponent),
+  },
 ];
