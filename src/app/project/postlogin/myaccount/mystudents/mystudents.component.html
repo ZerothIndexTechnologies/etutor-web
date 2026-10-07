@@ -1,23 +1,72 @@
-<div class="card student-list-card border-0 p-3">
-  <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="card student-list-card border-0 p-4 shadow-sm mb-4">
+  <!-- Top Header & Action Bar -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-      <h5 class="fw-bold text-dark mb-0"><i class="fas fa-user-graduate text-primary me-2"></i> My Students Directory</h5>
-      <p class="text-muted small mb-0">Students enrolled in your live classes and subjects.</p>
+      <h5 class="fw-bold text-dark mb-1 d-flex align-items-center">
+        <i class="fas fa-user-graduate brand-orange-text me-2 fs-5"></i> My Enrolled Students Directory
+      </h5>
+      <p class="text-muted text-xs mb-0">Select an enrolled class and subject below to view and filter your student list.</p>
     </div>
-    <button class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 shadow-sm" (click)="loadMyStudents()">
-      <i class="fas fa-sync-alt me-1"></i> Refresh List
-    </button>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-outline-orange rounded-pill px-3 py-1-5 text-xs fw-semibold shadow-sm" (click)="resetAllFilters()" title="Reset All Filters">
+        <i class="fas fa-undo me-1"></i> Reset Filters
+      </button>
+      <button class="btn btn-sm btn-orange rounded-pill px-3 py-1-5 text-xs fw-bold shadow-sm" (click)="loadMyStudents()" title="Refresh List">
+        <i class="fas fa-sync-alt me-1"></i> Refresh
+      </button>
+    </div>
   </div>
 
+  <!-- Separate Class & Subject Filter Bar -->
+  <div class="row g-3 mb-4 align-items-center bg-light p-3 rounded-4 border">
+    <!-- Filter 1: Enrolled Class -->
+    <div class="col-md-4 col-12">
+      <div class="position-relative">
+        <select class="form-select filter-select rounded-pill px-3 py-2 text-xs fw-bold shadow-sm" [(ngModel)]="selectedClassFilter" (change)="onClassChange()">
+          <option *ngFor="let opt of classOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Filter 2: Enrolled Subject -->
+    <div class="col-md-4 col-12">
+      <div class="position-relative">
+        <select class="form-select filter-select rounded-pill px-3 py-2 text-xs fw-bold shadow-sm" [(ngModel)]="selectedSubjectFilter" (change)="onSubjectChange()">
+          <option *ngFor="let opt of subjectOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="col-md-4 col-12">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3">
+          <i class="fas fa-search text-muted text-xs"></i>
+        </span>
+        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" class="form-control border-start-0 rounded-end-pill py-2 text-xs" placeholder="Search by student name or email..." />
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Count Bar -->
+  <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+    <span class="text-xs text-muted">Showing enrolled students for your active classes.</span>
+    <span class="badge bg-white text-dark border px-3 py-1-5 rounded-pill text-xs fw-bold shadow-2sm">
+      <i class="fas fa-users brand-orange-text me-1"></i> Showing {{ filteredStudentList.length }} / {{ totalStudentsCount }} Enrolled Students
+    </span>
+  </div>
+
+  <!-- Students Table -->
   <div class="table-responsive">
     <table class="table table-student-list align-middle mb-0">
       <thead>
         <tr>
-          <th style="width: 60px;">ID</th>
+          <th style="width: 50px;">ID</th>
           <th>Student Details</th>
-          <th>Contact Email</th>
+          <th>Respected Enrolled Subject</th>
+          <th>Assigned Class / Course</th>
           <th>Grade</th>
-          <th>Enrolled Subject</th>
+          <th>Contact Details</th>
           <th>Attendance</th>
           <th class="text-end" style="width: 90px;">Actions</th>
         </tr>
@@ -29,40 +78,90 @@
             <div class="d-flex align-items-center">
               <div class="student-avatar-circle me-2">{{ (st.name || 'S')[0] | uppercase }}</div>
               <div>
-                <div class="fw-bold text-dark" style="font-size: 13.5px;">{{ st.name }}</div>
-                <span class="badge bg-light text-secondary border" style="font-size: 9px; padding: 2px 6px;">Subscribed Student</span>
+                <div class="fw-bold text-dark" style="font-size: 13.5px;">{{ st.name | capitalize }}</div>
+                <span class="badge badge-sub-student" style="font-size: 9px; padding: 2px 6px;">Subscribed Student</span>
               </div>
             </div>
           </td>
           <td>
-            <div class="text-dark fw-bold small"><i class="fas fa-envelope text-primary me-1"></i> {{ st.email }}</div>
+            <span class="badge badge-orange-light px-3 py-1-5 rounded-pill fw-bold shadow-2sm" style="font-size: 11.5px;">
+              <i class="fas fa-book-open brand-orange-text me-1"></i> {{ st.enrolled_subject | capitalize }}
+            </span>
           </td>
-          <td><span class="badge bg-primary px-2 py-1 rounded-pill fw-bold" style="font-size: 11px;">{{ st.grade_name }}</span></td>
-          <td><span class="badge bg-info text-dark px-2 py-1 rounded-pill fw-bold text-capitalize" style="font-size: 11px;">{{ st.enrolled_subject | titlecase }}</span></td>
           <td>
-            <span class="badge bg-success px-2 py-1 rounded-pill fw-bold shadow-sm" style="font-size: 11px;">
-              <i class="fas fa-check-circle me-1"></i> {{ st.attendance_status }}
+            <span class="badge badge-class-name text-dark border bg-white px-2-5 py-1-5 rounded-pill fw-bold shadow-2sm" style="font-size: 11px;">
+              <i class="fas fa-chalkboard brand-orange-text me-1"></i> {{ (st.class_name || st.title || 'Class') | capitalize }}
+            </span>
+          </td>
+          <td><span class="badge badge-primary-orange px-2-5 py-1 rounded-pill fw-bold" style="font-size: 11px;">{{ st.grade_name | capitalize }}</span></td>
+          <td>
+            <div class="text-dark fw-bold small mb-0.5"><i class="fas fa-envelope brand-orange-text me-1"></i> {{ st.email }}</div>
+            <div class="text-muted text-xs"><i class="fas fa-phone-alt me-1" style="font-size: 10px;"></i> {{ st.mobile_number }}</div>
+          </td>
+          <td>
+            <span class="badge bg-success-light text-success px-2-5 py-1 rounded-pill fw-bold shadow-sm" style="font-size: 11px;">
+              <i class="fas fa-check-circle me-1"></i> {{ st.attendance_status | capitalize }}
             </span>
           </td>
           <td class="text-end" style="white-space: nowrap;">
             <div class="d-inline-flex align-items-center justify-content-end gap-2 flex-nowrap">
-              <button class="action-icon-btn action-view" (click)="openStudentDetails(st)" title="View Student Profile">
+              <button class="action-icon-btn action-view" (click)="openStudentDetails(st)" title="View Student Profile & Class Info">
                 <i class="fas fa-eye"></i>
               </button>
-              <button class="action-icon-btn action-reminder" (click)="sendReminder(st)" title="Send Meeting Alert Email">
+              <button class="action-icon-btn action-reminder" (click)="sendReminder(st)" title="Send Class Reminder Email">
                 <i class="fas fa-bell"></i>
               </button>
             </div>
           </td>
         </tr>
         <tr *ngIf="studentList.length === 0 && !loading">
-          <td colspan="7" class="text-center py-4 text-muted small">
+          <td colspan="8" class="text-center py-5 text-muted small">
             <i class="fas fa-user-slash fa-2x d-block mb-2 text-secondary"></i>
-            No students currently enrolled in your classes.
+            No students found matching your selected class filter or search criteria.
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Pagination Control Bar -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top" *ngIf="filteredStudentList.length > 0">
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-xs text-muted">
+        Showing <strong>{{ startIndex }}</strong> - <strong>{{ endIndex }}</strong> of <strong>{{ filteredStudentList.length }}</strong> students
+      </span>
+      <div class="d-flex align-items-center gap-1">
+        <label class="text-xs text-muted me-1 mb-0">Items per page:</label>
+        <select class="form-select form-select-sm border rounded-pill text-xs px-2 py-1" style="width: 75px;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <nav aria-label="Students pagination" *ngIf="totalPages > 1">
+      <ul class="pagination pagination-sm mb-0 align-items-center gap-1">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link rounded-circle border-0 shadow-2sm" (click)="prevPage()" [disabled]="currentPage === 1" title="Previous Page">
+            <i class="fas fa-chevron-left text-xs"></i>
+          </button>
+        </li>
+
+        <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="currentPage === page">
+          <button class="page-link rounded-circle border-0 shadow-2sm fw-bold" (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </li>
+
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link rounded-circle border-0 shadow-2sm" (click)="nextPage()" [disabled]="currentPage === totalPages" title="Next Page">
+            <i class="fas fa-chevron-right text-xs"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </div>
 
@@ -70,29 +169,35 @@
 <div class="modal d-block bg-dark bg-opacity-50" *ngIf="showDetailModal && selectedStudent">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title fw-bold"><i class="fas fa-id-card text-warning me-2"></i> Student Details Profile</h5>
-        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      <div class="modal-header bg-white text-dark border-bottom px-4 py-3">
+        <h5 class="modal-title fw-bold text-dark text-sm"><i class="fas fa-id-card brand-orange-text me-2"></i> Student Profile & Class Info</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
       </div>
       <div class="modal-body p-4">
         <div class="text-center mb-3">
-          <div class="student-avatar-circle mx-auto mb-2 fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 20px;">
+          <div class="student-avatar-circle mx-auto mb-2 fw-bold d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; font-size: 22px;">
             {{ (selectedStudent.name || 'S')[0] | uppercase }}
           </div>
-          <h5 class="fw-bold text-dark mb-0">{{ selectedStudent.name }}</h5>
-          <span class="badge bg-primary px-3 py-1 mt-1">{{ selectedStudent.grade_name }}</span>
+          <h5 class="fw-bold text-dark mb-1">{{ selectedStudent.name | capitalize }}</h5>
+          <span class="badge badge-primary-orange px-3 py-1 rounded-pill text-xs fw-bold">{{ selectedStudent.grade_name | capitalize }}</span>
         </div>
 
         <div class="bg-light p-3 rounded-3 border mb-3 small">
+          <div class="mb-2.5">
+            <strong>Assigned Class / Course:</strong> 
+            <span class="badge bg-white text-dark border px-2-5 py-1 ms-1 fw-bold rounded-pill">
+              <i class="fas fa-chalkboard brand-orange-text me-1"></i> {{ (selectedStudent.class_name || selectedStudent.title || 'Class') | capitalize }}
+            </span>
+          </div>
           <div class="mb-2"><strong>Email Address:</strong> {{ selectedStudent.email }}</div>
           <div class="mb-2"><strong>Mobile Phone:</strong> {{ selectedStudent.mobile_number || 'N/A' }}</div>
-          <div class="mb-2"><strong>Enrolled Subject:</strong> {{ selectedStudent.enrolled_subject }}</div>
-          <div><strong>Live Attendance Rate:</strong> {{ selectedStudent.attendance_status }}</div>
+          <div class="mb-2"><strong>Enrolled Subject:</strong> {{ selectedStudent.enrolled_subject | capitalize }}</div>
+          <div><strong>Live Attendance Rate:</strong> {{ selectedStudent.attendance_status | capitalize }}</div>
         </div>
       </div>
       <div class="modal-footer bg-light">
-        <button class="btn btn-secondary rounded-pill px-4" (click)="closeModal()">Close</button>
-        <button class="btn btn-warning rounded-pill px-4 fw-bold" (click)="sendReminder(selectedStudent)">
+        <button class="btn btn-light border rounded-pill px-4 fw-semibold text-xs py-2" (click)="closeModal()">Close</button>
+        <button class="btn btn-orange rounded-pill px-4 fw-bold text-xs py-2" (click)="sendReminder(selectedStudent)">
           <i class="fas fa-bell me-1"></i> Send Class Alert Email
         </button>
       </div>

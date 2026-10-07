@@ -5,8 +5,8 @@
   transition: all 0.2s ease-in-out;
 
   &:focus-within {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border-color: #ff7f00;
+    box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15);
     background-color: #ffffff;
   }
 }
@@ -25,4 +25,126 @@
 
 .max-w-600 {
   max-width: 600px;
+}
+
+.stepper-tab-header {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .stepper-tab-item {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #64748b;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    user-select: none;
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: #e2e8f0;
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: all 0.2s ease-in-out;
+    }
+
+    &:hover {
+      color: #0f172a;
+      background-color: #f8fafc;
+
+      .step-num {
+        background-color: #cbd5e1;
+      }
+    }
+
+    &.completed {
+      .step-num {
+        background-color: #10b981;
+        color: #ffffff;
+      }
+    }
+
+    &.active {
+      color: #ff7f00;
+      border-bottom-color: #ff7f00;
+      font-weight: 700;
+      background-color: transparent;
+
+      .step-num {
+        background-color: #ff7f00;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(255, 127, 0, 0.4);
+      }
+    }
+  }
+}
+
+// Brand Primary Color Overrides (#ff7f00)
+.text-primary {
+  color: #ff7f00 !important;
+}
+
+.bg-primary {
+  background-color: #ff7f00 !important;
+}
+
+.border-primary {
+  border-color: #ff7f00 !important;
+}
+
+.btn-primary {
+  background-color: #ff7f00 !important;
+  border-color: #ff7f00 !important;
+  color: #ffffff !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: #e67300 !important;
+    border-color: #e67300 !important;
+    color: #ffffff !important;
+  }
+}
+
+.btn-outline-primary {
+  color: #ff7f00 !important;
+  border-color: #ff7f00 !important;
+  background-color: transparent !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: #ff7f00 !important;
+    border-color: #ff7f00 !important;
+    color: #ffffff !important;
+  }
+}
+
+.custom-ng-select {
+  .ng-select-container {
+    min-height: 48px;
+    background-color: #f8fafc;
+    border-radius: 0.5rem !important;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+
+    &:focus-within {
+      border-color: #ff7f00;
+      box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15);
+    }
+  }
+
+  .ng-value-icon {
+    color: #ffffff !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  &.is-invalid .ng-select-container {
+    border-color: #dc3545 !important;
+  }
 }

@@ -29,7 +29,8 @@ export class AddClassComponent {
 
   public classForm: FormGroup;
   public daysList: any = [];
-  public type: any = 'add'
+  public type: any = 'add';
+  public submitted: boolean = false;
   public auth = inject(AuthService);
   public helper = inject(HelperService);
   public customValidater = inject(CustomValidationService);
@@ -199,67 +200,172 @@ export class AddClassComponent {
     this.helper.presentToast('Jitsi Live Classroom URL auto-generated!');
   }
 
-  submitClass() {
-    this.enableAllField();
-    if (this.classForm.valid && !this.checkForValidAmount && !this.checkValidAmountPerMonthOrYear('amount_quarter')
-      && !this.checkValidAmountPerMonthOrYear('amount_half_year') && !this.checkValidAmountPerMonthOrYear('amount_year')) {
-      if (this.daysList.some((day: any) => day.selected)) {
-        let meetingValue = this.classForm.controls['meeting_link'].value ?? '';
-        if (!meetingValue) {
-          const rawSub = this.classForm.controls['subject'].value || 'Class';
-          meetingValue = `https://meet.jit.si/Etutor_Class_${rawSub.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
-        }
-        const meeting_link = meetingValue.includes('https') ? meetingValue : meetingValue.includes('http') ?
-          meetingValue.replace(/^http:\/\//, 'https://') : 'https://' + meetingValue;
-        const rawStartTime = this.classForm.controls['start_time'].value;
-        const rawEndTime = this.classForm.controls['end_time'].value;
-        const utcStartTime = this.timezoneService.convertLocalToUtc(rawStartTime, this.selectedTimezone);
-        const utcEndTime = this.timezoneService.convertLocalToUtc(rawEndTime, this.selectedTimezone);
+  isAnyDaySelected(): boolean {
+    return this.daysList && this.daysList.some((day: any) => day.selected);
+  }
 
-        const classPayload: any = {
-          classes: [{
-              meeting_link,
-              curriculum_id: this.classForm.controls['curriculum'].value,
-              grade: this.classForm.controls['grade'].value,
-              subject: this.classForm.controls['subject'].value,
-              days: this.daysList.filter((day: any) => {
-                  return day.selected;
-                }).map((value: any) => value.value).toString(),
-              start_time: utcStartTime,
-              end_time: utcEndTime,
-              timezone: this.selectedTimezone,
-              teacher_id: this.auth.getUserId(),
-              monthly_amount: this.classForm.controls['amount_month'].value,
-              quarterly_amount: this.classForm.controls['amount_quarter'].value,
-              halfyearly_amount: this.classForm.controls['amount_half_year'].value,
-              yearly_amount: this.classForm.controls['amount_year'].value,
-            }],
-        };
-        if (this.type == 'edit') {
-          classPayload['class_id'] = this.classForm.controls['class_id'].value;
+  getMaxAmount(field: string): number {
+    const month = parseInt(this.classForm.controls['amount_month']?.value || '0');
+    if (isNaN(month) || month <= 0) return 0;
+    if (field === 'amount_quarter') return month * 3;
+    if (field === 'amount_half_year') return month * 6;
+    if (field === 'amount_year') return month * 12;
+    return 0;
+  }
+
+  isAmountExceeded(formControlName: string): boolean {
+    const formControlAmount = this.classForm.controls[formControlName]?.value;
+    const amount = this.classForm.controls['amount_month']?.value;
+    if (formControlAmount !== '' && formControlAmount !== null && formControlAmount !== undefined) {
+      const val = parseInt(formControlAmount);
+      if (!isNaN(val) && val > 0) {
+        if (amount !== '' && amount !== null && amount !== undefined) {
+          const baseMonth = parseInt(amount);
+          if (!isNaN(baseMonth) && baseMonth > 0) {
+            const maximumAmount = baseMonth * (formControlName === 'amount_quarter' ? 3 :
+              formControlName === 'amount_half_year' ? 6 : 12);
+            return val > maximumAmount;
+          }
         }
-        console.log(classPayload, 'classPayload');
-          this.auth.postService(classPayload, Urls.addClass).subscribe(
-            (successData: any) => {
-              console.log(successData, 'successData');
-              if (successData.IsSuccess) {
-                this.helper.presentToast('Class added successfully');
-                this.router.navigate(['/myaccount/myclasses/list'])
-              } else {
-                this.helper.presentErrorToast(successData.ErrorObject);
-              }
-            },
-            (error: any) => { console.error(error, 'error');});
-      } else {
-        this.helper.presentErrorToast('Kindly select at-least one day to proceed further');
       }
-    } else {
-      this.helper.presentErrorToast('Please enter all the field with valid data');
-      this.customValidater.validateAllFormFields(this.classForm);
-      setTimeout(() => {
-        this.disableAllField()
-      }, 1000)
     }
+    return false;
+  }
+
+  getValidationErrorsList(): string[] {
+    const errors: string[] = [];
+    const val = this.classForm.getRawValue();
+
+    if (this.classForm.get('curriculum')?.enabled && (!val.curriculum || val.curriculum === '')) {
+      errors.push('Board');
+    }
+    if (this.classForm.get('grade')?.enabled && (!val.grade || val.grade === '')) {
+      errors.push('Section');
+    }
+    if (this.classForm.get('subject')?.enabled && (!val.subject || val.subject === '')) {
+      errors.push('Subject');
+    }
+    if (!this.isAnyDaySelected()) {
+      errors.push('Select Days (at least one day)');
+    }
+    if (!val.start_time) {
+      errors.push('Start Time');
+    }
+    if (!val.end_time) {
+      errors.push('End Time');
+    } else if (val.start_time && this.classForm.hasError('startTimeAfterEndTime')) {
+      errors.push('End Time (must be later than Start Time)');
+    }
+    if (this.classForm.get('amount_month')?.enabled) {
+      if (!val.amount_month || val.amount_month.toString().trim() === '') {
+        errors.push('Session Amount Per Month');
+      } else if (parseInt(val.amount_month) <= 0) {
+        errors.push('Session Amount Per Month (must be greater than 0)');
+      }
+    }
+    if (this.classForm.get('amount_quarter')?.enabled) {
+      if (!val.amount_quarter || val.amount_quarter.toString().trim() === '') {
+        errors.push('Session Amount Per Quarter');
+      } else if (this.isAmountExceeded('amount_quarter')) {
+        errors.push(`Session Amount Per Quarter (cannot exceed ${this.getMaxAmount('amount_quarter')})`);
+      }
+    }
+    if (this.classForm.get('amount_half_year')?.enabled) {
+      if (!val.amount_half_year || val.amount_half_year.toString().trim() === '') {
+        errors.push('Session Amount Per Half Year');
+      } else if (this.isAmountExceeded('amount_half_year')) {
+        errors.push(`Session Amount Per Half Year (cannot exceed ${this.getMaxAmount('amount_half_year')})`);
+      }
+    }
+    if (this.classForm.get('amount_year')?.enabled) {
+      if (!val.amount_year || val.amount_year.toString().trim() === '') {
+        errors.push('Session Amount Per Year');
+      } else if (this.isAmountExceeded('amount_year')) {
+        errors.push(`Session Amount Per Year (cannot exceed ${this.getMaxAmount('amount_year')})`);
+      }
+    }
+
+    return errors;
+  }
+
+  submitClass() {
+    this.submitted = true;
+    this.classForm.markAllAsTouched();
+    this.customValidater.validateAllFormFields(this.classForm);
+
+    const validationErrors = this.getValidationErrorsList();
+    if (validationErrors.length > 0) {
+      if (validationErrors.length === 1) {
+        this.helper.presentErrorToast(`Please fill the required field: ${validationErrors[0]}`);
+      } else if (validationErrors.length <= 3) {
+        this.helper.presentErrorToast(`Please fill the required fields: ${validationErrors.join(', ')}`);
+      } else {
+        this.helper.presentErrorToast(`Please fill all required fields: ${validationErrors.slice(0, 3).join(', ')} and ${validationErrors.length - 3} more`);
+      }
+
+      setTimeout(() => {
+        const firstInvalid = document.querySelector('.is-invalid, .border-danger, em.error');
+        if (firstInvalid) {
+          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+
+      if (this.type === 'moreSession') {
+        this.disableAllField();
+      }
+      return;
+    }
+
+    let meetingValue = this.classForm.controls['meeting_link'].value ?? '';
+    if (!meetingValue) {
+      const rawSub = this.classForm.controls['subject'].value || 'Class';
+      meetingValue = `https://meet.jit.si/Etutor_Class_${rawSub.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+    }
+    const meeting_link = meetingValue.includes('https') ? meetingValue : meetingValue.includes('http') ?
+      meetingValue.replace(/^http:\/\//, 'https://') : 'https://' + meetingValue;
+    const rawStartTime = this.classForm.controls['start_time'].value;
+    const rawEndTime = this.classForm.controls['end_time'].value;
+    const startTimeIst = this.timezoneService.formatTimeToSqlTime(rawStartTime);
+    const endTimeIst = this.timezoneService.formatTimeToSqlTime(rawEndTime);
+
+    const classPayload: any = {
+      classes: [{
+          meeting_link,
+          curriculum_id: this.classForm.controls['curriculum'].value,
+          grade: this.classForm.controls['grade'].value,
+          subject: this.classForm.controls['subject'].value,
+          days: this.daysList.filter((day: any) => {
+              return day.selected;
+            }).map((value: any) => value.value).toString(),
+          start_time: startTimeIst,
+          end_time: endTimeIst,
+          timezone: 'Asia/Kolkata',
+          teacher_id: this.auth.getUserId(),
+          monthly_amount: this.classForm.controls['amount_month'].value,
+          quarterly_amount: this.classForm.controls['amount_quarter'].value,
+          halfyearly_amount: this.classForm.controls['amount_half_year'].value,
+          yearly_amount: this.classForm.controls['amount_year'].value,
+        }],
+    };
+    if (this.type == 'edit') {
+      classPayload['class_id'] = this.classForm.controls['class_id'].value;
+    }
+    console.log(classPayload, 'classPayload');
+    this.auth.postService(classPayload, Urls.addClass).subscribe(
+      (successData: any) => {
+        console.log(successData, 'successData');
+        if (successData.IsSuccess) {
+          this.helper.presentToast(this.type === 'edit' ? 'Class updated successfully' : 'Class added successfully');
+          this.router.navigate(['/myaccount/myclasses/list']);
+        } else {
+          this.helper.presentErrorToast(successData.ErrorObject);
+        }
+      },
+      (error: any) => {
+        console.error(error, 'error');
+        this.helper.presentErrorToast('Failed to save class. Please try again.');
+      }
+    );
   }
 
   getTeacherClassDetails(calledFrom = '') {
@@ -276,39 +382,29 @@ export class AddClassComponent {
   }
 
   calculateSessionAmount() {
-    if (this.classForm.controls['amount_month'].value.trim() != '' && parseInt(this.classForm.controls['amount_month'].value) != 0) {
-      const monthPerAmount = this.classForm.controls['amount_month'].value;
-      this.classForm.controls['amount_quarter'].patchValue(parseInt(monthPerAmount) * 3);
-      this.classForm.controls['amount_half_year'].patchValue(parseInt(monthPerAmount) * 6);
-      this.classForm.controls['amount_year'].patchValue(parseInt(monthPerAmount) * 12)
-    } else if (this.classForm.controls['amount_month'].value.trim() == '') {
+    const monthValue = this.classForm.controls['amount_month'].value;
+    if (monthValue && monthValue.toString().trim() !== '' && parseInt(monthValue) > 0) {
+      const monthPerAmount = parseInt(monthValue);
+      this.classForm.controls['amount_quarter'].patchValue(monthPerAmount * 3);
+      this.classForm.controls['amount_half_year'].patchValue(monthPerAmount * 6);
+      this.classForm.controls['amount_year'].patchValue(monthPerAmount * 12);
+    } else if (!monthValue || monthValue.toString().trim() === '') {
       this.classForm.controls['amount_quarter'].patchValue('');
       this.classForm.controls['amount_half_year'].patchValue('');
       this.classForm.controls['amount_year'].patchValue('');
     }
   }
 
-  get checkForValidAmount() {
-    return (
-      this.classForm.controls['amount_month'].value.trim() != '' &&
-      parseInt(this.classForm.controls['amount_month'].value) == 0
-    );
+  get checkForValidAmount(): boolean {
+    const val = this.classForm.controls['amount_month']?.value;
+    if (val !== '' && val !== null && val !== undefined) {
+      return parseInt(val) === 0;
+    }
+    return false;
   }
 
-  checkValidAmountPerMonthOrYear(formControlName: any) {
-    const formControlAmount = this.classForm.controls[formControlName].value
-    const amount = this.classForm.controls['amount_month'].value;
-    if (formControlAmount != '' && parseInt(formControlAmount) != 0) {
-      if (amount.trim() != '' && parseInt(amount) != 0) {
-        const maximumAmount = parseInt(amount) * (formControlName == 'amount_quarter' ? 3 :
-          formControlName == 'amount_half_year' ? 6 : 12);
-        return this.classForm.controls[formControlName].value > maximumAmount;
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
+  checkValidAmountPerMonthOrYear(formControlName: any): boolean {
+    return this.isAmountExceeded(formControlName);
   }
 
   daysArray() {

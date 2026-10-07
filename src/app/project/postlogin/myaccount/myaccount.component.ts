@@ -38,11 +38,26 @@ export class myAccountComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.breadcrumbs = this.createBreadcrumbs(this.route.root);
         this.currentUrl = event.urlAfterRedirects;
-        this.sidebarMenus.forEach((items: any) => {
-          const menuName = items.title.replace(/\s/g, "");
-          items.active = this.currentUrl.toLowerCase().includes(menuName.toLowerCase());
-        })
+        this.updateActiveMenu();
       });
+  }
+
+  updateActiveMenu() {
+    if (!this.currentUrl || !this.sidebarMenus) return;
+    const currentUrlLower = this.currentUrl.toLowerCase();
+    this.sidebarMenus.forEach((items: any) => {
+      if (!items || !items.url || typeof items.url !== 'string') {
+        items.active = false;
+        return;
+      }
+      const urlSegments = items.url.split('/');
+      if (urlSegments.length > 2 && urlSegments[2]) {
+        const urlSegment = urlSegments[2].toLowerCase();
+        items.active = currentUrlLower.includes(urlSegment);
+      } else {
+        items.active = false;
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -71,31 +86,43 @@ export class myAccountComponent implements OnInit {
         {
           title: 'General',
           url: '/myaccount/general',
+          icon: 'fas fa-home',
           active: false,
         },
         {
           title: 'My Classes',
           url: '/myaccount/myclasses/list',
-          active: true,
+          icon: 'fas fa-book-open',
+          active: false,
         },
         {
           title: 'My Students',
           url: '/myaccount/mystudents',
+          icon: 'fas fa-user-graduate',
           active: false,
         },
         {
           title: 'Wallet',
           url: '/myaccount/wallet',
+          icon: 'fas fa-wallet',
           active: false,
         },
         {
           title: 'Privacy Policy',
           url: '/myaccount/privacyPolicy',
+          icon: 'fas fa-shield-alt',
           active: false,
         },
         {
           title: 'Change Password',
           url: '/myaccount/change-password',
+          icon: 'fas fa-lock',
+          active: false,
+        },
+        {
+          title: 'Logout',
+          url: 'logout',
+          icon: 'fas fa-sign-out-alt text-danger',
           active: false,
         },
       ];
@@ -104,40 +131,60 @@ export class myAccountComponent implements OnInit {
         {
           title: 'General',
           url: '/myaccount/general',
+          icon: 'fas fa-home',
           active: false,
         },
         {
           title: 'My Classes',
           url: '/myaccount/myclasses/list',
-          active: true,
+          icon: 'fas fa-book-open',
+          active: false,
         },
         {
           title: 'Reserve Classes',
           url: '/myaccount/reserve-class/list',
+          icon: 'far fa-calendar-alt',
+          active: false,
+        },
+        {
+          title: 'Watchlist',
+          url: '/myaccount/watchlist',
+          icon: 'fas fa-heart',
           active: false,
         },
         {
           title: 'Attendance History',
           url: '/myaccount/attendance-history',
+          icon: 'fas fa-history',
           active: false,
         },
         {
           title: 'Wallet',
           url: '/myaccount/wallet',
+          icon: 'fas fa-wallet',
           active: false,
         },
         {
           title: 'Privacy Policy',
           url: '/myaccount/privacyPolicy',
+          icon: 'fas fa-shield-alt',
           active: false,
         },
         {
           title: 'Change Password',
           url: '/myaccount/change-password',
+          icon: 'fas fa-lock',
+          active: false,
+        },
+        {
+          title: 'Logout',
+          url: 'logout',
+          icon: 'fas fa-sign-out-alt text-danger',
           active: false,
         }
       ];
     }
+    this.updateActiveMenu();
   }
 
   private createBreadcrumbs(route: ActivatedRoute): any {
@@ -164,11 +211,12 @@ export class myAccountComponent implements OnInit {
   }
 
   navigation(menu: any, i: number) {
-    console.log(menu, 'menu');
-    console.log(i, 'index');
+    if (menu.url === 'logout' || menu.title === 'Logout') {
+      this.auth.signOut();
+      return;
+    }
     this.sidebarMenus.forEach((menu: any, index: any) => {
       menu.active = i === index;
-      console.log(menu)
     });
     this.router.navigateByUrl(menu.url);
   }

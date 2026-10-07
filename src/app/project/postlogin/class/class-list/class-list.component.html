@@ -168,11 +168,10 @@
               <span class="notes small text-danger"><i class="fa fa-info-circle me-1"></i>The meeting link for this class is not updated yet.</span>
             </div>
 
-            <!-- Bottom Divider -->
-            <div class="card-divider my-2"></div>
+            <!-- Bottom Divider & Teacher Avatar (Student View Only) -->
+            <div class="card-divider my-2" *ngIf="auth.getRoleId() == '3'"></div>
 
-            <!-- Footer: Teacher Avatar -->
-            <div class="card-footer-info d-flex align-items-center justify-content-between">
+            <div class="card-footer-info d-flex align-items-center justify-content-between" *ngIf="auth.getRoleId() == '3'">
               <div class="teacher-box d-flex align-items-center gap-2">
                 <div class="teacher-avatar-circle">
                   <img [src]="getTeacherImage(classData, i)"

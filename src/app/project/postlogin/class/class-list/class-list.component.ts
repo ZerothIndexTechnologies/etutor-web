@@ -80,7 +80,7 @@ export class ClassListComponent implements OnInit {
   @ViewChild('meetingLink') meetingLink!: TemplateRef<any>;
 
   getFormattedTime(timeStr: string): string {
-    return this.timezoneService.convertUtcToDisplay(timeStr, this.displayTimezone);
+    return this.timezoneService.convertIstToDisplay(timeStr, this.displayTimezone);
   }
 
   constructor(private fb: FormBuilder, private router: Router, protected auth: AuthService, private dialog: MatDialog) {
@@ -520,32 +520,35 @@ export class ClassListComponent implements OnInit {
     if (isStudent) {
       try {
         const studentDetails = this.auth.getUserDetails();
-        if (studentDetails && studentDetails.grade) {
-          userGradeId = studentDetails.grade;
+        if (studentDetails && (studentDetails.grade || studentDetails.grade_id)) {
+          userGradeId = studentDetails.grade || studentDetails.grade_id;
         }
       } catch (e) {
         console.warn('Could not parse student details', e);
       }
     }
 
-    const payload = {
-      grade: userGradeId ? [userGradeId] : [],
+    const payload: any = {
       user_id: currentUserId,
-      teacher_id: !isStudent && currentUserId ? [currentUserId] : []
+      teacher_id: !isStudent && currentUserId ? currentUserId : undefined,
+      tutor_id: !isStudent && currentUserId ? currentUserId : undefined,
+      filter_by: !isStudent ? 'teacher' : 'student',
+      filter_value: currentUserId
     };
+    if (userGradeId) payload.grade = [userGradeId];
 
     this.auth.postService(payload, Urls.classList).subscribe(
       (successData: any) => {
         let classes: any[] = [];
-        if (successData.IsSuccess && Array.isArray(successData.ResponseObject)) {
+        if (successData && successData.IsSuccess && Array.isArray(successData.ResponseObject)) {
           classes = successData.ResponseObject;
           
           classes.forEach((classData: any) => {
             const gradeDetails = this.gradeList.find(
-              (grade: any) => grade.id == classData.grade
+              (grade: any) => grade.id == classData.grade || grade.displayname == classData.grade
             );
             const curriculumDetails = this.curriculumList.find(
-              (curriculum: any) => curriculum.id == classData.curriculum_id
+              (curriculum: any) => curriculum.id == classData.curriculum_id || curriculum.curriculum_type == classData.curriculum_id
             );
             const fullNameOfDays = (classData.days || '').split(',');
             let fullDays: any = [];
@@ -554,13 +557,13 @@ export class ClassListComponent implements OnInit {
                 days == 'Mon' ? 'Monday' : days == 'Tue' ? 'Tuesday' : days == 'Wed' ? 'Wednesday' : days == 'Thu'
                   ? 'Thursday' : days == 'Fri' ? 'Friday' : days == 'Sat' ? 'Saturday' : 'Sunday');
             });
-            classData.grade_name = gradeDetails ? gradeDetails.displayname : '';
+            classData.grade_name = gradeDetails ? gradeDetails.displayname : (classData.grade_name || classData.grade || '');
             classData.curriculum_name = curriculumDetails
               ? curriculumDetails.curriculum_type
-              : '';
+              : (classData.curriculum_name || classData.curriculum || '');
 
             const tId = classData.teacher_id || classData.tutor_id || classData.created_by || (this.auth.isTeacherUser ? classData.user_id : null);
-            if (tId) {
+            if (tId && this.teacherList && this.teacherList.length > 0) {
               const matchingTeacher = this.teacherList.find(
                 (t: any) => String(t.teacher_id || t.id || t.user_id) === String(tId)
               );
@@ -576,21 +579,22 @@ export class ClassListComponent implements OnInit {
             }
           });
 
-          // Client-side filtering as safeguard
+          // Client-side filtering safeguard: match all teacher ID aliases
           if (!isStudent && currentUserId) {
-            // For Teacher: show classes created by this teacher
-            classes = classes.filter((item: any) => item.teacher_id == currentUserId);
+            classes = classes.filter((item: any) => {
+              const tId = item.teacher_id || item.user_id || item.tutor_id || item.created_by;
+              return !tId || String(tId) === String(currentUserId);
+            });
           } else if (isStudent) {
-            // For Student: show classes matching student's registered grade OR explicitly subscribed classes
-            classes = classes.filter((item: any) => (userGradeId && item.grade == userGradeId) || item.is_subscribed == 1);
+            classes = classes.filter((item: any) => (userGradeId && (item.grade == userGradeId || item.grade_id == userGradeId)) || item.is_subscribed == 1 || item.subscribed == 1);
             if (userGradeId) {
-              const matchedGrade = this.gradeList.find((g: any) => g.id == userGradeId);
+              const matchedGrade = this.gradeList.find((g: any) => g.id == userGradeId || g.displayname == userGradeId);
               if (matchedGrade) {
                 this.studentGradeName = matchedGrade.displayname;
               }
             }
           }
-        } else if (!successData.IsSuccess) {
+        } else if (successData && !successData.IsSuccess) {
           this.helper.presentErrorToast(successData.ErrorObject);
         }
 

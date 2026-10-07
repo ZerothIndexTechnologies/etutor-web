@@ -36,6 +36,11 @@ const routes: Routes = [
         loadChildren: () => import('../reserve-class/reserve-class.module').then(m => m.ReserveClassModule)
       },
       {
+        path: 'watchlist',
+        loadComponent: () => import('./watchlist/watchlist.component').then(m => m.WatchlistComponent),
+        data: { breadcrumb: 'Watchlist' },
+      },
+      {
         path: 'attendance-history',
         loadComponent: () => import('./attendance-history/attendance-history.component').then(m => m.AttendanceHistoryComponent),
         data: { breadcrumb: 'Attendance History' },

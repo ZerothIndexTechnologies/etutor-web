@@ -1,0 +1,26 @@
+<div class="confirm-card" [ngClass]="'theme-' + data.type">
+  <button type="button" class="btn-close-modal" (click)="cancel()" aria-label="Close" *ngIf="data.showCloseButton">
+    <i class="fas fa-times"></i>
+  </button>
+  
+  <div class="confirm-icon-wrapper">
+    <div class="confirm-icon-bg">
+      <i [class]="data.icon + ' confirm-icon'"></i>
+    </div>
+  </div>
+
+  <div class="confirm-content">
+    <h3 class="confirm-title" *ngIf="data.title">{{ data.title }}</h3>
+    <p class="confirm-message">{{ data.message }}</p>
+    <p class="confirm-subtext" *ngIf="data.subtext && data.subtext.trim().length > 0">{{ data.subtext }}</p>
+  </div>
+
+  <div class="confirm-actions">
+    <button type="button" class="btn-cancel" (click)="cancel()">
+      {{ data.cancelText }}
+    </button>
+    <button type="button" class="btn-confirm" (click)="confirm()">
+      <i [class]="data.icon + ' me-2'" *ngIf="data.icon"></i> {{ data.confirmText }}
+    </button>
+  </div>
+</div>

@@ -109,6 +109,55 @@ export class TimezoneService {
     }
   }
 
+  /**
+   * Formats a local time string (e.g. "11:20 AM" or "11:20") into clean SQL TIME format "11:20:00" in IST
+   */
+  formatTimeToSqlTime(timeStr: string): string {
+    if (!timeStr) return '';
+    return this.parseTimeString(timeStr);
+  }
+
+  /**
+   * Converts an IST stored time string (e.g. "11:20:00") into a formatted display string in targetTimezone.
+   * Defaults to 'Asia/Kolkata' (IST).
+   * If targetTimezone is 'Asia/Kolkata', outputs "11:20 AM (IST)".
+   * If targetTimezone is another timezone (e.g. EST, UTC, GST), converts from IST to that target timezone.
+   */
+  convertIstToDisplay(timeStr: string, targetTimezone: string = 'Asia/Kolkata'): string {
+    if (!timeStr) return '-';
+    try {
+      const normalized = this.parseTimeString(timeStr);
+      const [hStr, mStr] = normalized.split(':');
+      const hours = parseInt(hStr, 10);
+      const minutes = parseInt(mStr, 10);
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hh = String(hours).padStart(2, '0');
+      const mm = String(minutes).padStart(2, '0');
+
+      // Base time is in IST (UTC+05:30)
+      const isoIstStr = `${year}-${month}-${day}T${hh}:${mm}:00+05:30`;
+      const dateObj = new Date(isoIstStr);
+
+      const tz = targetTimezone || 'Asia/Kolkata';
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      const formattedTime = formatter.format(dateObj);
+      const tzShortName = this.getTimezoneAbbreviation(tz);
+      return `${formattedTime} (${tzShortName})`;
+    } catch (e) {
+      return timeStr;
+    }
+  }
+
   getTimezoneAbbreviation(tz: string): string {
     const found = this.TIMEZONES.find(t => t.code === tz);
     if (found) {

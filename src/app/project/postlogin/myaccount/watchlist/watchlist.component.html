@@ -1,53 +1,14 @@
-<section class="reserve-class-section">
-  <!-- Page Header with Decorative Education Illustration -->
+<section class="watchlist-section">
+  <!-- Page Header -->
   <div class="header-container d-flex justify-content-between align-items-center mb-4">
     <div class="header-text">
-      <h2 class="page-title">{{ activeTab === 'watchlist' ? 'My Watchlist' : 'Reserve Class List' }}</h2>
-      <p class="page-subtitle">{{ activeTab === 'watchlist' ? 'View and manage your saved favorite classes.' : 'Discover and subscribe to the best classes for your learning journey.' }}</p>
-    </div>
-    
-    <!-- Top-Right Decorative Education Illustration -->
-    <div class="header-illustration">
-      <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Floating decorative dots -->
-        <circle cx="20" cy="18" r="3" fill="#FF7F00" opacity="0.6"/>
-        <circle cx="125" cy="22" r="2.5" fill="#FF7F00" opacity="0.8"/>
-        <circle cx="110" cy="78" r="3.5" fill="#FF7F00" opacity="0.5"/>
-        <circle cx="15" cy="65" r="2" fill="#FF7F00" opacity="0.7"/>
-
-        <!-- Pale Orange Shadow Base -->
-        <ellipse cx="70" cy="85" rx="55" ry="9" fill="#FFE8D6"/>
-
-        <!-- Stack of Books -->
-        <!-- Bottom Book (Blue Details) -->
-        <path d="M35 74L70 82L105 74V64L70 72L35 64V74Z" fill="#2563EB"/>
-        <path d="M35 64L70 72L105 64L70 56L35 64Z" fill="#3B82F6"/>
-        <path d="M38 66.5L68 73.5" stroke="#EFF6FF" stroke-width="1.5" stroke-linecap="round"/>
-
-        <!-- Middle Book (Orange Cover) -->
-        <path d="M30 60L68 68L102 60V50L68 58L30 50V60Z" fill="#E66E00"/>
-        <path d="M30 50L68 58L102 50L68 42L30 50Z" fill="#FF7F00"/>
-        <path d="M33 52.5L66 59.5" stroke="#FFF0E6" stroke-width="1.5" stroke-linecap="round"/>
-
-        <!-- Top Book (Orange Cover) -->
-        <path d="M38 46L72 53L98 46V37L72 44L38 37V46Z" fill="#D96800"/>
-        <path d="M38 37L72 44L98 37L72 30L38 37Z" fill="#FF8C1A"/>
-
-        <!-- Potted Plant on Books -->
-        <path d="M72 35L66 18H82L76 35H72Z" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
-        <ellipse cx="74" cy="18" rx="8" ry="2.5" fill="#E2E8F0"/>
-        
-        <!-- Green Plant Leaves -->
-        <path d="M71 17C64 12 60 4 67 3C73 2 73 13 71 17Z" fill="#10B981"/>
-        <path d="M71 17C66 14 65 8 67 3" stroke="#047857" stroke-width="0.75"/>
-        <path d="M74 17C73 8 77 1 82 4C86 7 78 15 74 17Z" fill="#34D399"/>
-        <path d="M77 17C84 13 90 7 88 12C86 16 80 16 77 17Z" fill="#059669"/>
-      </svg>
+      <h2 class="page-title"><i class="fas fa-heart text-danger me-2"></i> My Watchlist</h2>
+      <p class="page-subtitle">View and manage your saved favorite classes.</p>
     </div>
   </div>
 
-  <!-- Rounded Filter Container -->
-  <div class="filter-container mb-4">
+  <!-- Filter Container -->
+  <div class="filter-container mb-4" *ngIf="classListdata && classListdata.length > 0">
     <div class="row align-items-center g-3">
       <!-- Teacher List -->
       <div class="col-lg-3 col-md-6">
@@ -62,14 +23,14 @@
             bindValue="teacher_id"
             placeholder="Please Select"
             [multiple]="true"
-            (change)="reserveClassList()"
+            (change)="getWatchlist()"
             [(ngModel)]="selectedTeacher">
           </ng-select>
         </div>
       </div>
 
       <!-- Grade List -->
-      <div class="col-lg-2 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <label class="filter-label">Grade List</label>
         <div class="filter-select-box">
           <div class="pastel-icon-circle bg-pastel-purple">
@@ -81,14 +42,14 @@
             bindValue="id"
             placeholder="Please Select"
             [multiple]="true"
-            (change)="reserveClassList()"
+            (change)="getWatchlist()"
             [(ngModel)]="selectedGrade">
           </ng-select>
         </div>
       </div>
 
       <!-- Subject List -->
-      <div class="col-lg-2 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <label class="filter-label">Subject List</label>
         <div class="filter-select-box">
           <div class="pastel-icon-circle bg-pastel-blue">
@@ -98,32 +59,14 @@
             [items]="subjectOptions"
             placeholder="Please Select"
             [multiple]="true"
-            (change)="reserveClassList()"
+            (change)="getWatchlist()"
             [(ngModel)]="selectedSubject">
           </ng-select>
         </div>
       </div>
 
-      <!-- Timezone Filter -->
-      <div class="col-lg-3 col-md-6">
-        <label class="filter-label">Timezone</label>
-        <div class="filter-select-box">
-          <div class="pastel-icon-circle bg-pastel-green">
-            <i class="fas fa-globe text-success"></i>
-          </div>
-          <ng-select
-            [items]="timezoneList"
-            bindLabel="name"
-            bindValue="code"
-            [clearable]="false"
-            placeholder="Select Timezone"
-            [(ngModel)]="selectedTimezone">
-          </ng-select>
-        </div>
-      </div>
-
       <!-- Reset Filters Button -->
-      <div class="col-lg-2 col-md-6 text-lg-end pt-lg-3">
+      <div class="col-lg-3 col-md-6 text-lg-end pt-lg-3">
         <button (click)="resetFilters()" type="button" class="btn-reset-filters">
           Reset Filters
         </button>
@@ -131,7 +74,7 @@
     </div>
   </div>
 
-  <!-- Class Cards Grid (Dynamic API Data) -->
+  <!-- Class Cards Grid -->
   <div class="row g-4 mb-4" *ngIf="classListdata && classListdata.length > 0">
     <div class="col-lg-6 col-md-12" *ngFor="let classData of classListdata; let i = index">
       <div class="class-card-box">
@@ -147,41 +90,22 @@
                 <text x="46" y="25" fill="#FF7F00" font-size="13" font-weight="800" font-family="sans-serif">C</text>
                 <path d="M18 48C24 44 32 44 36 47C40 44 48 44 54 48V32C48 28 40 28 36 31C32 28 24 28 18 32V48Z" fill="#FF7F00"/>
                 <path d="M36 31V47" stroke="#FFFFFF" stroke-width="2"/>
-                <path d="M22 36C26 34 30 34 33 35.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M50 36C46 34 42 34 39 35.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
               </g>
-
               <!-- CARD 2 Theme: Notebook & Pencil -->
               <g *ngSwitchCase="1">
                 <circle cx="36" cy="36" r="34" fill="#F3E8FF"/>
                 <rect x="22" y="18" width="28" height="36" rx="4" fill="#9333EA"/>
                 <rect x="26" y="22" width="20" height="28" rx="2" fill="#FFFFFF"/>
-                <line x1="29" y1="27" x2="43" y2="27" stroke="#9333EA" stroke-width="2" stroke-linecap="round"/>
-                <line x1="29" y1="33" x2="43" y2="33" stroke="#9333EA" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="21" cy="24" r="2" fill="#7E22CE"/>
-                <circle cx="21" cy="32" r="2" fill="#7E22CE"/>
-                <circle cx="21" cy="40" r="2" fill="#7E22CE"/>
-                <path d="M46 16L54 24L34 44H26V36L46 16Z" fill="#A855F7" stroke="#6B21A8" stroke-width="1"/>
               </g>
-
               <!-- CARD 3 Theme: Globe -->
               <g *ngSwitchCase="2">
                 <circle cx="36" cy="36" r="34" fill="#E6F4EA"/>
-                <path d="M36 50V56M28 56H44" stroke="#16A34A" stroke-width="3" stroke-linecap="round"/>
-                <path d="M20 34C20 44 26 50 36 50C46 50 52 44 52 34" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 <circle cx="36" cy="32" r="16" fill="#10B981"/>
-                <path d="M26 30C28 26 33 25 36 28C39 31 36 36 32 37C28 38 25 34 26 30Z" fill="#A7F3D0"/>
-                <path d="M40 34C43 32 48 35 47 38C46 41 42 43 39 40C39 37 38 35 40 34Z" fill="#A7F3D0"/>
               </g>
-
-              <!-- CARD 4 Theme: Pencil Holder & Books -->
+              <!-- CARD 4 Default -->
               <g *ngSwitchDefault>
                 <circle cx="36" cy="36" r="34" fill="#E0F2FE"/>
                 <path d="M24 34L28 52H44L48 34H24Z" fill="#0284C7"/>
-                <ellipse cx="36" cy="34" rx="12" ry="3" fill="#38BDF8"/>
-                <line x1="31" y1="34" x2="26" y2="18" stroke="#0284C7" stroke-width="3" stroke-linecap="round"/>
-                <path d="M26 18L24 14L28 16" fill="#F59E0B"/>
-                <line x1="36" y1="34" x2="36" y2="15" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
               </g>
             </svg>
           </div>
@@ -192,15 +116,15 @@
             <div class="d-flex align-items-center justify-content-between mb-2">
               <h4 class="subject-title mb-0">{{ classData.subject || 'Subject' }}</h4>
 
-              <div class="d-flex align-items-center gap-2" *ngIf="auth.getRoleId() == '3'">
+              <div class="d-flex align-items-center gap-2">
                 <button *ngIf="classData.is_subscribed == 1" type="button" class="btn-subscribed" disabled>
                   <i class="fas fa-check me-1"></i> Subscribed
                 </button>
                 <button *ngIf="classData.is_subscribed != 1" (click)="subscribeNow(classData)" type="button" class="btn-subscribe">
                   Subscribe Now
                 </button>
-                <button (click)="toggleWishlist(classData)" type="button" class="btn-heart-circle" [class.active]="classData.is_wishlist" title="Add to Watchlist">
-                  <i [class]="classData.is_wishlist ? 'fas fa-heart text-danger' : 'far fa-heart text-danger'"></i>
+                <button (click)="toggleWishlist(classData)" type="button" class="btn-heart-circle active" title="Remove from Watchlist">
+                  <i class="fas fa-heart text-danger"></i>
                 </button>
               </div>
             </div>
@@ -224,7 +148,7 @@
                 <span class="schedule-label">Session Time:</span>
                 <div class="schedule-value">
                   <i class="far fa-clock text-orange me-1"></i>
-                  {{ getFormattedTime(classData.start_time) }} - {{ getFormattedTime(classData.end_time) }}
+                  {{ classData.start_time || '00:00:00' }} - {{ classData.end_time || '00:00:00' }}
                 </div>
               </div>
 
@@ -237,10 +161,9 @@
               </div>
             </div>
 
-            <!-- Bottom Divider -->
             <div class="card-divider my-2"></div>
 
-            <!-- Footer: Teacher Avatar -->
+            <!-- Teacher Avatar -->
             <div class="card-footer-info d-flex align-items-center justify-content-between">
               <div class="teacher-box d-flex align-items-center gap-2">
                 <div class="teacher-avatar-circle">
@@ -258,16 +181,12 @@
     </div>
   </div>
 
-  <!-- Empty State (When API returns 0 classes or filters match 0 classes) -->
+  <!-- Empty Watchlist State -->
   <div class="empty-state-box" *ngIf="!classListdata || classListdata.length === 0">
-    <i [class]="activeTab === 'watchlist' ? 'fas fa-heart-broken empty-icon text-danger' : 'fas fa-folder-open empty-icon'"></i>
-    <h5>{{ activeTab === 'watchlist' ? 'Your Watchlist is Empty' : 'No Class Available' }}</h5>
-    <p>{{ activeTab === 'watchlist' ? 'Click the heart icon on any class card to save classes to your Watchlist.' : 'Try adjusting your filters or check back later for new class offerings.' }}</p>
-    <button (click)="resetFilters()" type="button" class="btn-reset-filters mt-2">
-      Reset Filters
-    </button>
+    <i class="fas fa-heart-broken empty-icon text-danger"></i>
+    <h5>Your Watchlist is Empty</h5>
+    <p>Click the heart icon on any class card to save classes to your Watchlist.</p>
   </div>
-
 </section>
 
 <!-- Subscription Plan Dialog -->

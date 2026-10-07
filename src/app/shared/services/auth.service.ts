@@ -1,9 +1,11 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {SessionConstants} from './sessionConstants';
 import {Router} from '@angular/router';
 import {catchError, map} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {throwError as observableThrowError} from 'rxjs/internal/observable/throwError';
+import {Dialog} from '@angular/cdk/dialog';
+import {ConfirmModalComponent} from '../components/confirm-modal/confirm-modal.component';
 
 const environment: any = {
   sessionPrefix: 'etutor',
@@ -14,6 +16,7 @@ const environment: any = {
 })
 export class AuthService {
   userData: any;
+  private dialog = inject(Dialog);
 
   constructor(
     public router: Router,
@@ -28,7 +31,7 @@ export class AuthService {
       role_id: this.getRoleId(),
     };
     const updatedData =
-      url != 'user/login' && url != 'user/forgotPassword' && url != 'user/verifyUser' && url != 'user/signup'
+      url != 'user/login' && url != 'user/googleAuth' && url != 'user/forgotPassword' && url != 'user/verifyUser' && url != 'user/signup'
         ? {...jsonStructure, ...data}
         : data;
     const json = JSON.stringify(updatedData);
@@ -88,14 +91,40 @@ export class AuthService {
   }
 
   // Sign out
-  signOut() {
+  signOut(showConfirm: boolean = true) {
+    if (showConfirm) {
+      const dialogRef = this.dialog.open<boolean>(ConfirmModalComponent, {
+        width: '440px',
+        disableClose: false,
+        hasBackdrop: true,
+        backdropClass: 'cdk-overlay-dark-backdrop',
+        data: {
+          title: 'Confirm Logout',
+          message: 'Are you sure you want to log out?',
+          confirmText: 'Log Out',
+          cancelText: 'Cancel',
+          type: 'danger',
+          icon: 'fas fa-sign-out-alt'
+        }
+      });
+
+      dialogRef.closed.subscribe((confirmed) => {
+        if (confirmed) {
+          this.executeSignOut();
+        }
+      });
+      return;
+    }
+    this.executeSignOut();
+  }
+
+  private executeSignOut() {
     const valueToKeep = JSON.parse(
       this.getLocalStorage(SessionConstants.configData)
-    ); //
+    );
     this.removeLocalStorage(SessionConstants.user_id);
     localStorage.clear();
     sessionStorage.clear();
-    // Set the key back with its value
     if (valueToKeep !== null) {
       this.setLocalStorage(
         SessionConstants.configData,
@@ -172,9 +201,58 @@ export class AuthService {
   get teacherVerificationStatus() {
     try {
       const userDetails = JSON.parse(this.getLocalStorage('user') || '{}');
-      return userDetails ? userDetails.is_account_verified : '0';
+      const teacherProfile = JSON.parse(this.getLocalStorage('teacherProfile') || '{}');
+      if (userDetails && userDetails.is_account_verified !== undefined && userDetails.is_account_verified !== null) {
+        return String(userDetails.is_account_verified);
+      }
+      if (teacherProfile && teacherProfile.is_account_verified !== undefined && teacherProfile.is_account_verified !== null) {
+        return String(teacherProfile.is_account_verified);
+      }
+      return '0';
     } catch (e) {
       return '0';
+    }
+  }
+
+  get isTeacherApplicationSubmitted(): boolean {
+    try {
+      const userStr = this.getLocalStorage('user');
+      if (!userStr || userStr === 'null') return false;
+      const u = JSON.parse(userStr);
+      if (!u || Object.keys(u).length === 0) return false;
+      const currentEmail = (u.email || '').toLowerCase().trim();
+      if (u.first_name === 'JOHN' && u.last_name === 'V' && currentEmail !== 'john@example.com') {
+        return false;
+      }
+      if (u.is_account_verified == '1' || u.is_account_verified == 1 || u.is_account_verified === true || u.is_account_verified === 'true') return false;
+      return !!(
+        u.is_document_uploaded == '1' ||
+        u.is_document_uploaded === 1 ||
+        u.is_document_uploaded === true ||
+        u.application_submitted === true ||
+        u.is_submitted === true
+      );
+    } catch (e) {
+      return false;
+    }
+  }
+
+  get isTeacherVerified(): boolean {
+    if (!this.isTeacherUser) return true;
+    try {
+      const userDetails = JSON.parse(this.getLocalStorage('user') || '{}');
+      const teacherProfile = JSON.parse(this.getLocalStorage('teacherProfile') || '{}');
+      const status = userDetails?.is_account_verified ?? userDetails?.is_verified ?? teacherProfile?.is_account_verified ?? teacherProfile?.is_verified;
+      return (
+        status == '1' ||
+        status === 1 ||
+        status === true ||
+        status === 'true' ||
+        String(status).toUpperCase() === 'APPROVED' ||
+        String(status).toUpperCase() === 'VERIFIED'
+      );
+    } catch (e) {
+      return false;
     }
   }
 

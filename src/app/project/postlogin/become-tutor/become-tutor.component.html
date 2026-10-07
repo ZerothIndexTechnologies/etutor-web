@@ -1,106 +1,181 @@
 <div class="container py-4">
-  <!-- Top Title & Stepper Card -->
-  <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4 bg-white">
-    <div class="card-body p-4 bg-gradient-dark text-white d-flex flex-column flex-md-row justify-content-between align-items-center">
-      <div>
-        <h3 class="fw-bold mb-1 text-warning"><i class="fas fa-chalkboard-teacher me-2"></i> Teacher Profile Setup & Verification</h3>
-        <p class="text-white-50 mb-0 small">Complete your 5-step application to publish live classes and receive payouts.</p>
+  <!-- VIEW A: Application Under Review Screen (Show ONLY when application is submitted & waiting for Admin approval) -->
+  <div *ngIf="!checkingStatus && isApplicationSubmitted && !showFive && teacherStatus !== '1' && teacherStatus !== '2'" class="mx-auto my-4" style="max-width: 680px;">
+    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white text-center">
+      <div class="mb-4 d-inline-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 p-4 mx-auto" style="width: 96px; height: 96px;">
+        <i class="fas fa-hourglass-half fa-4x text-warning"></i>
       </div>
-      <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill mt-3 mt-md-0 fw-bold shadow-sm">
-        Step {{ showFirst ? '1' : showSecond ? '2' : showThird ? '3' : showFourth ? '4' : '5' }} of 5
-      </span>
-    </div>
+      
+      <h3 class="fw-bold text-dark mb-2">Application Under Review</h3>
+      <p class="text-secondary fs-6 mb-4 px-md-3">
+        Thank you for submitting your tutor profile! Your details and credentials have been received and are currently being verified by our team.
+      </p>
 
-    <!-- Stepper Navigation Header -->
-    <div class="p-3 bg-light border-bottom">
-      <div class="row text-center g-2">
-        <div class="col" (click)="onCollapseStepper(1)" style="cursor: pointer;">
-          <div class="p-2 rounded-3 border" [class.bg-primary]="showFirst" [class.text-white]="showFirst" [class.bg-white]="!showFirst">
-            <div class="fw-bold small">1. Personal</div>
+      <div class="bg-light rounded-4 p-4 mb-4 text-start border shadow-sm">
+        <h6 class="fw-bold text-dark mb-3"><i class="fas fa-id-card text-primary me-2"></i> Application Details</h6>
+        <div class="row g-3 small">
+          <div class="col-sm-6">
+            <span class="text-muted d-block mb-1">Applicant Name</span>
+            <strong class="text-dark">{{ getFullName() }}</strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block mb-1">Email Address</span>
+            <strong class="text-dark">{{ stepper.get('email')?.value || user?.email || 'N/A' }}</strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block mb-1">Mobile Number</span>
+            <strong class="text-dark">{{ stepper.get('mobile_number')?.value || user?.mobile_number || 'N/A' }}</strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block mb-1">Verification Status</span>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+              <i class="fas fa-clock me-1"></i> Pending Admin Approval
+            </span>
           </div>
         </div>
-        <div class="col" (click)="onCollapseStepper(2)" style="cursor: pointer;">
-          <div class="p-2 rounded-3 border" [class.bg-primary]="showSecond" [class.text-white]="showSecond" [class.bg-white]="!showSecond">
-            <div class="fw-bold small">2. Teaching</div>
-          </div>
-        </div>
-        <div class="col" (click)="onCollapseStepper(3)" style="cursor: pointer;">
-          <div class="p-2 rounded-3 border" [class.bg-primary]="showThird" [class.text-white]="showThird" [class.bg-white]="!showThird">
-            <div class="fw-bold small">3. Bank & Identity</div>
-          </div>
-        </div>
-        <div class="col" (click)="onCollapseStepper(4)" style="cursor: pointer;">
-          <div class="p-2 rounded-3 border" [class.bg-primary]="showFourth" [class.text-white]="showFourth" [class.bg-white]="!showFourth">
-            <div class="fw-bold small">4. Documents</div>
-          </div>
-        </div>
-        <div class="col" (click)="onCollapseStepper(5)" style="cursor: pointer;">
-          <div class="p-2 rounded-3 border" [class.bg-success]="showFive" [class.text-white]="showFive" [class.bg-white]="!showFive">
-            <div class="fw-bold small">5. Verified</div>
-          </div>
-        </div>
+      </div>
+
+      <div class="alert alert-info border-0 rounded-3 text-start small mb-0 bg-info bg-opacity-10 text-dark">
+        <i class="fas fa-info-circle text-info me-2 fs-6"></i>
+        <span>Our admin verification team reviews applications within <strong>24 hours</strong>. Once approved, you will automatically get full access to your teacher dashboard.</span>
       </div>
     </div>
   </div>
+
+  <!-- VIEW B: Rejected Admin Verification Alert Banner (Action Required) -->
+  <div *ngIf="teacherStatus === '2'" class="alert alert-danger border-0 shadow-sm rounded-4 p-4 mb-4 bg-danger bg-opacity-10 border-start border-4 border-danger d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+    <div class="d-flex align-items-center">
+      <div class="rounded-circle bg-danger bg-opacity-25 me-3 text-danger flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+        <i class="fas fa-exclamation-triangle fa-2x"></i>
+      </div>
+      <div>
+        <h5 class="fw-bold text-dark mb-1"><i class="fas fa-user-times text-danger me-2"></i> Verification Action Required</h5>
+        <p class="text-secondary small mb-0">{{ rejectionNotes || 'Your application requires document updates. Please review your details and resubmit.' }}</p>
+      </div>
+    </div>
+    <span class="badge bg-danger text-white px-3 py-2 rounded-pill fw-bold text-nowrap align-self-start align-self-md-center shadow-sm">
+      <i class="fas fa-exclamation-triangle me-1"></i> Action Required
+    </span>
+  </div>
+
+  <!-- VIEW C: Form & Stepper (Show ONLY when NOT submitted, OR when Action Required, OR on Step 5 Success screen) -->
+  <ng-container *ngIf="(!isApplicationSubmitted && teacherStatus !== '1') || teacherStatus === '2' || showFive">
+    <!-- Stepper Navigation Header (Clean Underline Tab Design with Progress Badges) -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4" *ngIf="!showFive">
+      <div class="stepper-tab-header bg-white px-3 pt-2 rounded-4">
+        <div class="d-flex align-items-center justify-content-between overflow-auto flex-nowrap text-center">
+          <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showFirst" [class.completed]="isStepCompleted(1)" (click)="onCollapseStepper(1)">
+            <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+              <i class="fas fa-check text-white small" *ngIf="isStepCompleted(1) && !showFirst"></i>
+              <span *ngIf="!isStepCompleted(1) || showFirst">1</span>
+            </span>
+            <span class="step-label">Personal</span>
+          </div>
+          <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showSecond" [class.completed]="isStepCompleted(2)" (click)="onCollapseStepper(2)">
+            <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+              <i class="fas fa-check text-white small" *ngIf="isStepCompleted(2) && !showSecond"></i>
+              <span *ngIf="!isStepCompleted(2) || showSecond">2</span>
+            </span>
+            <span class="step-label">Teaching</span>
+          </div>
+          <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showThird" [class.completed]="isStepCompleted(3)" (click)="onCollapseStepper(3)">
+            <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+              <i class="fas fa-check text-white small" *ngIf="isStepCompleted(3) && !showThird"></i>
+              <span *ngIf="!isStepCompleted(3) || showThird">3</span>
+            </span>
+            <span class="step-label">Bank & Identity</span>
+          </div>
+          <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showFourth" [class.completed]="isStepCompleted(4)" (click)="onCollapseStepper(4)">
+            <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+              <i class="fas fa-check text-white small" *ngIf="isStepCompleted(4) && !showFourth"></i>
+              <span *ngIf="!isStepCompleted(4) || showFourth">4</span>
+            </span>
+            <span class="step-label">Documents</span>
+          </div>
+          <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showFive" [class.completed]="isStepCompleted(5)" (click)="onCollapseStepper(5)">
+            <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+              <i class="fas fa-check text-white small" *ngIf="isStepCompleted(5) && !showFive"></i>
+              <span *ngIf="!isStepCompleted(5) || showFive">5</span>
+            </span>
+            <span class="step-label">Verified</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
   <!-- STEP 1: Personal Information -->
   <div class="row" *ngIf="showFirst">
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-user-circle text-primary me-2"></i> Step 1: Personal Details & Address</h5>
-        
         <form [formGroup]="stepper">
-          <!-- Profile Avatar Upload -->
-          <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-4 border">
-            <div class="position-relative me-3">
-              <img *ngIf="!profileBase64" src="app/assets/etutor/avatar.svg" width="90" height="90" class="rounded-circle shadow-sm border border-2 border-primary object-fit-cover">
-              <img *ngIf="profileBase64" [src]="profileBase64" width="90" height="90" class="rounded-circle shadow-sm border border-2 border-primary object-fit-cover">
-              <button type="button" class="btn btn-sm btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow" (click)="file.click()">
-                <i class="material-icons fs-6">add_a_photo</i>
+          <!-- Profile Avatar Upload (Top Center Layout) -->
+          <div class="d-flex flex-column align-items-center text-center mb-4 p-4 bg-light rounded-4 border">
+            <div class="position-relative mx-auto mb-3">
+              <img *ngIf="!profileBase64" src="app/assets/etutor/avatar.svg" width="100" height="100" class="rounded-circle shadow-sm border border-2 border-primary object-fit-cover">
+              <img *ngIf="profileBase64" [src]="profileBase64" width="100" height="100" class="rounded-circle shadow-sm border border-2 border-primary object-fit-cover">
+              <button type="button" class="btn btn-sm btn-primary rounded-circle position-absolute bottom-0 end-0 shadow p-0 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border: 2px solid #ffffff;" (click)="file.click()" title="Upload Profile Photo">
+                <i class="fas fa-camera" style="font-size: 14px;"></i>
               </button>
               <input type="file" #file (change)="onFileSelected($event, 'profile')" id="profile" hidden>
             </div>
-            <div>
-              <h6 class="fw-bold mb-0 text-dark">{{ getFullName() }}</h6>
-              <span class="text-muted small">{{ user?.mobile_number || '' }}</span>
-              <div class="small text-primary mt-1 fw-medium" (click)="file.click()" style="cursor: pointer;">Click icon to change photo</div>
+            <h5 class="fw-bold mb-0 text-dark">{{ getFullName() }}</h5>
+          </div>
+
+          <!-- Email & Mobile -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark text-start d-block">Email Address <span class="text-danger">*</span></label>
+              <input placeholder="Enter email address" type="email" formControlName="email" class="form-control rounded-3" [class.is-invalid]="stepper.get('email')?.invalid && (stepper.get('email')?.touched || submittedStep1)">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark text-start d-block">Mobile Number <span class="text-danger">*</span></label>
+              <input placeholder="Enter mobile number" type="tel" formControlName="mobile_number" class="form-control rounded-3" [class.is-invalid]="stepper.get('mobile_number')?.invalid && (stepper.get('mobile_number')?.touched || submittedStep1)">
             </div>
           </div>
 
+          <!-- Residence Address -->
           <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Address <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold small text-dark text-start d-block">Address <span class="text-danger">*</span></label>
             <input placeholder="Enter full residence address" formControlName="address" class="form-control form-control-lg rounded-3 fs-6" [class.is-invalid]="stepper.get('address')?.invalid && (stepper.get('address')?.touched || submittedStep1)" />
           </div>
 
-          <div class="form-group mb-3">
-            <label class="form-label fw-bold small">About You <span class="text-danger">*</span></label>
-            <textarea rows="3" placeholder="Brief intro about your teaching bio and background..." formControlName="aboutInfo" class="form-control rounded-3 fs-6" [class.is-invalid]="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)"></textarea>
-          </div>
-
-          <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Language Proficiency <span class="text-danger">*</span></label>
-            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1" [class.is-invalid]="stepper.get('language')?.invalid && langChips.length === 0 && (stepper.get('language')?.touched || submittedStep1)">
-              <span *ngFor="let chip of langChips" class="badge bg-primary rounded-pill px-3 py-2 d-inline-flex align-items-center">
-                {{ chip }}
-                <i class="fas fa-times ms-2 cursor" (click)="removeChip(chip)"></i>
-              </span>
-              <input placeholder="Type language & press Enter..." type="text" class="border-0 flex-grow-1 bg-transparent py-1 px-2" formControlName="language" (keydown)="handleKeyDown($event, 'language')">
-            </div>
-          </div>
-
+          <!-- Location Details: City, State, Pincode -->
           <div class="row g-2 mb-3">
             <div class="col-md-4">
-              <label class="form-label fw-bold small">Pincode <span class="text-danger">*</span></label>
-              <input placeholder="6-digit PIN" type="text" formControlName="pin" class="form-control rounded-3" [class.is-invalid]="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-bold small">City <span class="text-danger">*</span></label>
+              <label class="form-label fw-bold small text-dark text-start d-block">City <span class="text-danger">*</span></label>
               <input placeholder="City" type="text" formControlName="city" class="form-control rounded-3" [class.is-invalid]="stepper.get('city')?.invalid && (stepper.get('city')?.touched || submittedStep1)">
             </div>
             <div class="col-md-4">
-              <label class="form-label fw-bold small">State <span class="text-danger">*</span></label>
+              <label class="form-label fw-bold small text-dark text-start d-block">State <span class="text-danger">*</span></label>
               <input placeholder="State" type="text" formControlName="state" class="form-control rounded-3" [class.is-invalid]="stepper.get('state')?.invalid && (stepper.get('state')?.touched || submittedStep1)">
             </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small text-dark text-start d-block">Pincode <span class="text-danger">*</span></label>
+              <input placeholder="6-digit PIN" type="text" formControlName="pin" class="form-control rounded-3" [class.is-invalid]="stepper.get('pin')?.invalid && (stepper.get('pin')?.touched || submittedStep1)">
+            </div>
+          </div>
+
+          <!-- Language Proficiency -->
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold small text-dark text-start d-block">Language Proficiency <span class="text-danger">*</span></label>
+            <ng-select
+              [items]="availableLanguages"
+              [multiple]="true"
+              [addTag]="true"
+              [closeOnSelect]="false"
+              placeholder="Select Languages Known..."
+              [(ngModel)]="selectedLanguages"
+              [ngModelOptions]="{standalone: true}"
+              (change)="onLanguageChange($event)"
+              [class.is-invalid]="selectedLanguages.length === 0 && (stepper.get('language')?.touched || submittedStep1)"
+              class="custom-ng-select rounded-3">
+            </ng-select>
+          </div>
+
+          <!-- Bio / About You -->
+          <div class="form-group mb-4">
+            <label class="form-label fw-bold small text-dark text-start d-block">About You <span class="text-danger">*</span></label>
+            <textarea rows="3" placeholder="Brief intro about your teaching bio and background..." formControlName="aboutInfo" class="form-control rounded-3 fs-6" [class.is-invalid]="stepper.get('aboutInfo')?.invalid && (stepper.get('aboutInfo')?.touched || submittedStep1)"></textarea>
           </div>
 
           <button type="button" class="btn btn-primary btn-lg rounded-pill px-4 float-end shadow-sm" (click)="stepSubmit(2)">
@@ -114,11 +189,11 @@
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-gradient-light text-dark h-100">
         <h5 class="fw-bold text-primary mb-3"><i class="fas fa-lightbulb text-warning me-2"></i> Teacher Onboarding Guide</h5>
-        <p class="text-muted small mb-3">Providing complete and accurate information speeds up your SuperAdmin approval process within 24 hours.</p>
+        <p class="text-muted small mb-3">Providing complete and accurate information speeds up your profile verification within 24 hours.</p>
         <ul class="list-unstyled small text-secondary lh-lg mb-4">
-          <li><i class="fas fa-check-circle text-success me-2"></i> Upload a clear profile picture.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> Specify all languages you can teach in.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> Complete address details for localized student matching.</li>
+          <li><i class="fas fa-check-circle text-primary me-2"></i> Upload a clear profile picture.</li>
+          <li><i class="fas fa-check-circle text-primary me-2"></i> Specify all languages you can teach in.</li>
+          <li><i class="fas fa-check-circle text-primary me-2"></i> Complete address details for localized student matching.</li>
         </ul>
         <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
       </div>
@@ -129,39 +204,37 @@
   <div class="row" *ngIf="showSecond">
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-graduation-cap text-success me-2"></i> Step 2: Teaching Experience & Subjects</h5>
-        
         <form [formGroup]="stepper1">
           <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Highest Qualification <span class="text-danger">*</span></label>
-            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1">
-              <span *ngFor="let chip of qualificationChips" class="badge bg-success rounded-pill px-3 py-2 d-inline-flex align-items-center">
+            <label class="form-label fw-bold small text-dark text-start d-block">Highest Qualification <span class="text-danger">*</span></label>
+            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1" [class.is-invalid]="stepper1.get('qualification')?.invalid && qualificationChips.length === 0 && (stepper1.get('qualification')?.touched || submittedStep2)">
+              <span *ngFor="let chip of qualificationChips" class="badge bg-primary rounded-pill px-3 py-2 d-inline-flex align-items-center">
                 {{ chip }}
                 <i class="fas fa-times ms-2 cursor" (click)="removeQualificationChip(chip)"></i>
               </span>
-              <input placeholder="Enter degree/qualification & press Enter..." type="text" formControlName="qualification" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'qualification')">
+              <input placeholder="Enter degree/qualification & press Enter..." type="text" [(ngModel)]="qualInputText" [ngModelOptions]="{standalone: true}" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'qualification')" (blur)="addQualOnBlur()">
             </div>
           </div>
 
           <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Teaching Experience (Years) <span class="text-danger">*</span></label>
-            <input placeholder="e.g. 5 Years" formControlName="exp" type="text" class="form-control rounded-3">
+            <label class="form-label fw-bold small text-dark text-start d-block">Teaching Experience (Years) <span class="text-danger">*</span></label>
+            <input placeholder="e.g. 5 Years" formControlName="exp" type="text" class="form-control rounded-3" [class.is-invalid]="stepper1.get('exp')?.invalid && (stepper1.get('exp')?.touched || submittedStep2)">
           </div>
 
           <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Subjects Taught <span class="text-danger">*</span></label>
-            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1">
-              <span *ngFor="let subject of subjectChips" class="badge bg-info text-dark rounded-pill px-3 py-2 d-inline-flex align-items-center">
+            <label class="form-label fw-bold small text-dark text-start d-block">Subjects Taught <span class="text-danger">*</span></label>
+            <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1" [class.is-invalid]="stepper1.get('subTeach')?.invalid && subjectChips.length === 0 && (stepper1.get('subTeach')?.touched || submittedStep2)">
+              <span *ngFor="let subject of subjectChips" class="badge bg-primary rounded-pill px-3 py-2 d-inline-flex align-items-center">
                 {{ subject }}
                 <i class="fas fa-times ms-2 cursor" (click)="removeSubjectChip(subject)"></i>
               </span>
-              <input placeholder="Type subject & press Enter..." type="text" formControlName="subTeach" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'subjectTeach')">
+              <input placeholder="Type subject & press Enter..." type="text" [(ngModel)]="subjectInputText" [ngModelOptions]="{standalone: true}" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'subjectTeach')" (blur)="addSubjectOnBlur()">
             </div>
           </div>
 
           <div class="form-group mb-4">
-            <label class="form-label fw-bold small">Curriculum <span class="text-danger">*</span></label>
-            <select formControlName="curriculum" class="form-select rounded-3">
+            <label class="form-label fw-bold small text-dark text-start d-block">Curriculum <span class="text-danger">*</span></label>
+            <select formControlName="curriculum" class="form-select rounded-3" [class.is-invalid]="stepper1.get('curriculum')?.invalid && (stepper1.get('curriculum')?.touched || submittedStep2)">
               <option value="" disabled selected>Select Curriculum Type</option>
               <option *ngFor="let data of curriculumList" [value]="data.curriculum_type">{{ data.curriculum_type }}</option>
             </select>
@@ -171,7 +244,7 @@
             <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="onCollapseStepper(1)">
               <i class="fas fa-arrow-left me-2"></i> Back
             </button>
-            <button type="button" class="btn btn-success btn-lg rounded-pill px-4 shadow-sm" (click)="stepSubmit(3)">
+            <button type="button" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm" (click)="stepSubmit(3)">
               Proceed to Bank & Identity <i class="fas fa-arrow-right ms-2"></i>
             </button>
           </div>
@@ -180,7 +253,7 @@
     </div>
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-light text-dark h-100">
-        <h5 class="fw-bold text-success mb-3"><i class="fas fa-certificate me-2"></i> Teaching Accreditation</h5>
+        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-certificate me-2"></i> Teaching Accreditation</h5>
         <p class="text-muted small">Highlight your specialized subjects and board curriculums to attract relevant students.</p>
         <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
       </div>
@@ -191,50 +264,50 @@
   <div class="row" *ngIf="showThird">
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-university text-warning me-2"></i> Step 3: Identity Verification & Bank Details</h5>
-        
         <form [formGroup]="stepper2">
+          
           <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Identification Proof Type <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold small text-dark text-start d-block">Identification Proof Type <span class="text-danger">*</span></label>
             <select formControlName="identity" class="form-select rounded-3">
+              <option value="" disabled selected>Select Identification Proof Type...</option>
               <option *ngFor="let data of proofList" [value]="data.proof_type">{{ data.proof_type }}</option>
             </select>
           </div>
 
           <!-- Document Upload Box -->
-          <div class="border border-2 border-dashed rounded-4 p-4 text-center mb-4 bg-light">
+          <div class="border border-2 border-dashed rounded-4 p-4 text-center mb-4 bg-light" [class.border-danger]="!identityBase64 && !user?.is_document_uploaded && submittedStep3">
             <input type="file" (change)="onFileSelected($event, 'identity')" id="identity" hidden>
             <label for="identity" style="cursor: pointer;" class="mb-0">
-              <i class="fas fa-cloud-upload-alt fa-3x text-warning mb-2"></i>
-              <h6 class="fw-bold text-dark mb-1">Click to Upload Identity Document</h6>
+              <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-2"></i>
+              <h6 class="fw-bold text-dark mb-1">Click to Upload Identity Document <span class="text-danger">*</span></h6>
               <p class="text-muted small mb-2">Supported formats: JPG, PNG, PDF (Max 5MB)</p>
             </label>
-            <div *ngIf="identityFile" class="badge bg-success px-3 py-2 mt-2">
+            <div *ngIf="identityFile" class="badge bg-primary px-3 py-2 mt-2">
               <i class="fas fa-file-alt me-1"></i> {{ identityFile?.name }} ({{ (identityFile?.size / 1000) | number:'1.0-1' }} KB)
             </div>
           </div>
 
           <div class="form-group mb-3">
-            <label class="form-label fw-bold small">Bank Name <span class="text-danger">*</span></label>
-            <input placeholder="e.g. State Bank of India" formControlName="bankName" type="text" class="form-control rounded-3">
+            <label class="form-label fw-bold small text-dark text-start d-block">Bank Name <span class="text-danger">*</span></label>
+            <input placeholder="e.g. State Bank of India / HDFC Bank" formControlName="bankName" type="text" class="form-control rounded-3" [class.is-invalid]="stepper2.get('bankName')?.invalid && (stepper2.get('bankName')?.touched || submittedStep3)">
           </div>
 
-          <div class="row g-2 mb-4">
+          <div class="row g-3 mb-4">
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Bank Account Number <span class="text-danger">*</span></label>
-              <input placeholder="Account Number" type="text" formControlName="bankAccnum" class="form-control rounded-3">
+              <label class="form-label fw-bold small text-dark text-start d-block">Bank Account Number <span class="text-danger">*</span></label>
+              <input placeholder="Enter Account Number" type="text" formControlName="bankAccnum" class="form-control rounded-3" [class.is-invalid]="stepper2.get('bankAccnum')?.invalid && (stepper2.get('bankAccnum')?.touched || submittedStep3)">
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-bold small">IFSC Code <span class="text-danger">*</span></label>
-              <input placeholder="e.g. SBIN0001234" type="text" formControlName="ifsc" class="form-control rounded-3">
+              <label class="form-label fw-bold small text-dark text-start d-block">IFSC Code <span class="text-danger">*</span></label>
+              <input placeholder="e.g. SBIN0001234" type="text" formControlName="ifsc" class="form-control rounded-3" [class.is-invalid]="stepper2.get('ifsc')?.invalid && (stepper2.get('ifsc')?.touched || submittedStep3)">
             </div>
           </div>
 
-          <div class="d-flex justify-content-between">
+          <div class="d-flex justify-content-between pt-2">
             <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="onCollapseStepper(2)">
               <i class="fas fa-arrow-left me-2"></i> Back
             </button>
-            <button type="button" class="btn btn-warning text-dark fw-bold btn-lg rounded-pill px-4 shadow-sm" (click)="stepSubmit(4)">
+            <button type="button" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm" (click)="stepSubmit(4)">
               Proceed to Certificates <i class="fas fa-arrow-right ms-2"></i>
             </button>
           </div>
@@ -243,7 +316,7 @@
     </div>
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-light text-dark h-100">
-        <h5 class="fw-bold text-warning mb-3"><i class="fas fa-shield-alt me-2"></i> Secure Payout Processing</h5>
+        <h5 class="fw-bold text-primary mb-3"><i class="fas fa-shield-alt me-2"></i> Secure Payout Processing</h5>
         <p class="text-muted small">Bank details are encrypted and used solely for direct teacher earnings payouts after class completions.</p>
         <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
       </div>
@@ -254,15 +327,13 @@
   <div class="row" *ngIf="showFourth">
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-file-pdf text-danger me-2"></i> Step 4: Educational Certificates & Degree Upload</h5>
-        
         <form>
           <!-- UG Certificate Upload Box -->
-          <div class="border rounded-4 p-3 mb-3 bg-light d-flex align-items-center justify-content-between">
+          <div class="border rounded-4 p-3 mb-3 bg-light d-flex align-items-center justify-content-between" [class.border-danger]="!ugCertBase64 && submittedStep3">
             <div>
-              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-upload text-primary me-2"></i> UG Degree Certificate</h6>
+              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-upload text-primary me-2"></i> UG Degree Certificate <span class="text-danger">*</span></h6>
               <span class="text-muted small" *ngIf="!ugFile">No file selected</span>
-              <span class="badge bg-success" *ngIf="ugFile">{{ ugFile?.name }} ({{ (ugFile?.size / 1000) | number:'1.0-1' }} KB)</span>
+              <span class="badge bg-primary" *ngIf="ugFile">{{ ugFile?.name }} ({{ (ugFile?.size / 1000) | number:'1.0-1' }} KB)</span>
             </div>
             <input type="file" (change)="onFileSelected($event, 'ug')" id="ug" hidden>
             <label for="ug" class="btn btn-sm btn-outline-primary rounded-pill px-3 mb-0" style="cursor: pointer;">
@@ -270,15 +341,15 @@
             </label>
           </div>
 
-          <!-- PG Certificate Upload Box -->
+          <!-- PG Certificate Upload Box (Optional) -->
           <div class="border rounded-4 p-3 mb-3 bg-light d-flex align-items-center justify-content-between">
             <div>
-              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-upload text-primary me-2"></i> PG Degree Certificate (Optional)</h6>
+              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-upload text-secondary me-2"></i> PG Degree Certificate (Optional)</h6>
               <span class="text-muted small" *ngIf="!pgFile">No file selected</span>
-              <span class="badge bg-success" *ngIf="pgFile">{{ pgFile?.name }} ({{ (pgFile?.size / 1000) | number:'1.0-1' }} KB)</span>
+              <span class="badge bg-primary" *ngIf="pgFile">{{ pgFile?.name }} ({{ (pgFile?.size / 1000) | number:'1.0-1' }} KB)</span>
             </div>
             <input type="file" (change)="onFileSelected($event, 'pg')" id="pg" hidden>
-            <label for="pg" class="btn btn-sm btn-outline-primary rounded-pill px-3 mb-0" style="cursor: pointer;">
+            <label for="pg" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-0" style="cursor: pointer;">
               Choose File
             </label>
           </div>
@@ -286,9 +357,9 @@
           <!-- Additional Documents Upload Box -->
           <div class="border rounded-4 p-3 mb-4 bg-light d-flex align-items-center justify-content-between">
             <div>
-              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-medical text-secondary me-2"></i> Additional Certifications / Experience Letters</h6>
+              <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-medical text-secondary me-2"></i> Additional Certifications / Experience Letters (Optional)</h6>
               <span class="text-muted small" *ngIf="otherFile.length === 0">No files selected</span>
-              <span class="badge bg-info text-dark ms-1" *ngFor="let file of otherFile">{{ file.name }}</span>
+              <span class="badge bg-primary ms-1" *ngFor="let file of otherFile">{{ file.name }}</span>
             </div>
             <input type="file" multiple (change)="onFileSelected($event, 'other')" id="other" hidden>
             <label for="other" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-0" style="cursor: pointer;">
@@ -310,7 +381,7 @@
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-light text-dark h-100">
         <h5 class="fw-bold text-primary mb-3"><i class="fas fa-check-double me-2"></i> Document Verification</h5>
-        <p class="text-muted small">Uploaded educational documents are reviewed by the SuperAdmin team to grant official Teacher Verification status.</p>
+        <p class="text-muted small">Uploaded educational documents are reviewed by our verification team to grant official Teacher Verification status.</p>
         <img class="img-fluid rounded-3 mt-auto opacity-75" src="app/assets/etutor/becometutor_background.svg" alt="Tutor Onboarding">
       </div>
     </div>
@@ -321,15 +392,16 @@
     <div class="col-12 text-center py-5">
       <div class="card border-0 shadow-lg rounded-4 p-5 bg-white max-w-600 mx-auto">
         <div class="mb-4">
-          <i class="fas fa-check-circle fa-5x text-success"></i>
+          <i class="fas fa-check-circle fa-5x text-primary"></i>
         </div>
         <h2 class="fw-bold text-dark mb-2">Congratulations!</h2>
         <h4 class="text-primary mb-3">Your Teacher Application Submitted Successfully!</h4>
-        <p class="text-muted mb-4">Our SuperAdmin team will review your identity proof and bank account credentials within 24 hours. You can start creating your live classes right away.</p>
-        <button class="btn btn-success btn-lg rounded-pill px-5 shadow-sm" (click)="onCollapseStepper(1)">
-          <i class="fas fa-home me-2"></i> Go to Dashboard
+        <p class="text-muted mb-4">Our verification team will review your identity proof and credentials within <strong>24 hours</strong>. You will receive an email notification once approved. Dashboard access will be enabled after admin approval.</p>
+        <button class="btn btn-outline-primary btn-lg rounded-pill px-5 shadow-sm" (click)="onCollapseStepper(1)">
+          <i class="fas fa-eye me-2"></i> View Application Status
         </button>
       </div>
     </div>
   </div>
+  </ng-container>
 </div>

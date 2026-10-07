@@ -1,7 +1,7 @@
 <!-- Header Section -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light" [class.navbar-with-sidebar]="currentUrl.includes('/myaccount')">
     <div class="container">
-        <a class="navbar-brand" href="#">E - Tuition</a>
+        <a *ngIf="!currentUrl.includes('/myaccount')" class="navbar-brand" href="#">E - Tuition</a>
         <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -29,13 +29,23 @@
             </ul>
         </div>
         <div class="ml-auto d-flex align-items-center gap-2">
-          <a *ngIf="auth.getUserType === '1'" class="btn btn-signup mx-1 rounded-border" (click)="toTutor()">Become Tutor</a>
+          <a *ngIf="showBecomeTutor" class="btn btn-signup mx-1 rounded-border" (click)="toTutor()">Become Tutor</a>
 
-          <!-- Watchlist Star Icon (Student Only) -->
-          <i *ngIf="auth.isStudentUser" (click)="toWishlist()" class="fas fa-star cursor mx-2" style="font-size: 22px; color: #ff7f00; cursor: pointer; transition: transform 0.2s;" title="Watchlist"></i>
-
-          <!-- My Account User Icon -->
-          <i (click)="toMyaccount()" class="fas fa-user-circle cursor mx-2" style="font-size: 26px; color: #ff8c00; cursor: pointer; transition: transform 0.2s;" title="My Account"></i>
+          <!-- My Account User Icon, Name & Approved/Pending Badge for Teachers -->
+          <div (click)="toMyaccount()" class="d-flex align-items-center gap-2 cursor mx-2 user-account-badge" style="cursor: pointer;" title="My Account">
+            <i class="fas fa-user-circle" style="font-size: 28px; color: #ff8c00; transition: transform 0.2s;"></i>
+            <div class="d-flex flex-column align-items-start lh-1">
+              <span class="user-name-label fw-bold text-dark mb-0" style="font-size: 0.9rem;">{{ userName | capitalize }}</span>
+              <ng-container *ngIf="auth.isTeacherUser">
+                <span *ngIf="isAccountVerified" class="badge bg-success text-white px-2 py-1 rounded-pill mt-1" style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.3px;">
+                  <i class="fas fa-check-circle me-1"></i>Approved
+                </span>
+                <span *ngIf="!isAccountVerified && isApplicationPending" class="badge bg-warning text-dark px-2 py-1 rounded-pill mt-1" style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.3px;">
+                  <i class="fas fa-clock me-1"></i>Pending
+                </span>
+              </ng-container>
+            </div>
+          </div>
         </div>
     </div>
 </nav>
@@ -49,14 +59,6 @@
         </div>
         <h5 class="text-warning mx-font-20 font-weight-bold">Verification Approval Pending</h5>
         <p class="text-muted mx-font-14 mt-2">Your tutor verification application is currently under review by our admin team. You will be notified via email once approved.</p>
-      </div>
-
-      <div class="col-12" *ngIf="auth.teacherVerificationStatus == '1' || teacherStatus == '1'">
-        <div class="mb-3">
-          <span class="material-icons text-success" style="font-size: 56px">check_circle</span>
-        </div>
-        <h5 class="text-success mx-font-20 font-weight-bold">Tutor Account Verified</h5>
-        <p class="text-muted mx-font-14 mt-2">Congratulations! Your tutor application has been verified. You can now schedule live classes and accept students.</p>
       </div>
 
       <div class="col-12" *ngIf="auth.teacherVerificationStatus == '2' || teacherStatus == '2'">

@@ -12,6 +12,7 @@ export class Urls {
   public static readonly addClass = 'teacher/addClass';
   public static readonly classList = 'teacher/classList';
   public static readonly reserveClassList = 'teacher/reserveClass';
+  public static readonly toggleWishlist = 'teacher/toggleWishlist';
   public static readonly getStateByPincode = 'common/getStateByPincode';
   public static readonly citiesList = 'common/getCitiesList';
   public static readonly statesList = 'common/getStateList';
@@ -23,6 +24,8 @@ export class Urls {
   public static readonly updateMettingLink = 'teacher/meetingLinkUpdate';
   public static readonly addStudentToClass = 'user/userSubscription';
   public static readonly studentProfile = 'user/studentList';
+  public static readonly updateStudentProfile = 'user/updateStudentProfile';
+  public static readonly getSubscribedClasses = 'student/getSubscribedClasses';
   public static readonly teacherProfile = 'user/getTeacherList';
   public static readonly notifyTeacherProfileStatus = 'common/notifyTeacherProfileStatus';
   public static readonly sendClassReminderEmail = 'teacher/sendClassReminderEmail';

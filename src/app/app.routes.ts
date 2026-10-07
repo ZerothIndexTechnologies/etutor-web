@@ -47,6 +47,10 @@ export const routes: Routes = [
     component: LoginComponent,
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./project/prelogin/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+  },
+  {
     path: 'signup',
     component: SignUpComponent,
   },

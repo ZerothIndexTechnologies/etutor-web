@@ -1,153 +1,453 @@
 <!-- general page starts here -->
-<div class="container">
-<!--    @if (auth.getUserType === '1') {-->
-    <!-- Teacher Profile form starts here -->
-    <div class="row" *ngIf="isTeacher">
-        <div class="col-md-12">
-            <div class="profile-section p-4 mb-3 rounded-border">
-                <div class="row">
-                    <div class="col-md-6 d-flex text-center align-items-center">
-                        <div>
-                            <img src="app/assets/etutor/avatar.svg" height="130" alt="Profile Picture"
-                                class="profile-img">
-                            <div class="profileAdd cursor" (click)="teacherFile.click()">
-                                <i class="material-icons">add</i>
-                                <input type="file" #teacherFile (change)="onFileSelected($event)" id="teacher" hidden>
-                            </div>
-                        </div>
-                        <div class="mx-5 profile-info">
-                            <h6 class="fw-bold">{{profileData?.first_name}} {{profileData?.last_name}}</h6>
-                            <span class="text-black-50 fw-bold">Teacher</span>
-                            <p class="mb-0 mt-1">
-                                <a (click)="routeToChangePassword()" class="fw-medium cursor highlight mx-font-13 me-3">Change Password</a>
-                                <a (click)="onLogout()" class="fw-medium cursor text-danger mx-font-13"><i class="fa fa-sign-out-alt me-1"></i>Logout</a>
-                            </p>
-                        </div>
+<div class="container py-3">
+
+    <!-- TEACHER PROFILE SECTION (All Stepper Tabs with View & Edit Profile Modes) -->
+    <div *ngIf="isTeacher" class="teacher-profile-wrapper">
+        
+        <!-- Top Profile Overview Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-wrapper position-relative cursor-pointer" (click)="teacherFile.value = ''; teacherFile.click()" title="Change Profile Picture">
+                        <img [src]="getProfileImage()" class="avatar-img rounded-circle object-fit-cover shadow-sm border border-2 border-warning" width="84" height="84" (error)="handleAvatarError($event)" />
+                        <button type="button" class="avatar-add-btn rounded-circle border-0 d-flex align-items-center justify-content-center cursor-pointer shadow-sm" (click)="$event.stopPropagation(); teacherFile.value = ''; teacherFile.click()" title="Upload Photo">
+                            <i class="fa fa-camera text-white text-xs"></i>
+                        </button>
+                        <input type="file" #teacherFile (change)="onFileSelected($event, 'profile')" id="teacher" accept="image/*" hidden>
                     </div>
-                    <div class="col-md-6">
-                        <h5>About</h5>
-                        <p class="mx-font-14 text-black-50">It is a long established fact that a reader will be
-                            distracted by the
-                            readable content of
-                            a page when looking at its layout. The point of using Lorem Ipsum is that it has a
-                            more-or-less normal distribution of letters, as opposed to using 'Content here',making it
-                            look like readable English. Many desktop publishng packages and wep page editors now use
-                            Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will concover many
-                            web sites still in their infancy.</p>
+
+                    <div class="profile-info-text">
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="fw-bold text-dark mb-0">{{ (profileData?.first_name || 'Teacher') | capitalize }} {{ (profileData?.last_name || '') | capitalize }}</h4>
+                            <span *ngIf="auth.isTeacherVerified || teacherStatus === '1'" class="badge bg-success text-white px-2-5 py-1 rounded-pill text-xs fw-bold">
+                                <i class="fas fa-check-circle me-1"></i> Approved
+                            </span>
+                            <span *ngIf="!auth.isTeacherVerified && teacherStatus !== '1' && auth.isTeacherApplicationSubmitted" class="badge bg-warning text-dark px-2-5 py-1 rounded-pill text-xs fw-bold">
+                                <i class="fas fa-clock me-1"></i> Under Review
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-2">
-                  <h6 class="mx-font-20 fw-bold">General Info<span><i (click)="editProfileDetails = !editProfileDetails" class="material-icons mt-2">edit</i></span></h6>
+
+                <!-- Action Button Container (Edit Profile) -->
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn edit-btn-inside-box rounded-pill px-4 py-2 text-xs fw-bold d-flex align-items-center gap-2 cursor-pointer" (click)="toggleEditMode()">
+                        <i class="fa fa-pen"></i> 
+                        <span>{{ editProfileDetails ? 'View Profile' : 'Edit Profile' }}</span>
+                    </button>
                 </div>
-                <form [formGroup]="teacherForm" (ngSubmit)="submitTeacherForm()">
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="subjects">Subjects<span class="text-danger">*</span></label>
-                                <input type="text" formControlName="subject" class="form-control" id="subjects"
-                                  [class.is-invalid]="teacherForm.get('subject')?.invalid && (teacherForm.get('subject')?.touched || submittedTeacher)">
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('subject')?.invalid && (teacherForm.get('subject')?.touched || submittedTeacher)">
-                                  Subject is required
-                                </div>
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="gender">Gender<span class="text-danger">*</span></label>
-                                <select formControlName="gender" class="form-control rounded-border" id="gender"
-                                  [class.is-invalid]="teacherForm.get('gender')?.invalid && (teacherForm.get('gender')?.touched || submittedTeacher)">
-                                    <option value="">Please Select</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                </select>
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('gender')?.invalid && (teacherForm.get('gender')?.touched || submittedTeacher)">
-                                  Gender is required
-                                </div>
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="languages">Languages<span class="text-danger">*</span></label>
-                                <input type="text" formControlName="language" class="form-control" id="languages"
-                                  [class.is-invalid]="teacherForm.get('language')?.invalid && (teacherForm.get('language')?.touched || submittedTeacher)">
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('language')?.invalid && (teacherForm.get('language')?.touched || submittedTeacher)">
-                                  Language is required
-                                </div>
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="mobile">Mobile Number<span class="text-danger">*</span></label>
-                                <input type="text" formControlName="mobile" class="form-control" id="mobile"
-                                  [class.is-invalid]="teacherForm.get('mobile')?.invalid && (teacherForm.get('mobile')?.touched || submittedTeacher)">
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('mobile')?.invalid && (teacherForm.get('mobile')?.touched || submittedTeacher)">
-                                  Mobile Number is required
-                                </div>
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="identfication">Identification</label>
-                                <input type="text" formControlName="identification" class="form-control" id="identfication">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="qualfication">Qualification<span class="text-danger">*</span></label>
-                                <input type="text" formControlName="qualification" class="form-control" id="qualfication"
-                                  [class.is-invalid]="teacherForm.get('qualification')?.invalid && (teacherForm.get('qualification')?.touched || submittedTeacher)">
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('qualification')?.invalid && (teacherForm.get('qualification')?.touched || submittedTeacher)">
-                                  Qualification is required
-                                </div>
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="duration">Duration</label>
-                                <input type="text" class="form-control" formControlName="duration" id="duration" />
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="mail">Mail ID<span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" formControlName="mail" id="mail"
-                                  [class.is-invalid]="teacherForm.get('mail')?.invalid && (teacherForm.get('mail')?.touched || submittedTeacher)">
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('mail')?.invalid && (teacherForm.get('mail')?.touched || submittedTeacher)">
-                                  Valid Mail ID is required
-                                </div>
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="address">Address<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" formControlName="address" id="address"
-                                  [class.is-invalid]="teacherForm.get('address')?.invalid && (teacherForm.get('address')?.touched || submittedTeacher)">
-                                <div class="text-danger small font-weight-bold mt-1"
-                                  *ngIf="teacherForm.get('address')?.invalid && (teacherForm.get('address')?.touched || submittedTeacher)">
-                                  Address is required
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-end">
-                        <button type="button" (click)="editProfileDetails = false" class="btn mx-2 rounded-border">Cancel</button>
-                        <button type="submit" class="btn btn-save rounded-border">Save</button>
-                    </div>
-                </form>
             </div>
         </div>
+
+        <!-- Stepper Navigation Header (Underline Tab Design matching Tutor Page) -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+            <div class="stepper-tab-header bg-white px-3 pt-2 rounded-4">
+                <div class="d-flex align-items-center justify-content-between overflow-auto flex-nowrap text-center">
+                    <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showFirst" [class.completed]="isStepCompleted(1)" (click)="onCollapseStepper(1)">
+                        <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <i class="fas fa-check text-white small" *ngIf="isStepCompleted(1) && !showFirst"></i>
+                            <span *ngIf="!isStepCompleted(1) || showFirst">1</span>
+                        </span>
+                        <span class="step-label">Personal</span>
+                    </div>
+
+                    <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showSecond" [class.completed]="isStepCompleted(2)" (click)="onCollapseStepper(2)">
+                        <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <i class="fas fa-check text-white small" *ngIf="isStepCompleted(2) && !showSecond"></i>
+                            <span *ngIf="!isStepCompleted(2) || showSecond">2</span>
+                        </span>
+                        <span class="step-label">Teaching</span>
+                    </div>
+
+                    <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showThird" [class.completed]="isStepCompleted(3)" (click)="onCollapseStepper(3)">
+                        <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <i class="fas fa-check text-white small" *ngIf="isStepCompleted(3) && !showThird"></i>
+                            <span *ngIf="!isStepCompleted(3) || showThird">3</span>
+                        </span>
+                        <span class="step-label">Bank & Identity</span>
+                    </div>
+
+                    <div class="stepper-tab-item d-flex align-items-center justify-content-center gap-2" [class.active]="showFourth" [class.completed]="isStepCompleted(4)" (click)="onCollapseStepper(4)">
+                        <span class="step-num rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <i class="fas fa-check text-white small" *ngIf="isStepCompleted(4) && !showFourth"></i>
+                            <span *ngIf="!isStepCompleted(4) || showFourth">4</span>
+                        </span>
+                        <span class="step-label">Documents</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN STEPPER TAB CONTENT AREA -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+            
+            <!-- FORM FOR EDIT MODE / DATA CONTEXT -->
+            <form [formGroup]="teacherForm" (ngSubmit)="submitTeacherForm()">
+
+                <!-- STEP 1: PERSONAL DETAILS & ADDRESS -->
+                <div *ngIf="showFirst" class="step-content">
+                    
+                    <!-- VIEW MODE: Step 1 Key-Value Grid -->
+                    <div *ngIf="!editProfileDetails" class="view-mode-grid">
+                        <div class="row g-4 text-start">
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">First Name</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ (teacherForm.get('firstName')?.value || profileData?.first_name || '—') | capitalize }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Last Name</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ (teacherForm.get('lastName')?.value || profileData?.last_name || '—') | capitalize }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Gender</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ (teacherForm.get('gender')?.value || profileData?.gender || '—') | capitalize }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Email ID</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('mail')?.value || profileData?.email || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Mobile Number</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('mobile')?.value || profileData?.mobile_number || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Residence Address</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('address')?.value || profileData?.address || profileData?.residence_address || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">City</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('city')?.value || profileData?.city || profileData?.town || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">State</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('state')?.value || profileData?.state || profileData?.province || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Pincode</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('pin')?.value || profileData?.pin_code || profileData?.pincode || profileData?.pin || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Language Proficiency</span>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <span *ngFor="let lang of selectedLanguages" class="badge bg-warning text-dark rounded-pill px-2-5 py-1 text-xs">
+                                            {{ lang }}
+                                        </span>
+                                        <span *ngIf="selectedLanguages.length === 0" class="text-dark text-sm fw-bold">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">About / Bio</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('aboutInfo')?.value || profileData?.about_you || profileData?.about_info || profileData?.aboutInfo || profileData?.bio || profileData?.about || profileData?.description || '—' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EDIT MODE: Step 1 Form Controls -->
+                    <div *ngIf="editProfileDetails" class="edit-mode-form">
+                        <div class="row g-3 text-start">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">First Name <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="firstName" class="form-control rounded-3 py-1-5 custom-input" placeholder="First Name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="lastName" class="form-control rounded-3 py-1-5 custom-input" placeholder="Last Name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Email ID <span class="text-danger">*</span></label>
+                                <input type="email" formControlName="mail" class="form-control rounded-3 py-1-5 custom-input" placeholder="Email Address" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Mobile Number <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="mobile" class="form-control rounded-3 py-1-5 custom-input" placeholder="Mobile Number" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Gender <span class="text-danger">*</span></label>
+                                <select formControlName="gender" class="form-select rounded-3 py-1-5 custom-input">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Address <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="address" class="form-control rounded-3 py-1-5 custom-input" placeholder="Full Residence Address" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">City <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="city" class="form-control rounded-3 py-1-5 custom-input" placeholder="City" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">State <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="state" class="form-control rounded-3 py-1-5 custom-input" placeholder="State" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Pincode <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="pin" class="form-control rounded-3 py-1-5 custom-input" placeholder="Pincode" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Language Proficiency <span class="text-danger">*</span></label>
+                                <ng-select
+                                  [items]="availableLanguages"
+                                  [multiple]="true"
+                                  [addTag]="true"
+                                  [closeOnSelect]="false"
+                                  placeholder="Select Languages Known..."
+                                  [(ngModel)]="selectedLanguages"
+                                  [ngModelOptions]="{standalone: true}"
+                                  (change)="onLanguageChange($event)"
+                                  class="custom-ng-select rounded-3">
+                                </ng-select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">About You <span class="text-danger">*</span></label>
+                                <textarea rows="3" formControlName="aboutInfo" class="form-control rounded-3 py-1-5 custom-input" placeholder="Brief teaching bio & background..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: TEACHING PROFILE & SUBJECTS -->
+                <div *ngIf="showSecond" class="step-content">
+                    
+                    <!-- VIEW MODE: Step 2 Key-Value Grid -->
+                    <div *ngIf="!editProfileDetails" class="view-mode-grid">
+                        <div class="row g-4 text-start">
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Highest Qualification</span>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <span *ngFor="let qual of qualificationChips" class="badge bg-warning text-dark rounded-pill px-2-5 py-1 text-xs">
+                                            {{ qual }}
+                                        </span>
+                                        <span *ngIf="qualificationChips.length === 0" class="text-dark text-sm fw-bold">{{ teacherForm.get('qualification')?.value || profileData?.highest_qualification || '—' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Teaching Experience</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('exp')?.value || profileData?.experience_in_yrs || '—' }} Years</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Subjects Taught</span>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <span *ngFor="let sub of subjectChips" class="badge bg-warning text-dark rounded-pill px-2-5 py-1 text-xs">
+                                            {{ sub }}
+                                        </span>
+                                        <span *ngIf="subjectChips.length === 0" class="text-dark text-sm fw-bold">{{ teacherForm.get('subTeach')?.value || profileData?.subjects_you_teach || '—' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Curriculum Type</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ (teacherForm.get('curriculum')?.value || profileData?.curriculum_type || '—') | uppercase }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EDIT MODE: Step 2 Form Controls -->
+                    <div *ngIf="editProfileDetails" class="edit-mode-form">
+                        <div class="row g-3 text-start">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Highest Qualification <span class="text-danger">*</span></label>
+                                <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1">
+                                    <span *ngFor="let chip of qualificationChips" class="badge bg-warning text-dark rounded-pill px-2-5 py-1 text-xs d-inline-flex align-items-center">
+                                        {{ chip }}
+                                        <i class="fas fa-times ms-2 cursor" (click)="removeQualificationChip(chip)"></i>
+                                    </span>
+                                    <input placeholder="Type degree & press Enter..." type="text" [(ngModel)]="qualInputText" [ngModelOptions]="{standalone: true}" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'qualification')" (blur)="addQualOnBlur()">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Teaching Experience (Years) <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="exp" class="form-control rounded-3 py-1-5 custom-input" placeholder="e.g. 5 Years" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Subjects Taught <span class="text-danger">*</span></label>
+                                <div class="chip-input-container rounded-3 form-control p-2 d-flex flex-wrap align-items-center gap-1">
+                                    <span *ngFor="let subject of subjectChips" class="badge bg-warning text-dark rounded-pill px-2-5 py-1 text-xs d-inline-flex align-items-center">
+                                        {{ subject }}
+                                        <i class="fas fa-times ms-2 cursor" (click)="removeSubjectChip(subject)"></i>
+                                    </span>
+                                    <input placeholder="Type subject & press Enter..." type="text" [(ngModel)]="subjectInputText" [ngModelOptions]="{standalone: true}" class="border-0 flex-grow-1 bg-transparent py-1 px-2" (keydown)="handleKeyDown($event, 'subjectTeach')" (blur)="addSubjectOnBlur()">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Curriculum <span class="text-danger">*</span></label>
+                                <select formControlName="curriculum" class="form-select rounded-3 py-1-5 custom-input">
+                                    <option value="" disabled selected>Select Curriculum Type</option>
+                                    <option *ngFor="let data of curriculumList" [value]="data.curriculum_type">{{ data.curriculum_type }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: BANK ACCOUNT & PAYOUT DETAILS -->
+                <div *ngIf="showThird" class="step-content">
+                    
+                    <!-- VIEW MODE: Step 3 Key-Value Grid -->
+                    <div *ngIf="!editProfileDetails" class="view-mode-grid">
+                        <div class="row g-4 text-start">
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Bank Name</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('bankName')?.value || profileData?.bank_name || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Bank Account Number</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ teacherForm.get('bankAccnum')?.value || profileData?.bank_account_number || '—' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">IFSC Code</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ (teacherForm.get('ifsc')?.value || profileData?.IFSC_code || '—') | uppercase }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="info-block">
+                                    <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Identity Proof Type</span>
+                                    <span class="fw-bold text-dark text-sm d-block">{{ getIdentityDisplay() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EDIT MODE: Step 3 Form Controls -->
+                    <div *ngIf="editProfileDetails" class="edit-mode-form">
+                        <div class="row g-3 text-start">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Bank Name <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="bankName" class="form-control rounded-3 py-1-5 custom-input" placeholder="Bank Name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Account Number <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="bankAccnum" class="form-control rounded-3 py-1-5 custom-input" placeholder="Account Number" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">IFSC Code <span class="text-danger">*</span></label>
+                                <input type="text" formControlName="ifsc" class="form-control rounded-3 py-1-5 custom-input" placeholder="IFSC Code" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Identity Proof Type <span class="text-danger">*</span></label>
+                                <select formControlName="identity" class="form-select rounded-3 py-1-5 custom-input">
+                                    <option value="" disabled>Select Proof Type</option>
+                                    <option *ngFor="let proof of proofList" [value]="proof.proof_type">{{ proof.proof_type }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: DOCUMENTS & CERTIFICATES -->
+                <div *ngIf="showFourth" class="step-content">
+                    
+                    <!-- VIEW MODE: Step 4 Document Status Cards -->
+                    <div *ngIf="!editProfileDetails" class="view-mode-grid">
+                        <div class="row g-4 text-start">
+                            <div class="col-md-6 col-12">
+                                <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-id-card text-warning fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark text-sm">Government Identity Proof</h6>
+                                            <span class="text-muted text-xs">Govt Issued ID Card</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-1 text-xs fw-bold">
+                                        <i class="fa fa-check-circle me-1"></i> Uploaded
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-12">
+                                <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-graduation-cap text-warning fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark text-sm">Degree / Teaching Certificate</h6>
+                                            <span class="text-muted text-xs">UG / Educational Degree</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-1 text-xs fw-bold">
+                                        <i class="fa fa-check-circle me-1"></i> Uploaded
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EDIT MODE: Step 4 File Upload Inputs -->
+                    <div *ngIf="editProfileDetails" class="edit-mode-form">
+                        <div class="row g-4 text-start">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Government ID Proof</label>
+                                <input type="file" (change)="onFileSelected($event, 'identity')" class="form-control rounded-3" accept="image/*,.pdf" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">Degree Certificate (UG)</label>
+                                <input type="file" (change)="onFileSelected($event, 'ug')" class="form-control rounded-3" accept="image/*,.pdf" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-xs text-dark mb-1">PG / Master's Certificate (Optional)</label>
+                                <input type="file" (change)="onFileSelected($event, 'pg')" class="form-control rounded-3" accept="image/*,.pdf" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM ACTION BAR FOR EDIT MODE (CANCEL & SAVE CHANGES) -->
+                <div *ngIf="editProfileDetails" class="d-flex justify-content-end align-items-center gap-3 pt-3 mt-4 border-top">
+                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2 fw-semibold" (click)="resetForm()">Cancel</button>
+                    <button type="submit" class="btn btn-orange text-white rounded-pill px-4 py-2 fw-semibold d-flex align-items-center">
+                        <i class="fa fa-save me-2"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
     </div>
-    <!-- Teacher Profile form ends here -->
 
-
-<!--    } @else {-->
-    <!-- Student Profile starts here -->
+    <!-- STUDENT PROFILE SECTION (Unchanged for Student Users) -->
     <div *ngIf="!isTeacher" class="student-profile-wrapper">
         <!-- Page Header -->
-        <div class="page-header d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-1 text-dark page-title">Student Profile</h2>
-                <p class="text-muted mb-0 page-subtitle">View and manage your personal and academic information.</p>
-            </div>
-            <div class="d-flex align-items-center">
-                <button type="button" class="btn btn-outline-danger rounded-pill px-4 py-2 text-sm fw-semibold d-flex align-items-center gap-2 cursor-pointer logout-btn-header" (click)="onLogout()">
-                    <i class="fa fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
+        <div class="page-header mb-4">
+            <h2 class="fw-bold mb-1 text-dark page-title">Student Profile</h2>
+            <p class="text-muted mb-0 page-subtitle">View and manage your personal and academic information.</p>
         </div>
 
         <!-- Top Row Cards -->
@@ -161,13 +461,12 @@
                             <button type="button" class="avatar-add-btn rounded-circle border-0 d-flex align-items-center justify-content-center cursor-pointer" (click)="$event.stopPropagation(); studentFile.value = ''; studentFile.click()" title="Edit Profile Picture">
                                 <i class="fa fa-plus text-white"></i>
                             </button>
-                            <input type="file" #studentFile (change)="onFileSelected($event)" id="student" accept="image/*" hidden>
+                            <input type="file" #studentFile (change)="onFileSelected($event, 'profile')" id="student" accept="image/*" hidden>
                         </div>
 
                         <div class="profile-info-text overflow-hidden">
-                            <h4 class="fw-bold text-dark mb-1 text-truncate">{{ profileData?.first_name || 'Student' }} {{ profileData?.last_name || '' }}</h4>
-                            <div class="text-muted fw-medium text-sm mb-2">Student</div>
-                            <a (click)="routeToChangePassword()" class="change-password-link cursor-pointer fw-semibold text-orange text-decoration-none">Change Password</a>
+                            <h4 class="fw-bold text-dark mb-1 text-truncate">{{ (profileData?.first_name || 'Student') | capitalize }} {{ (profileData?.last_name || '') | capitalize }}</h4>
+                            <div class="text-muted fw-medium text-sm mb-0">Student</div>
                         </div>
                     </div>
                 </div>
@@ -177,7 +476,6 @@
             <div class="col-lg-7 col-md-12">
                 <div class="info-grid card border-0 shadow-sm rounded-4 p-4 h-100">
                     <div class="row g-3 h-100 align-items-center">
-                        <!-- Item 1: Grade & Curriculum -->
                         <div class="col-md-4 col-12">
                             <div class="d-flex align-items-center p-2">
                                 <div class="icon-circle bg-purple-light text-purple rounded-3 p-3 me-3 d-flex align-items-center justify-content-center flex-shrink-0">
@@ -185,12 +483,11 @@
                                 </div>
                                 <div>
                                     <span class="text-muted text-xs d-block mb-1">Grade & Curriculum</span>
-                                    <span class="fw-bold text-dark text-sm full-text-wrap d-block">{{ studentGradeName || '6 Grade' }} &bull; {{ studentCurriculumName || 'CBSE' }}</span>
+                                    <span class="fw-bold text-dark text-sm full-text-wrap d-block">{{ studentGradeName || '6 Grade' }} &bull; {{ (studentCurriculumName || 'CBSE') | uppercase }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Item 2: Active Learning Track -->
                         <div class="col-md-4 col-12">
                             <div class="d-flex align-items-center p-2">
                                 <div class="icon-circle bg-yellow-light text-yellow rounded-3 p-3 me-3 d-flex align-items-center justify-content-center flex-shrink-0">
@@ -203,7 +500,6 @@
                             </div>
                         </div>
 
-                        <!-- Item 3: Schedule Type -->
                         <div class="col-md-4 col-12">
                             <div class="d-flex align-items-center p-2">
                                 <div class="icon-circle bg-blue-light text-blue rounded-3 p-3 me-3 d-flex align-items-center justify-content-center flex-shrink-0">
@@ -220,7 +516,7 @@
             </div>
         </div>
 
-        <!-- Student Profile Tabs Navigation (Material Tab Style) -->
+        <!-- Student Profile Tabs Navigation -->
         <div class="profile-tabs-wrapper mb-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white p-0 overflow-hidden">
                 <div class="d-flex align-items-center justify-content-between px-4 pt-2 flex-wrap gap-3">
@@ -251,106 +547,131 @@
 
         <!-- TAB 1: General Information Section -->
         <div *ngIf="activeStudentTab === 'general'" class="general-tab-content">
-            <!-- Unified Single Form Card -->
-            <form [formGroup]="studentForm" (ngSubmit)="submitStudentForm()">
-                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white" [class.view-mode-card]="!editProfileDetails">
-                    <!-- Box Header with Title & Edit Profile Button -->
-                    <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
-                        <div class="d-flex align-items-center gap-2 text-start">
-                            <i class="fa fa-user-edit text-orange fs-6"></i>
-                            <h6 class="fw-bold text-dark m-0">Personal & Academic Details</h6>
-                        </div>
-                        <button type="button" class="btn btn-outline-warning text-orange rounded-pill px-3 py-1-5 text-xs fw-bold d-flex align-items-center gap-1.5 cursor-pointer edit-btn-inside-box" (click)="toggleEditMode()">
-                            <i class="fa me-1" [ngClass]="editProfileDetails ? 'fa-times' : 'fa-pen'"></i> 
-                            <span>{{ editProfileDetails ? 'Cancel Edit' : 'Edit Profile' }}</span>
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                
+                <div *ngIf="!editProfileDetails" class="view-mode-wrapper">
+                    <div class="d-flex justify-content-end mb-4">
+                        <button type="button" class="btn edit-btn-inside-box rounded-pill px-4 py-2 text-xs fw-bold d-flex align-items-center gap-2 cursor-pointer" (click)="toggleEditMode()">
+                            <i class="fa fa-pen"></i> 
+                            <span>Edit Profile</span>
                         </button>
                     </div>
+                    <div class="row g-4 text-start">
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">First Name</span>
+                                <span class="fw-bold text-dark text-sm d-block">{{ (studentForm.get('firstName')?.value || profileData?.first_name || '—') | capitalize }}</span>
+                            </div>
+                        </div>
 
-                    <div class="row g-3 text-start">
-                        <!-- 4 Fields Per Row Grid (col-lg-3) -->
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Last Name</span>
+                                <span class="fw-bold text-dark text-sm d-block">{{ (studentForm.get('lastName')?.value || profileData?.last_name || '—') | capitalize }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Email ID</span>
+                                <span class="fw-bold text-dark text-sm d-block text-truncate" [title]="studentForm.get('mail')?.value || profileData?.email">{{ studentForm.get('mail')?.value || profileData?.email || '—' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Mobile Number</span>
+                                <span class="fw-bold text-dark text-sm d-block">{{ studentForm.get('mobile')?.value || profileData?.mobile_number || '—' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Gender</span>
+                                <span class="fw-bold text-dark text-sm d-block">{{ (studentForm.get('gender')?.value || profileData?.gender || '—') | capitalize }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Grade</span>
+                                <span class="fw-bold text-dark text-sm d-block">{{ getGradeDisplayName() | capitalize }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="info-block">
+                                <span class="text-muted text-uppercase text-xs fw-bold d-block mb-1">Curriculum Type</span>
+                                <span class="fw-bold text-dark text-sm d-block">{{ getCurriculumDisplayName() | uppercase }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form [formGroup]="studentForm" (ngSubmit)="submitStudentForm()" *ngIf="editProfileDetails">
+                    <div class="row g-3 text-start mb-4">
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">First Name <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
-                            <input type="text" formControlName="firstName" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="First Name"
-                                [readonly]="!editProfileDetails"
-                                [class.is-invalid]="studentForm.get('firstName')?.invalid && (studentForm.get('firstName')?.touched || submittedStudent)" />
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('firstName')?.invalid && (studentForm.get('firstName')?.touched || submittedStudent)">First Name is required</div>
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">First Name <span class="text-danger">*</span></label>
+                            <input type="text" formControlName="firstName" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="First Name" />
                         </div>
 
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Last Name <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
-                            <input type="text" formControlName="lastName" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="Last Name"
-                                [readonly]="!editProfileDetails"
-                                [class.is-invalid]="studentForm.get('lastName')?.invalid && (studentForm.get('lastName')?.touched || submittedStudent)" />
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('lastName')?.invalid && (studentForm.get('lastName')?.touched || submittedStudent)">Last Name is required</div>
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" formControlName="lastName" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="Last Name" />
                         </div>
 
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Email ID <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
-                            <input type="email" formControlName="mail" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="Email ID"
-                                [readonly]="!editProfileDetails"
-                                [class.is-invalid]="studentForm.get('mail')?.invalid && (studentForm.get('mail')?.touched || submittedStudent)" />
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('mail')?.invalid && (studentForm.get('mail')?.touched || submittedStudent)">Valid Email ID is required</div>
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Email ID <span class="text-danger">*</span></label>
+                            <input type="email" formControlName="mail" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="Email ID" />
                         </div>
 
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Mobile Number <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
-                            <input type="text" formControlName="mobile" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="Mobile Number"
-                                [readonly]="!editProfileDetails"
-                                [class.is-invalid]="studentForm.get('mobile')?.invalid && (studentForm.get('mobile')?.touched || submittedStudent)" />
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('mobile')?.invalid && (studentForm.get('mobile')?.touched || submittedStudent)">Mobile Number is required</div>
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Mobile Number <span class="text-danger">*</span></label>
+                            <input type="text" formControlName="mobile" class="form-control rounded-3 py-1-5 custom-input text-start" placeholder="Mobile Number" />
                         </div>
 
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Gender <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
-                            <select formControlName="gender" class="form-select rounded-3 py-1-5 custom-input text-start"
-                                [disabled]="!editProfileDetails"
-                                [class.is-invalid]="studentForm.get('gender')?.invalid && (studentForm.get('gender')?.touched || submittedStudent)">
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Gender <span class="text-danger">*</span></label>
+                            <select formControlName="gender" class="form-select rounded-3 py-1-5 custom-input text-start">
                                 <option value="" disabled>Please Select</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                                 <option value="Other">Other</option>
                             </select>
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('gender')?.invalid && (studentForm.get('gender')?.touched || submittedStudent)">Gender is required</div>
                         </div>
 
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Grade <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Grade <span class="text-danger">*</span></label>
                             <ng-select class="custom-ng-select text-start"
                                 formControlName="grade"
                                 [items]="gradeListData"
                                 bindLabel="displayname"
                                 bindValue="id"
-                                placeholder="Please Select"
-                                [disabled]="!editProfileDetails"
-                            >
+                                placeholder="Please Select">
                             </ng-select>
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('grade')?.invalid && (studentForm.get('grade')?.touched || submittedStudent)">Grade is required</div>
                         </div>
 
                         <div class="col-lg-3 col-md-6 col-12 text-start">
-                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Curriculum Type <span class="text-danger" *ngIf="editProfileDetails">*</span></label>
+                            <label class="form-label text-xs fw-semibold text-dark mb-1 text-start d-block">Curriculum Type <span class="text-danger">*</span></label>
                             <ng-select class="custom-ng-select text-start"
                                 formControlName="curriculum"
                                 [items]="curriculumList"
                                 bindLabel="curriculum_type"
                                 bindValue="id"
-                                placeholder="Please Select"
-                                [disabled]="!editProfileDetails"
-                            >
+                                placeholder="Please Select">
                             </ng-select>
-                            <div class="text-danger small mt-1 text-start" *ngIf="editProfileDetails && studentForm.get('curriculum')?.invalid && (studentForm.get('curriculum')?.touched || submittedStudent)">Curriculum Type is required</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Action Buttons (Only visible in Edit Mode) -->
-                <div class="d-flex justify-content-end align-items-center gap-3" *ngIf="editProfileDetails">
-                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2 fw-semibold" (click)="resetForm()">Cancel</button>
-                    <button type="submit" class="btn btn-orange text-white rounded-pill px-4 py-2 fw-semibold d-flex align-items-center">
-                        <i class="fa fa-save me-2"></i> Save Changes
-                    </button>
-                </div>
-            </form>
+                    <div class="d-flex justify-content-end align-items-center gap-3 pt-3 border-top">
+                        <button type="button" class="btn btn-light border rounded-pill px-4 py-2 fw-semibold" (click)="resetForm()">Cancel</button>
+                        <button type="submit" class="btn btn-orange text-white rounded-pill px-4 py-2 fw-semibold d-flex align-items-center">
+                            <i class="fa fa-save me-2"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+
+            </div>
         </div>
 
         <!-- TAB 2: Purchases / Subscribed Classes Section -->
@@ -370,7 +691,6 @@
                     </button>
                 </div>
 
-                <!-- If Subscriptions Exist: Compact Overview Table -->
                 <div *ngIf="subscribedClassesList.length > 0" class="table-responsive">
                     <table class="table align-middle table-hover mb-0 text-start">
                         <thead class="table-light text-xs text-muted text-uppercase">
@@ -394,7 +714,7 @@
                                     </div>
                                 </td>
                                 <td class="px-3 text-secondary text-sm">
-                                    {{ item.grade || studentGradeName || 'Grade' }} &bull; {{ item.curriculum || item.curriculum_type || studentCurriculumName || 'Curriculum' }}
+                                    {{ item.grade || studentGradeName || 'Grade' }} &bull; {{ (item.curriculum || item.curriculum_type || studentCurriculumName || 'Curriculum') | uppercase }}
                                 </td>
                                 <td class="px-3 text-center">
                                     <span class="badge rounded-pill bg-success-light text-success fw-semibold px-2-5 py-1 text-xs">
@@ -411,7 +731,6 @@
                     </table>
                 </div>
 
-                <!-- Fallback / Overview summary when list length is 0 -->
                 <div *ngIf="subscribedClassesList.length === 0" class="py-4 text-center">
                     <div class="empty-icon-circle bg-orange-light text-orange rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                         <i class="fa fa-book-reader fs-3"></i>
@@ -429,6 +748,5 @@
             </div>
         </div>
     </div>
-    <!-- Student Profile ends here -->
 
 </div>

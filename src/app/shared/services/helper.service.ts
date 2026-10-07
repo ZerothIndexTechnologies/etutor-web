@@ -1,12 +1,28 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
+import { Dialog } from '@angular/cdk/dialog';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ConfirmModalComponent, ConfirmModalData } from '../components/confirm-modal/confirm-modal.component';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HelperService {
   isLoading = false;
+  private dialog = inject(Dialog);
   constructor(public snackBar: MatSnackBar) {}
+
+  public confirm(data: ConfirmModalData): Observable<boolean> {
+    const dialogRef = this.dialog.open<boolean>(ConfirmModalComponent, {
+      width: '440px',
+      disableClose: false,
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      data: data
+    });
+    return dialogRef.closed.pipe(map(res => !!res));
+  }
   // toaster
   public async presentToast(msg: any) {
     await this.snackBar.open(msg, '×', {

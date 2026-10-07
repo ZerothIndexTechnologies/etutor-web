@@ -10,7 +10,101 @@ input, select {
   padding: 0.5rem 0.75rem;
 }
 
-.student-profile-wrapper {
+.cursor {
+  cursor: pointer;
+}
+
+/* Teacher Stepper Tab Header Styling (Matching Tutor Page) */
+.stepper-tab-header {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .stepper-tab-item {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #64748b;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    user-select: none;
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: #e2e8f0;
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: all 0.2s ease-in-out;
+    }
+
+    &:hover {
+      color: #0f172a;
+      background-color: #f8fafc;
+
+      .step-num {
+        background-color: #cbd5e1;
+      }
+    }
+
+    &.completed {
+      .step-num {
+        background-color: #10b981;
+        color: #ffffff;
+      }
+    }
+
+    &.active {
+      color: #ff7f00;
+      border-bottom-color: #ff7f00;
+      font-weight: 700;
+      background-color: transparent;
+
+      .step-num {
+        background-color: #ff7f00;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(255, 127, 0, 0.4);
+      }
+    }
+  }
+}
+
+.chip-input-container {
+  min-height: 48px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  transition: all 0.2s ease-in-out;
+
+  &:focus-within {
+    border-color: #ff7f00;
+    box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15);
+    background-color: #ffffff;
+  }
+}
+
+.custom-ng-select {
+  ::ng-deep .ng-select-container {
+    min-height: 44px !important;
+    background-color: #ffffff !important;
+    border-radius: 0.5rem !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 0.9rem !important;
+
+    &:focus-within, &:hover {
+      border-color: #ff7f00 !important;
+      box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15) !important;
+    }
+  }
+
+  ::ng-deep .ng-value-icon {
+    color: #000000 !important;
+  }
+}
+
+.teacher-profile-wrapper, .student-profile-wrapper {
   background-color: transparent;
 
   .header-img {
@@ -58,70 +152,35 @@ input, select {
     font-size: 0.875rem;
   }
 
-  .profile-card {
-    background: #ffffff;
-    
-    .edit-profile-btn {
-      top: 1.25rem;
-      right: 1.25rem;
-      border-color: #ff7f00;
-      color: #ff7f00;
-      font-weight: 500;
-      background: #ffffff;
-      transition: all 0.2s ease-in-out;
+  .avatar-wrapper {
+    position: relative;
+    width: 84px;
+    height: 84px;
+
+    .avatar-img {
+      width: 84px;
+      height: 84px;
+    }
+
+    .avatar-add-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 28px;
+      height: 28px;
+      background-color: #ff7f00;
+      box-shadow: 0 2px 6px rgba(255, 127, 0, 0.4);
+      transition: transform 0.2s ease;
 
       &:hover {
-        background-color: #ff7f00;
-        color: #ffffff !important;
+        transform: scale(1.1);
       }
     }
-
-    .avatar-wrapper {
-      position: relative;
-      width: 90px;
-      height: 90px;
-
-      .avatar-img {
-        width: 90px;
-        height: 90px;
-        border: 3px solid #f1f5f9;
-      }
-
-      .avatar-add-btn {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 28px;
-        height: 28px;
-        background-color: #ff7f00;
-        box-shadow: 0 2px 6px rgba(255, 127, 0, 0.4);
-        transition: transform 0.2s ease;
-
-        &:hover {
-          transform: scale(1.1);
-        }
-      }
-    }
-  }
-
-  .info-grid {
-    background: #ffffff;
-
-    .icon-circle {
-      width: 48px;
-      height: 48px;
-      flex-shrink: 0;
-    }
-  }
-
-  .section-icon {
-    width: 38px;
-    height: 38px;
   }
 
   .custom-input {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     font-size: 0.85rem;
     padding: 0.4rem 0.75rem;
     color: #1e293b;
@@ -131,44 +190,6 @@ input, select {
       border-color: #ff7f00;
       box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.15);
     }
-  }
-
-  .view-mode-card {
-    .custom-input[readonly], .custom-input:disabled {
-      background-color: #f8fafc !important;
-      border-color: #e2e8f0 !important;
-      color: #334155 !important;
-      cursor: default !important;
-      box-shadow: none !important;
-    }
-
-    ::ng-deep .ng-select.ng-select-disabled .ng-select-container {
-      background-color: #f8fafc !important;
-      border-color: #e2e8f0 !important;
-      cursor: default !important;
-    }
-  }
-
-  .custom-ng-select {
-    ::ng-deep .ng-select-container {
-      border-radius: 8px !important;
-      border: 1px solid #e2e8f0 !important;
-      padding: 2px 6px !important;
-      min-height: 36px !important;
-      font-size: 0.85rem !important;
-
-      &:focus, &:hover {
-        border-color: #ff7f00 !important;
-      }
-    }
-  }
-
-  .full-text-wrap {
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    line-height: 1.35;
   }
 
   .btn-orange {
@@ -183,31 +204,69 @@ input, select {
     }
   }
 
-  .general-tab-content {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-  }
-
   .cursor-pointer {
     cursor: pointer;
   }
 
-  .hover-highlight {
-    transition: background-color 0.2s ease, transform 0.2s ease;
+  .edit-btn-inside-box, .edit-profile-btn {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff !important;
+    border: 1.5px solid #ff7f00 !important;
+    color: #ff7f00 !important;
+    padding: 0.45rem 1.35rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    border-radius: 50rem !important;
+    box-shadow: 0 2px 6px rgba(255, 127, 0, 0.08) !important;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+
+    i {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: #ff7f00 !important;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), color 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
     &:hover {
-      background-color: #fff8f0 !important;
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #ff7f00 0%, #ff6600 100%) !important;
+      border-color: #ff6600 !important;
+      color: #ffffff !important;
+      transform: translateY(-3px) scale(1.03) !important;
+      box-shadow: 0 8px 24px rgba(255, 127, 0, 0.4) !important;
+
+      i {
+        transform: rotate(-15deg) scale(1.2);
+        color: #ffffff !important;
+      }
+    }
+
+    &:active {
+      transform: translateY(-1px) scale(0.98) !important;
+      box-shadow: 0 4px 10px rgba(255, 127, 0, 0.25) !important;
+    }
+  }
+
+  .info-block {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      background-color: #fffaf5;
+      border-color: #ffe0cc;
     }
   }
 
   .profile-tabs-wrapper {
     .custom-profile-tabs {
-      border-bottom: 2px solid #f1f5f9;
+      border-bottom: 2px solid #e2e8f0;
       width: 100%;
 
       .nav-link {
-        color: #64748b;
+        color: #64748b !important;
         background: transparent !important;
         border: none !important;
         border-radius: 0 !important;
@@ -215,28 +274,28 @@ input, select {
         position: relative;
         font-weight: 600;
         font-size: 0.9rem;
-        transition: color 0.2s ease;
+        transition: all 0.2s ease;
         margin-bottom: -2px;
 
         i {
           font-size: 0.95rem;
-          color: #94a3b8;
+          color: #94a3b8 !important;
           transition: color 0.2s ease;
         }
 
         .tab-badge {
-          background-color: #f1f5f9;
-          color: #64748b;
+          background-color: #f1f5f9 !important;
+          color: #64748b !important;
           font-size: 0.75rem;
-          padding: 0.25em 0.6em;
+          padding: 0.25em 0.65em;
           transition: all 0.2s ease;
         }
 
         &:hover {
-          color: #ff7f00;
+          color: #ff7f00 !important;
           
           i {
-            color: #ff7f00;
+            color: #ff7f00 !important;
           }
         }
 
@@ -261,7 +320,7 @@ input, select {
           }
 
           .tab-badge {
-            background-color: #ffe6d5 !important;
+            background-color: #fff0e6 !important;
             color: #ff7f00 !important;
             font-weight: 700;
           }
@@ -269,107 +328,4 @@ input, select {
       }
     }
   }
-
-  .bg-orange-subtle {
-    background-color: #ffe6d5;
-  }
-
-  .bg-success-light {
-    background-color: #dcfce7 !important;
-  }
-
-  .text-success {
-    color: #15803d !important;
-  }
-
-  .py-1-5 {
-    padding-top: 0.375rem !important;
-    padding-bottom: 0.375rem !important;
-  }
-
-  .py-2-5 {
-    padding-top: 0.625rem !important;
-    padding-bottom: 0.625rem !important;
-  }
-
-  .subscription-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
-    }
-  }
-
-  .logout-btn-header {
-    /* Primary (resting state) colors */
-    background-color: #ffffff !important;
-    border: 1.5px solid #dc3545 !important;
-    color: #dc3545 !important;
-    padding: 0.45rem 1.25rem !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    border-radius: 50rem !important;
-    transition: all 0.2s ease-in-out;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.08);
-
-    i {
-      font-size: 0.95rem;
-      color: #dc3545 !important;
-      transition: color 0.2s ease-in-out;
-    }
-
-    /* Secondary (hover / active state) colors */
-    &:hover, &:focus, &:active {
-      background-color: #dc3545 !important;
-      border-color: #dc3545 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(220, 53, 69, 0.3) !important;
-      transform: translateY(-1px);
-
-      i {
-        color: #ffffff !important;
-      }
-    }
-  }
-
-  .logout-link {
-    color: #dc3545 !important;
-    transition: all 0.2s ease-in-out;
-
-    i {
-      color: #dc3545 !important;
-    }
-
-    &:hover {
-      color: #b02a37 !important;
-      text-decoration: underline !important;
-
-      i {
-        color: #b02a37 !important;
-      }
-    }
-  }
-
-  .edit-btn-inside-box {
-    border-color: #ff7f00 !important;
-    color: #ff7f00 !important;
-    font-weight: 600;
-    background: #ffffff;
-    transition: all 0.2s ease-in-out;
-
-    &:hover {
-      background-color: #ff7f00 !important;
-      color: #ffffff !important;
-    }
-  }
-
-  .form-label {
-    text-align: left !important;
-    display: block !important;
-  }
 }
-

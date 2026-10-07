@@ -11,17 +11,17 @@
     <p class="text-center">welcome back !</p>
     <form [formGroup]="loginForm" (ngSubmit)="userLogin(loginForm)">
       <div class="form-group">
-        <label class="p-1" for="email">User Name</label>
+        <label class="p-1" for="email">Email ID or Mobile Number</label>
         <input type="text" required formControlName="email" class="form-control rounded-border" id="email"
-          placeholder="Enter Your Username" pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$">
+          placeholder="Enter Email ID or Mobile Number">
         @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
         <label *ngIf="loginForm.get('email')?.errors?.['required']"
           class="error jquery-validation-error small form-text ">Please
-          enter your user name.
+          enter your Email ID or Mobile Number.
         </label>
-        <label *ngIf="loginForm.get('email')?.hasError('pattern')"
+        <label *ngIf="loginForm.get('email')?.hasError('invalidIdentifier')"
           class="error jquery-validation-error small form-text ">Please
-          enter valid Email Id.
+          enter a valid Email ID or Mobile Number.
         </label>
         }
 
@@ -44,8 +44,8 @@
         }
 
       </div>
-      <a class="mt-2 mx-font-11 cursor mx-1 anchorStyle" (click)="showLogin = undefined;showForGot = !showForGot">Forgot
-        Password</a>
+      <a href="javascript:void(0)" class="mt-2 mx-font-11 cursor mx-1 anchorStyle" (click)="openForgotPassword()">Forgot
+        Password?</a>
       <button type="submit" class="btn w-100 mt-2 rounded-border btn-save btn-login btn-block">Login</button>
     </form>
     <div class="my-3 text-center">
@@ -80,16 +80,23 @@
   }
   @if(showForGot) {
   <div class="col-6 signup-form align-content-center mt-1">
-    <p class="text-center mx-font-25"><strong>Reset Password</strong></p>
-    <p class="text-center">Forgot your password?</p>
+    <p class="text-center mx-font-25 mb-1"><strong>Reset Password</strong></p>
+    <p class="text-center text-muted small mb-4">Enter your registered Email or Mobile Number to receive your new login password.</p>
     <form (ngSubmit)="resetPassword()">
-      <div class="form-group">
-        <label class="p-1" for="mobileNumber">Email Id or Mobile Number</label>
-        <input type="text" [(ngModel)]="forgotInput" name="forgotInput" class="form-control rounded-border" id="mobileNumber" placeholder="Enter Email or Mobile Number" required>
+      <div class="form-group mb-3">
+        <label class="p-1 fw-bold small" for="mobileNumber">Email Id or Mobile Number</label>
+        <input type="text" [(ngModel)]="forgotInput" name="forgotInput" class="form-control rounded-border" id="mobileNumber" placeholder="e.g. name@example.com or 9876543210" [disabled]="isForgotSubmitting" required>
       </div>
-      <button type="submit" class="btn w-100 mt-4 rounded-border btn-login btn-block">Send Reset Link / Password</button>
+      <button type="submit" class="btn w-100 mt-3 rounded-border btn-login btn-block" [disabled]="isForgotSubmitting">
+        @if (isForgotSubmitting) {
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <span>Sending Password...</span>
+        } @else {
+          <span>Send New Password</span>
+        }
+      </button>
       <div class="text-center mt-3">
-        <a class="anchorStyle mx-font-12 cursor" (click)="showForGot = false; showLogin = false">Back to Login</a>
+        <a href="javascript:void(0)" class="anchorStyle mx-font-12 cursor" (click)="backToLogin()">Back to Login</a>
       </div>
     </form>
   </div>

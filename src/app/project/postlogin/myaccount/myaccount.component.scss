@@ -1,0 +1,124 @@
+.myaccount-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 270px;
+  height: 100vh;
+  z-index: 1040;
+  background-color: #ffffff;
+  border-right: 1px solid #f0f0f0;
+  padding: 28px 20px !important;
+  overflow-y: auto;
+  border-radius: 0 !important;
+
+  .sidebar-brand {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-bottom: 28px;
+
+    .brand-logo-icon {
+      font-size: 36px;
+      color: #f26522;
+      transform: rotate(-5deg);
+    }
+
+    .brand-logo-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #f26522;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-tagline {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #718096;
+      margin-top: 0px;
+    }
+  }
+
+  .sidebar-nav {
+    list-style: none;
+
+    .nav-item {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      padding: 13px 18px;
+      border-radius: 12px;
+      text-decoration: none !important;
+      color: #374151;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      border: 1.5px solid transparent;
+      transition: all 0.2s ease-in-out;
+      background-color: transparent;
+
+      .sidebar-icon {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+        color: #4a5568;
+        transition: color 0.2s ease-in-out;
+      }
+
+      .sidebar-title {
+        color: inherit;
+        font-weight: inherit;
+      }
+
+      &:hover {
+        background-color: #fff9f5;
+        color: #f26522;
+
+        .sidebar-icon {
+          color: #f26522;
+        }
+      }
+
+      &.active {
+        background-color: #fff7f2;
+        border: 1.5px solid #fcd4b4;
+        color: #f26522;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(242, 101, 34, 0.05);
+
+        .sidebar-icon {
+          color: #f26522;
+        }
+      }
+    }
+  }
+}
+
+.myaccount-main-content {
+  margin-left: 270px;
+  width: calc(100% - 270px);
+  padding: 24px 32px;
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .myaccount-main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
+  }
+}

@@ -1,0 +1,26 @@
+<div class="logout-card">
+  <button type="button" class="btn-close-modal" (click)="cancel()" aria-label="Close">
+    <i class="fas fa-times"></i>
+  </button>
+  
+  <div class="logout-icon-wrapper">
+    <div class="logout-icon-bg">
+      <i class="fas fa-sign-out-alt logout-icon"></i>
+    </div>
+  </div>
+
+  <div class="logout-content">
+    <h3 class="logout-title">Confirm Logout</h3>
+    <p class="logout-message">Are you sure you want to log out?</p>
+    <p class="logout-subtext">You will be signed out of your active session and returned to the home page.</p>
+  </div>
+
+  <div class="logout-actions">
+    <button type="button" class="btn-cancel" (click)="cancel()">
+      Cancel
+    </button>
+    <button type="button" class="btn-confirm" (click)="confirm()">
+      <i class="fas fa-sign-out-alt me-2"></i> Log Out
+    </button>
+  </div>
+</div>

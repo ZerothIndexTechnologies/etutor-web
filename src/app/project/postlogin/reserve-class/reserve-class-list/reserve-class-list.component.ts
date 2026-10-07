@@ -25,8 +25,9 @@ import {
   MatCardFooter,
   MatCardHeader,
 } from '@angular/material/card';
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {NgSelectComponent} from "@ng-select/ng-select";
+import { TimezoneService } from '../../../../shared/services/timezone.service';
 
 @Component({
   selector: 'app-reserve-class-list',
@@ -57,9 +58,18 @@ export class ReserveClassListComponent implements OnInit {
   protected subjectList: any = [];
   protected gradeList: any = [];
   protected curriculumList: any = [];
+  public activeTab: string = 'all';
   protected classListdata: any = [];
   public teacherList: any = [];
   helper = inject(HelperService);
+  timezoneService = inject(TimezoneService);
+  public selectedTimezone: string = 'Asia/Kolkata';
+  public timezoneList = this.timezoneService.TIMEZONES;
+
+  getFormattedTime(timeStr: string): string {
+    return this.timezoneService.convertIstToDisplay(timeStr, this.selectedTimezone);
+  }
+
   protected type = '';
   protected gradeListData: any = [];
   public selectedTeacher: any[] = [];
@@ -73,7 +83,7 @@ export class ReserveClassListComponent implements OnInit {
   @ViewChild('addOrUpdateClass') modalContent!: TemplateRef<any>;
   @ViewChild('showSubscriptionPlan') showSubscriptionPlan!: TemplateRef<any>;
 
-  constructor(private fb: FormBuilder, private router: Router, protected auth: AuthService, private dialog: MatDialog) {
+  constructor(private fb: FormBuilder, private router: Router, private route: ActivatedRoute, protected auth: AuthService, private dialog: MatDialog) {
     const config = JSON.parse(this.auth.getLocalStorage(SessionConstants.configData) || '{}');
     this.gradeListData = config?.grade || [];
     this.subjectList = config?.subjects || [];
@@ -83,6 +93,18 @@ export class ReserveClassListComponent implements OnInit {
 
   ngOnInit() {
     this.getTeacherList();
+    this.route.queryParams.subscribe((params: any) => {
+      if (params['tab'] === 'watchlist') {
+        this.activeTab = 'watchlist';
+      } else {
+        this.activeTab = 'all';
+      }
+      this.reserveClassList();
+    });
+  }
+
+  setTab(tab: string) {
+    this.activeTab = tab;
     this.reserveClassList();
   }
 
@@ -91,7 +113,8 @@ export class ReserveClassListComponent implements OnInit {
       user_id: this.auth.getUserId(),
       teacher_id: this.selectedTeacher && this.selectedTeacher.length > 0 ? this.selectedTeacher : [],
       grade: this.selectedGrade && this.selectedGrade.length > 0 ? this.selectedGrade : [],
-      subject: this.selectedSubject && this.selectedSubject.length > 0 ? this.selectedSubject : []
+      subject: this.selectedSubject && this.selectedSubject.length > 0 ? this.selectedSubject : [],
+      is_wishlist_only: this.activeTab === 'watchlist' ? 1 : 0
     };
     console.log(payload, 'reserveClassList payload');
     this.auth.postService(payload, Urls.reserveClassList).subscribe(
@@ -103,6 +126,13 @@ export class ReserveClassListComponent implements OnInit {
             (user: any, index: number, self: any[]) =>
               index === self.findIndex((u: any) => u.class_id === user.class_id)
           );
+
+          // Always sort descending by ID so newly created classes appear at the top
+          classes.sort((a: any, b: any) => Number(b.id || b.class_id) - Number(a.id || a.class_id));
+
+          if (this.activeTab === 'watchlist') {
+            classes = classes.filter((c: any) => c.is_wishlist == 1 || c.is_wishlist === true);
+          }
 
           // Populate subject options dynamically from available classes
           const subjects = new Set<string>();
@@ -140,6 +170,15 @@ export class ReserveClassListComponent implements OnInit {
                 if (tImg && !classData.teacher_image) {
                   classData.teacher_image = tImg;
                 }
+              } else if (classData.teacher_name && classData.teacher_name !== 'Teacher') {
+                // Dynamically add teacher to teacherList for filtering
+                this.teacherList.push({
+                  id: tId,
+                  teacher_id: tId,
+                  display_name: classData.teacher_name,
+                  first_name: classData.teacher_name,
+                  profile_image: classData.teacher_image || ''
+                });
               }
             }
           });
@@ -161,7 +200,11 @@ export class ReserveClassListComponent implements OnInit {
           }
           if (this.selectedSubject && this.selectedSubject.length > 0) {
             classes = classes.filter((c: any) =>
-              this.selectedSubject.some((s: any) => String(s).toLowerCase() === String(c.subject || '').toLowerCase())
+              this.selectedSubject.some((s: any) => {
+                const sStr = String(s).toLowerCase().trim();
+                const cStr = String(c.subject || '').toLowerCase().trim();
+                return sStr === cStr || (sStr === 'maths' && cStr === 'mathematics') || (sStr === 'mathematics' && cStr === 'maths');
+              })
             );
           }
 
@@ -268,6 +311,7 @@ export class ReserveClassListComponent implements OnInit {
     this.selectedTeacher = [];
     this.selectedGrade = [];
     this.selectedSubject = [];
+    this.selectedTimezone = 'Asia/Kolkata';
     this.reserveClassList();
   }
 
@@ -420,12 +464,33 @@ export class ReserveClassListComponent implements OnInit {
   }
 
   toggleWishlist(classData: any) {
-    classData.is_wishlist = !classData.is_wishlist;
-    if (classData.is_wishlist) {
-      this.helper.presentToast('Added to Watchlist!');
-    } else {
-      this.helper.presentToast('Removed from Watchlist');
-    }
+    const payload = {
+      user_id: this.auth.getUserId(),
+      class_id: classData.class_id || classData.id
+    };
+    const prevStatus = !!classData.is_wishlist;
+    classData.is_wishlist = !prevStatus;
+
+    this.auth.postService(payload, Urls.toggleWishlist).subscribe({
+      next: (res: any) => {
+        if (res && res.IsSuccess) {
+          const isWishlist = res.ResponseObject?.is_wishlist;
+          classData.is_wishlist = isWishlist === 1;
+          const msg = res.ResponseObject?.message || (classData.is_wishlist ? 'Added to Watchlist!' : 'Removed from Watchlist');
+          this.helper.presentToast(msg);
+          if (this.activeTab === 'watchlist' && !classData.is_wishlist) {
+            this.classListdata = this.classListdata.filter((item: any) => (item.class_id || item.id) !== (classData.class_id || classData.id));
+          }
+        } else {
+          classData.is_wishlist = prevStatus;
+          if (res?.ErrorObject) this.helper.presentErrorToast(res.ErrorObject);
+        }
+      },
+      error: (err) => {
+        classData.is_wishlist = prevStatus;
+        console.error(err, 'error toggling wishlist');
+      }
+    });
   }
 
   userSubscription(value: any) {

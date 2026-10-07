@@ -929,6 +929,24 @@ table.wallet-table td {
 .footer {
   background-color: #edfbff;
   padding: 80px 85px 50px 85px;
+  transition: margin-left 0.2s ease-in-out, width 0.2s ease-in-out, padding 0.2s ease-in-out;
+}
+
+@media (min-width: 992px) {
+  body:has(.sidebar) .footer,
+  .footer.footer-myaccount {
+    margin-left: 270px !important;
+    width: calc(100% - 270px) !important;
+    padding: 60px 45px 40px 45px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .footer {
+    padding: 40px 20px !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
 }
 
 .footer h5 {
@@ -1876,6 +1894,134 @@ select {
 .card-ribbon {
   display: none !important;
 }
+
+.navbar-with-sidebar {
+  margin-left: 270px;
+  width: calc(100% - 270px);
+  transition: margin-left 0.2s ease-in-out;
+}
+
+@media (max-width: 991px) {
+  .navbar-with-sidebar {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Global Select Overlap Fix & Dropdown Styling */
+select.form-select, select.filter-select, .page-size-select {
+  letter-spacing: 0.2px !important;
+  word-spacing: normal !important;
+  text-transform: none !important;
+  font-family: inherit !important;
+  line-height: 1.4 !important;
+  min-width: 64px;
+}
+
+select.form-select option {
+  padding: 8px 12px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+}
+
+/* Styled Page Size Dropdown */
+.page-size-dropdown {
+  position: relative;
+  display: inline-block;
+
+  .btn-page-size {
+    background-color: #ffffff !important;
+    border: 1.5px solid #ff7f00 !important;
+    color: #e67300 !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    border-radius: 10px !important;
+    padding: 3px 12px !important;
+    min-width: 54px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1 !important;
+    box-shadow: 0 2px 6px rgba(255, 127, 0, 0.12) !important;
+    transition: all 0.2s ease !important;
+
+    &:hover, &:focus {
+      background-color: #fff7ed !important;
+      border-color: #e67300 !important;
+      color: #d96600 !important;
+    }
+
+    &::after {
+      margin-left: 6px;
+      vertical-align: middle;
+      border-top-color: #ff7f00;
+    }
+  }
+
+  .page-size-menu {
+    border-radius: 12px !important;
+    padding: 6px !important;
+    min-width: 88px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.05) !important;
+    margin-top: 4px !important;
+    z-index: 1050 !important;
+
+    .page-size-item {
+      border-radius: 8px !important;
+      padding: 6px 12px !important;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
+
+      &:hover {
+        background-color: #fff7ed !important;
+        color: #ff7f00 !important;
+      }
+
+      &.active {
+        background: linear-gradient(135deg, #ff7f00 0%, #ff6600 100%) !important;
+        color: #ffffff !important;
+
+        .check-icon {
+          color: #ffffff !important;
+        }
+      }
+
+      .check-icon {
+        font-size: 0.75rem;
+        color: #ff7f00;
+      }
+    }
+  }
+}
+
+/* User Account Badge Styling in Navbar */
+.user-account-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+
+  &:hover {
+    background-color: #fff7ed;
+    border-color: #ffedd5;
+
+    i {
+      transform: scale(1.08);
+    }
+    .user-name-label {
+      color: #ff8c00 !important;
+    }
+  }
+}
+
 
 
 

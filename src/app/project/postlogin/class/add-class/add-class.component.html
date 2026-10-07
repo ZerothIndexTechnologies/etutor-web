@@ -9,55 +9,58 @@
       <div class="col-12">
         <div class="row">
           <div class="col-6 text-start mb-3">
-            <label class="form-label font-weight-bold">Select Board</label>
-            <select (change)="getSubject()" class="form-select select-board" formControlName="curriculum">
+            <label class="form-label font-weight-bold">Select Board <span class="text-danger">*</span></label>
+            <select (change)="getSubject()" class="form-select select-board" [ngClass]="{'is-invalid': (submitted || classForm.get('curriculum')?.touched) && classForm.get('curriculum')?.invalid}" formControlName="curriculum">
               <option value="" selected disabled>Please Select</option>
               <option [ngValue]="curriculum.id" *ngFor="let curriculum of curriculumList">
                 {{curriculum.curriculum_type}}
               </option>
             </select>
             <em class="error"
-                *ngIf="classForm.get('curriculum')?.enabled && !classForm.get('curriculum')?.valid && (classForm.get('curriculum')?.dirty || classForm.get('curriculum')?.touched)">Board
+                *ngIf="classForm.get('curriculum')?.enabled && classForm.get('curriculum')?.invalid && (submitted || classForm.get('curriculum')?.dirty || classForm.get('curriculum')?.touched)">Board
               is required</em>
           </div>
           <div class="col-6 text-start mb-3">
-            <label class="form-label font-weight-bold">Section</label>
-            <select (change)="getSubject()" class="form-select select-section" formControlName="grade">
+            <label class="form-label font-weight-bold">Section <span class="text-danger">*</span></label>
+            <select (change)="getSubject()" class="form-select select-section" [ngClass]="{'is-invalid': (submitted || classForm.get('grade')?.touched) && classForm.get('grade')?.invalid}" formControlName="grade">
               <option value="" selected disabled>Please Select</option>
               <option [ngValue]="grade.id" *ngFor="let grade of gradeList">
                 {{grade.displayname}}
               </option>
             </select>
             <em class="error"
-                *ngIf="classForm.get('grade')?.enabled && !classForm.get('grade')?.valid && (classForm.get('grade')?.dirty || classForm.get('grade')?.touched)">Section
+                *ngIf="classForm.get('grade')?.enabled && classForm.get('grade')?.invalid && (submitted || classForm.get('grade')?.dirty || classForm.get('grade')?.touched)">Section
               is required</em>
           </div>
           <div class="col-12 text-start mb-3">
-            <label class="form-label font-weight-bold">Select Subject</label>
-            <select (change)="getTeacherClassDetails()" class="form-select select-board" formControlName="subject">
+            <label class="form-label font-weight-bold">Select Subject <span class="text-danger">*</span></label>
+            <select (change)="getTeacherClassDetails()" class="form-select select-board" [ngClass]="{'is-invalid': (submitted || classForm.get('subject')?.touched) && classForm.get('subject')?.invalid}" formControlName="subject">
               <option value="" selected disabled>Please Select</option>
               <option [value]="getSubjectValue(subject)" *ngFor="let subject of subjectList">
                 {{getSubjectName(subject)}}
               </option>
             </select>
             <em class="error"
-                *ngIf="classForm.get('subject')?.enabled && !classForm.get('subject')?.valid && (classForm.get('subject')?.dirty || classForm.get('subject')?.touched)">Subject
+                *ngIf="classForm.get('subject')?.enabled && classForm.get('subject')?.invalid && (submitted || classForm.get('subject')?.dirty || classForm.get('subject')?.touched)">Subject
               is required</em>
           </div>
 
-          <div class="col-12 text-start mb-3 d-flex">
+          <div class="col-12 text-start mb-3 d-flex flex-column">
             <div>
-              <label class="form-label font-weight-bold">Select Days</label>
+              <label class="form-label font-weight-bold">Select Days <span class="text-danger">*</span></label>
               <div class="form-group">
-                <div class="d-inline-flex">
-                  <button *ngFor="let day of daysList; let i = index" (click)="day.selected = !day.selected"
+                <div class="d-inline-flex p-1 rounded" [ngClass]="{'border border-danger': submitted && !isAnyDaySelected()}">
+                  <button type="button" *ngFor="let day of daysList; let i = index" (click)="day.selected = !day.selected"
                           [ngClass]="{'active': day.selected, 'inactive': !day.selected}" class="day-selector">
                     {{ day.id }}
                   </button>
                   <i title="Added Availability Slot" *ngIf="oldAvailabilityData.length != 0"
-                     (click)="showDialog()" class="fa fa-eye align-self-center cursor"></i>
+                     (click)="showDialog()" class="fa fa-eye align-self-center cursor ms-2"></i>
                 </div>
               </div>
+              <em class="error d-block" *ngIf="submitted && !isAnyDaySelected()">
+                Please select at least one day
+              </em>
             </div>
 
           </div>
@@ -69,28 +72,28 @@
               </select>
             </div>
             <div class="col-4 text-start">
-              <div class="timepicker-card p-2">
-                <label class="col-12 text-center font-weight-bold">Start Time</label>
+              <div class="timepicker-card p-2" [ngClass]="{'border-danger': (submitted || classForm.get('start_time')?.touched) && classForm.get('start_time')?.invalid}">
+                <label class="col-12 text-center font-weight-bold">Start Time <span class="text-danger">*</span></label>
                 <input readonly placeholder="00:00" class="timepicker-input cursor" [ngxTimepicker]="picker"
                        formControlName="start_time"/>
                 <ngx-material-timepicker #picker></ngx-material-timepicker>
               </div>
-              <em class="error" *ngIf="!classForm.get('start_time')?.valid && (classForm.get('start_time')?.dirty || classForm.get('start_time')?.touched)">
+              <em class="error" *ngIf="classForm.get('start_time')?.invalid && (submitted || classForm.get('start_time')?.dirty || classForm.get('start_time')?.touched)">
                 Start Time is required
               </em>
             </div>
             <div class="col-4 text-center">
-              <div class="timepicker-card p-2">
-                <label class="col-12 text-center font-weight-bold">End Time</label>
+              <div class="timepicker-card p-2" [ngClass]="{'border-danger': (submitted || classForm.get('end_time')?.touched) && (classForm.get('end_time')?.invalid || classForm.hasError('startTimeAfterEndTime'))}">
+                <label class="col-12 text-center font-weight-bold">End Time <span class="text-danger">*</span></label>
                 <input readonly placeholder="00:00" class="timepicker-input cursor" [ngxTimepicker]="picker1"
                   formControlName="end_time"/>
                 <ngx-material-timepicker #picker1></ngx-material-timepicker>
               </div>
-              <em class="error" *ngIf="!classForm.get('end_time')?.valid && (classForm.get('end_time')?.dirty || classForm.get('end_time')?.touched)">
+              <em class="error" *ngIf="classForm.get('end_time')?.invalid && (submitted || classForm.get('end_time')?.dirty || classForm.get('end_time')?.touched)">
                 End Time is required
               </em>
             </div>
-            <em class="error" *ngIf="classForm.hasError('startTimeAfterEndTime')">
+            <em class="error" *ngIf="classForm.hasError('startTimeAfterEndTime') && (submitted || (classForm.get('start_time')?.value && classForm.get('end_time')?.value))">
               Start Time must be earlier than End Time.
             </em>
           </div>
@@ -143,54 +146,57 @@
 
           <div class="col-12 row mb-3">
             <div class="col-3 text-start">
-              <label class="form-label col-12 font-weight-bold">Session Amount Per Month</label>
+              <label class="form-label col-12 font-weight-bold">Session Amount Per Month <span class="text-danger">*</span></label>
               <div class="form-group">
                 <input (input)="calculateSessionAmount()" (keypress)="customValidater.numberOnly($event)" maxlength="4"
-                       placeholder="Amount Per Month" formControlName="amount_month" type="text" class="form-control">
+                       placeholder="Amount Per Month" formControlName="amount_month" type="text" class="form-control"
+                       [ngClass]="{'is-invalid': (submitted || classForm.get('amount_month')?.touched) && (classForm.get('amount_month')?.invalid || checkForValidAmount)}">
                 <em class="error"
-                    *ngIf="classForm.get('amount_month')?.enabled && !classForm.get('amount_month')?.valid && (classForm.get('amount_month')?.dirty || classForm.get('amount_month')?.touched)">Amount
+                    *ngIf="classForm.get('amount_month')?.enabled && classForm.get('amount_month')?.invalid && (submitted || classForm.get('amount_month')?.dirty || classForm.get('amount_month')?.touched)">Amount
                   Per Month is required</em>
-                <em class="error" *ngIf="checkForValidAmount">Please enter valid amount</em>
+                <em class="error" *ngIf="classForm.get('amount_month')?.enabled && checkForValidAmount">Please enter valid amount (greater than 0)</em>
               </div>
-<!--              <label class="mt-1 mx-font-11 text-danger"><span>Note: Admin only will fix an amount</span></label>-->
             </div>
             <div class="col-3 text-start">
-              <label class="form-label font-weight-bold">Session Amount Per Quarter</label>
+              <label class="form-label font-weight-bold">Session Amount Per Quarter <span class="text-danger">*</span></label>
               <div class="form-group">
                 <input (keypress)="customValidater.numberOnly($event)" maxlength="4" placeholder="Amount Per Quarter"
-                       formControlName="amount_quarter" type="text" class="form-control">
+                       formControlName="amount_quarter" type="text" class="form-control"
+                       [ngClass]="{'is-invalid': (submitted || classForm.get('amount_quarter')?.touched) && (classForm.get('amount_quarter')?.invalid || isAmountExceeded('amount_quarter'))}">
                 <em class="error"
-                    *ngIf="classForm.get('amount_quarter')?.enabled && !classForm.get('amount_quarter')?.valid && (classForm.get('amount_quarter')?.dirty || classForm.get('amount_quarter')?.touched)">Amount
+                    *ngIf="classForm.get('amount_quarter')?.enabled && classForm.get('amount_quarter')?.invalid && (submitted || classForm.get('amount_quarter')?.dirty || classForm.get('amount_quarter')?.touched)">Amount
                  Per Quarter is required</em>
-                <em class="error" *ngIf="checkValidAmountPerMonthOrYear('amount_quarter') && classForm.get('amount_quarter')?.value != ''">
-                  Amount Per Quarter Should be less than or equal to {{parseInt(classForm.controls['amount_month'].value) * 3}}
-                  </em>
-              </div>
-            </div>
-            <div class="col-3 text-start">
-              <label class="form-label font-weight-bold">Session Amount Per Half Year</label>
-              <div class="form-group">
-                <input (keypress)="customValidater.numberOnly($event)" maxlength="4" placeholder="Amount Per Quarter"
-                       formControlName="amount_half_year" type="text" class="form-control">
-                <em class="error"
-                    *ngIf="classForm.get('amount_half_year')?.enabled && !classForm.get('amount_half_year')?.valid && (classForm.get('amount_half_year')?.dirty || classForm.get('amount_half_year')?.touched)">Amount
-                  For Half Year is required</em>
-                <em class="error" *ngIf="checkValidAmountPerMonthOrYear('amount_half_year') && classForm.get('amount_half_year')?.value != ''">
-                  Amount For Half Year Should be less than or equal to {{parseInt(classForm.controls['amount_month'].value) * 6}}
+                <em class="error" *ngIf="classForm.get('amount_quarter')?.enabled && isAmountExceeded('amount_quarter')">
+                  Amount Per Quarter Should be less than or equal to {{getMaxAmount('amount_quarter')}}
                 </em>
               </div>
             </div>
             <div class="col-3 text-start">
-              <label class="form-label font-weight-bold">Session Amount Per Year</label>
+              <label class="form-label font-weight-bold">Session Amount Per Half Year <span class="text-danger">*</span></label>
+              <div class="form-group">
+                <input (keypress)="customValidater.numberOnly($event)" maxlength="4" placeholder="Amount Per Half Year"
+                       formControlName="amount_half_year" type="text" class="form-control"
+                       [ngClass]="{'is-invalid': (submitted || classForm.get('amount_half_year')?.touched) && (classForm.get('amount_half_year')?.invalid || isAmountExceeded('amount_half_year'))}">
+                <em class="error"
+                    *ngIf="classForm.get('amount_half_year')?.enabled && classForm.get('amount_half_year')?.invalid && (submitted || classForm.get('amount_half_year')?.dirty || classForm.get('amount_half_year')?.touched)">Amount
+                  For Half Year is required</em>
+                <em class="error" *ngIf="classForm.get('amount_half_year')?.enabled && isAmountExceeded('amount_half_year')">
+                  Amount For Half Year Should be less than or equal to {{getMaxAmount('amount_half_year')}}
+                </em>
+              </div>
+            </div>
+            <div class="col-3 text-start">
+              <label class="form-label font-weight-bold">Session Amount Per Year <span class="text-danger">*</span></label>
               <div class="form-group">
                 <input (keypress)="customValidater.numberOnly($event)" maxlength="4" placeholder="Amount Per Year"
-                       formControlName="amount_year" type="text" class="form-control">
+                       formControlName="amount_year" type="text" class="form-control"
+                       [ngClass]="{'is-invalid': (submitted || classForm.get('amount_year')?.touched) && (classForm.get('amount_year')?.invalid || isAmountExceeded('amount_year'))}">
                 <em class="error"
-                    *ngIf="classForm.get('amount_year')?.enabled && !classForm.get('amount_year')?.valid && (classForm.get('amount_year')?.dirty || classForm.get('amount_year')?.touched)">Amount
+                    *ngIf="classForm.get('amount_year')?.enabled && classForm.get('amount_year')?.invalid && (submitted || classForm.get('amount_year')?.dirty || classForm.get('amount_year')?.touched)">Amount
                   Per Year is required</em>
-                <em class="error" *ngIf="checkValidAmountPerMonthOrYear('amount_year') && classForm.get('amount_year')?.value != ''">
-                  Amount Per Year Should be less than or equal to {{parseInt(classForm.controls['amount_month'].value) * 12}}
-                  Please enter valid amount</em>
+                <em class="error" *ngIf="classForm.get('amount_year')?.enabled && isAmountExceeded('amount_year')">
+                  Amount Per Year Should be less than or equal to {{getMaxAmount('amount_year')}}
+                </em>
               </div>
             </div>
           </div>
@@ -198,9 +204,17 @@
       </div>
     </form>
   </div>
+
+  <div *ngIf="submitted && getValidationErrorsList().length > 0" class="alert alert-danger mx-3 mb-2 py-2">
+    <div class="fw-bold mb-1"><i class="fa fa-exclamation-circle me-1"></i> Please fill in the required field(s) to proceed:</div>
+    <ul class="mb-0 ps-3 small">
+      <li *ngFor="let err of getValidationErrorsList()">{{ err }}</li>
+    </ul>
+  </div>
+
   <div class="card-footer py-3 d-flex justify-content-between align-items-center">
-    <label class="text-muted">Note: All field are mandatory</label>
-    <button class="btn pull-right btn-orange" (click)="submitClass()">{{type == 'add' ? 'Submit' : 'Update'}}</button>
+    <label class="text-muted"><span class="text-danger">*</span> Marked fields are mandatory</label>
+    <button type="button" class="btn pull-right btn-orange" (click)="submitClass()">{{type == 'add' ? 'Submit' : 'Update'}}</button>
   </div>
 </div>
 
