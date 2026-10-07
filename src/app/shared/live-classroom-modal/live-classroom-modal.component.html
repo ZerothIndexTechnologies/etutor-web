@@ -32,10 +32,16 @@
 
       <!-- Error State -->
       <div class="jaas-error-box" *ngIf="!loading && errorMessage">
-        <i class="fa fa-exclamation-circle text-danger mb-3" style="font-size: 3rem;"></i>
-        <h4 class="text-white">Unable to Join Class</h4>
+        <i class="fa fa-lock text-warning mb-3" *ngIf="isSubscriptionError" style="font-size: 3rem;"></i>
+        <i class="fa fa-exclamation-circle text-danger mb-3" *ngIf="!isSubscriptionError" style="font-size: 3rem;"></i>
+        <h4 class="text-white">{{ isSubscriptionError ? 'Subscription Required' : 'Unable to Join Class' }}</h4>
         <p class="text-light mb-4">{{ errorMessage }}</p>
-        <button class="btn btn-outline-light rounded-pill px-4" (click)="closeModal()">Close</button>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-warning rounded-pill px-4 font-weight-bold text-dark" *ngIf="isSubscriptionError" (click)="goToSubscription()">
+            <i class="fas fa-shopping-cart me-1"></i> Subscribe Now
+          </button>
+          <button class="btn btn-outline-light rounded-pill px-4" (click)="closeModal()">Close</button>
+        </div>
       </div>
 
       <!-- Jitsi Frame Container -->

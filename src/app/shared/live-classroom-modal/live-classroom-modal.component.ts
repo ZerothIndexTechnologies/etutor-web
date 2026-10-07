@@ -11,6 +11,7 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { Urls } from '../services/urls';
 
@@ -37,13 +38,20 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
 
   public loading: boolean = true;
   public errorMessage: string = '';
+  public isSubscriptionError: boolean = false;
   public participantCount: number = 1;
   private api: any = null;
 
   constructor(
     private authService: AuthService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
+
+  public goToSubscription(): void {
+    this.closeModal();
+    this.router.navigate(['/subscription'], { queryParams: { class_id: this.classId } });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']) {
@@ -81,6 +89,7 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
         } else {
           this.loading = false;
           this.errorMessage = (res && res.ErrorObject) ? res.ErrorObject : 'Unable to join live class. Active subscription required.';
+          this.isSubscriptionError = this.errorMessage.toLowerCase().includes('subscri') || this.errorMessage.toLowerCase().includes('denied');
           this.cdr.detectChanges();
         }
       },
@@ -89,6 +98,7 @@ export class LiveClassroomModalComponent implements OnChanges, OnDestroy {
         this.errorMessage = (err && err.error && err.error.ErrorObject)
           ? err.error.ErrorObject
           : 'Could not connect to backend authorization server.';
+        this.isSubscriptionError = (err && err.status === 403) || this.errorMessage.toLowerCase().includes('subscri') || this.errorMessage.toLowerCase().includes('denied');
         this.cdr.detectChanges();
       }
     });

@@ -400,6 +400,13 @@ export class ClassListComponent implements OnInit {
       return;
     }
 
+    const isStudent = this.auth.getRoleId() == '3';
+    if (isStudent && classData.is_subscribed != 1) {
+      this.helper.presentErrorToast('You are not subscribed to this class. Redirecting to subscription plans...');
+      this.subscribeLiveClass(classData);
+      return;
+    }
+
     this.helper.presentToast('Connecting to secure live classroom...');
 
     this.auth.postService({ class_id: classId }, Urls.joinLiveClass).subscribe({
@@ -424,6 +431,11 @@ export class ClassListComponent implements OnInit {
       error: (err: any) => {
         const errorMsg = err?.error?.ErrorObject || 'Unable to join live class. Please check your subscription and scheduled start time.';
         this.helper.presentErrorToast(errorMsg);
+        if (err?.status === 403 || (errorMsg && errorMsg.toLowerCase().includes('subscri'))) {
+          setTimeout(() => {
+            this.subscribeLiveClass(classData);
+          }, 1500);
+        }
       }
     });
   }

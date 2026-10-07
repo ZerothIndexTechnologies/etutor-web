@@ -103,13 +103,20 @@
 
               <!-- Action Buttons -->
               <div class="d-flex align-items-center gap-2 flex-wrap">
-                <button (click)="joinLiveRoom(classData)" style="padding: 5px 14px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm" *ngIf="canShowLiveRoomButton(classData)">
+                <!-- For Subscribed Students or Teachers: Show Live Room Button -->
+                <button (click)="joinLiveRoom(classData)" style="padding: 5px 14px; font-size: 12px;" class="btn btn-success btn-sm rounded-pill font-weight-bold shadow-sm" *ngIf="canShowLiveRoomButton(classData) && (auth.getRoleId() != '3' || classData.is_subscribed == 1)">
                   <i class="fas fa-video me-1"></i> Live Room
                 </button>
+
+                <!-- For Unsubscribed Students: Show Subscribe to Join Button -->
+                <button (click)="subscribeLiveClass(classData)" style="padding: 5px 14px; font-size: 12px;" class="btn btn-warning btn-sm rounded-pill font-weight-bold shadow-sm text-dark" *ngIf="auth.getRoleId() == '3' && classData.is_subscribed != 1">
+                  <i class="fas fa-lock me-1"></i> Subscribe to Join
+                </button>
+
                 <button *ngIf="auth.getRoleId() != '3' && canShowLiveRoomButton(classData)" (click)="send10MinReminder(classData)" class="btn btn-warning btn-sm rounded-circle shadow-sm text-dark p-0 d-inline-flex align-items-center justify-content-center" style="width: 30px; height: 30px;" title="Send 10-Minute Alert Email to Students">
                   <i class="fas fa-bell text-dark" style="font-size: 13px;"></i>
                 </button>
-                <span class="badge bg-light text-dark border py-1 px-2" *ngIf="!canShowLiveRoomButton(classData) && classData.status !== 'COMPLETED' && classData.status !== 'CANCELLED'" style="font-size: 11px;">
+                <span class="badge bg-light text-dark border py-1 px-2" *ngIf="!canShowLiveRoomButton(classData) && classData.status !== 'COMPLETED' && classData.status !== 'CANCELLED' && (auth.getRoleId() != '3' || classData.is_subscribed == 1)" style="font-size: 11px;">
                   <i class="fas fa-clock me-1 text-muted"></i> Opens 15m before start
                 </span>
                 <button *ngIf="auth.getRoleId() != '3' && classData.status === 'LIVE'" (click)="endLiveClass(classData)" style="padding: 5px 14px; font-size: 12px;" class="btn btn-danger btn-sm rounded-pill font-weight-bold shadow-sm">
